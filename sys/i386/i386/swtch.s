@@ -62,7 +62,7 @@
 	.text
 
 /*
- * cpu_throw()
+ * void cpu_throw(struct thread *oldtd, struct thread *newtd); // __noreturn__
  *
  * This is the second half of cpu_switch(). It is used when the current
  * thread is either a dummy or slated to die, and we no longer care
@@ -102,7 +102,7 @@ ENTRY(cpu_throw)
 END(cpu_throw)
 
 /*
- * cpu_switch(old, new)
+ * void cpu_switch(struct thread *oldtd, struct thread *newtd, struct mtx *newlock);
  *
  * Save the current thread state, then select the next thread to run
  * and load its state.
@@ -205,7 +205,7 @@ sw0:
 sw1:
 	BLOCK_SPIN(%ecx)
 	/*
-	 * At this point, we've switched address spaces and are ready
+	 * At this point, we`ve switched address spaces and are ready
 	 * to load up the rest of the next context.
 	 */
 	cmpl	$0, PCB_EXT(%edx)		/* has pcb extension? */
@@ -216,14 +216,14 @@ sw1:
 
 1:	/*
 	 * Use the common default TSS instead of our own.
-	 * Set our stack pointer into the TSS, it's set to just
+	 * Set our stack pointer into the TSS, it`s set to just
 	 * below the PCB.  In C, common_tss.tss_esp0 = &pcb - 16;
 	 */
 	leal	-16(%edx), %ebx			/* leave space for vm86 */
 	movl	%ebx, PCPU(COMMON_TSS) + TSS_ESP0
 
 	/*
-	 * Test this CPU's  bit in the bitmap to see if this
+	 * Test this CPU`s  bit in the bitmap to see if this
 	 * CPU was using a private TSS.
 	 */
 	cmpl	$0, PCPU(PRIVATE_TSS)		/* Already using the common? */
@@ -265,7 +265,7 @@ sw1:
 	popfl
 
 	movl	%edx, PCPU(CURPCB)
-	movl	TD_TID(%ecx),%eax
+	movl	TD_TID(%ecx),%eax	/* WYC: TD_TID is not used after loaded to eax */
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
 	/*
@@ -347,6 +347,7 @@ END(cpu_switch)
 /*
  * savectx(pcb)
  * Update pcb, saving current processor state.
+ * 4(%esp) = pcb
  */
 ENTRY(savectx)
 	/* Fetch PCB. */
@@ -405,6 +406,8 @@ END(savectx)
 /*
  * resumectx(pcb) __fastcall
  * Resuming processor state from pcb.
+ * WYC:
+ * ecx = pcb
  */
 ENTRY(resumectx)
 	/* Restore GDT. */
