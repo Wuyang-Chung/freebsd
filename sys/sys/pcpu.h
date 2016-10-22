@@ -48,7 +48,7 @@
 #include <machine/pcpu.h>
 
 #define	DPCPU_SETNAME		"set_pcpu"
-#define	DPCPU_SYMPREFIX		"pcpu_entry_"
+#define	DPCPU_SYMPREFIX		"pcpu_entry_"	// WYC: not referenced at all
 
 #ifdef _KERNEL
 
