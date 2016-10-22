@@ -64,14 +64,14 @@ __FBSDID("$FreeBSD$");
 
 static MALLOC_DEFINE(M_PCPU, "Per-cpu", "Per-cpu resource accouting.");
 
-struct dpcpu_free {
+typedef struct _dpcpu_free {
 	uintptr_t	df_start;
 	int		df_len;
-	TAILQ_ENTRY(dpcpu_free) df_link;
-};
+	TAILQ_ENTRY(_dpcpu_free) df_link;
+} *dpcpu_free_t;
 
 static DPCPU_DEFINE(char, modspace[DPCPU_MODMIN]);
-static TAILQ_HEAD(, dpcpu_free) dpcpu_head = TAILQ_HEAD_INITIALIZER(dpcpu_head);
+static TAILQ_HEAD(, _dpcpu_free) dpcpu_head = TAILQ_HEAD_INITIALIZER(dpcpu_head);
 static struct sx dpcpu_lock;
 uintptr_t dpcpu_off[MAXCPU];
 struct pcpu *cpuid_to_pcpu[MAXCPU];
@@ -117,7 +117,7 @@ dpcpu_init(void *dpcpu, int cpuid)
 static void
 dpcpu_startup(void *dummy __unused)
 {
-	struct dpcpu_free *df;
+	dpcpu_free_t df;
 
 	df = malloc(sizeof(*df), M_PCPU, M_WAITOK | M_ZERO);
 	df->df_start = (uintptr_t)&DPCPU_NAME(modspace);
@@ -159,7 +159,7 @@ SYSINIT(pcpu_zones, SI_SUB_KMEM, SI_ORDER_ANY, pcpu_zones_startup, NULL);
 void *
 dpcpu_alloc(int size)
 {
-	struct dpcpu_free *df;
+	dpcpu_free_t df;
 	void *s;
 
 	s = NULL;
@@ -190,8 +190,8 @@ dpcpu_alloc(int size)
 void
 dpcpu_free(void *s, int size)
 {
-	struct dpcpu_free *df;
-	struct dpcpu_free *dn;
+	dpcpu_free_t df;
+	dpcpu_free_t dn;
 	uintptr_t start;
 	uintptr_t end;
 
