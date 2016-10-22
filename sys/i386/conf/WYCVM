@@ -94,8 +94,8 @@ device		cpufreq
 # Bus support.
 device		acpi
 device		pci
-options 	PCI_HP			# PCI-Express native HotPlug
-options		PCI_IOV			# PCI SR-IOV support
+#options 	PCI_HP			# PCI-Express native HotPlug
+#options		PCI_IOV			# PCI SR-IOV support
 
 # Floppy drives
 #device		fdc
