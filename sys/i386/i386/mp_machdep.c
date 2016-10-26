@@ -237,7 +237,7 @@ init_secondary(void)
 
 	/* prime data page for it to use */
 	pcpu_init(pc, myid, sizeof(struct pcpu));
-	dpcpu_init(dpcpu, myid);
+	dpcpu_init(dpcpu, myid);	// WYC: dpcup allocated by start_all_aps()
 	pc->pc_apic_id = cpu_apic_ids[myid];
 	pc->pc_prvspace = pc;
 	pc->pc_curthread = 0;
@@ -342,7 +342,7 @@ start_all_aps(void)
 		    (char *)kmem_malloc(kernel_arena, kstack_pages * PAGE_SIZE,
 		    M_WAITOK | M_ZERO);
 		dpcpu = (void *)kmem_malloc(kernel_arena, DPCPU_SIZE,
-		    M_WAITOK | M_ZERO);
+		    M_WAITOK | M_ZERO);	// WYC: init_secondary() will store dpcpu to pc_dynamic
 		/* setup a vector to our boot code */
 		*((volatile u_short *) WARMBOOT_OFF) = WARMBOOT_TARGET;
 		*((volatile u_short *) WARMBOOT_SEG) = (boot_address >> 4);

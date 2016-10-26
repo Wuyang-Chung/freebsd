@@ -73,7 +73,7 @@
 NON_GPROF_ENTRY(MPentry)
 	CHECKPOINT(0x36, 3)
 	/*
-	 * Enable features on this processor.  We don't support SMP on
+	 * Enable features on this processor.  We don`t support SMP on
 	 * CPUs older than a Pentium, so we know that we can use the cpuid
 	 * instruction.
 	 */
@@ -185,7 +185,7 @@ protmode:
 	 * are using a segment descriptor with the origin
 	 * not matching the booting kernel.
 	 *
- 	 * SO NOW... for the BIG Jump into kernel's segment
+ 	 * SO NOW... for the BIG Jump into kernel`s segment
 	 * and physical text above 1 Meg.
 	 */
 	mov	$0x10, %ebx

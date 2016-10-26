@@ -86,7 +86,7 @@ dtrace_invop_calltrap_addr:
  * the interrupt disable state prior to the trap), the code segment register,
  * and the return instruction pointer are pushed by the cpu.  The cpu
  * will also push an 'error' code for certain traps.  We push a dummy
- * error code for those traps where the cpu doesn't in order to maintain
+ * error code for those traps where the cpu doesn`t in order to maintain
  * a consistent frame.  We also push a contrived 'trap number'.
  *
  * The cpu does not push the general registers, we must do that, and we
@@ -202,7 +202,7 @@ IDTVEC(ill)
 
 	/*
 	 * Set our jump address for the jump back in the event that
-	 * the exception wasn't caused by DTrace at all.
+	 * the exception wasn`t caused by DTrace at all.
 	 */
 	movl	$norm_ill, dtrace_invop_calltrap_addr
 
@@ -225,7 +225,7 @@ norm_ill:
  * This leaves a place to put eflags so that the call frame can be
  * converted to a trap frame. Note that the eflags is (semi-)bogusly
  * pushed into (what will be) tf_err and then copied later into the
- * final spot. It has to be done this way because esp can't be just
+ * final spot. It has to be done this way because esp can`t be just
  * temporarily altered for the pushfl - an interrupt might come in
  * and clobber the saved cs/eip.
  */
@@ -301,7 +301,7 @@ ENTRY(fork_trampoline)
  * and bintr, and only interrupt handlers between the labels bintr and
  * eintr.  This is implemented (partly) by including files that contain
  * some of the handlers.  Before including the files, set up a normal asm
- * environment so that the included files doen't need to know that they are
+ * environment so that the included files doen`t need to know that they are
  * included.
  */
 
@@ -371,7 +371,7 @@ doreti_next:
 
 doreti_notvm86:
 	testb	$SEL_RPL_MASK,TF_CS(%esp) /* are we returning to user mode? */
-	jz	doreti_exit		/* can't handle ASTs now if not */
+	jz	doreti_exit		/* can`t handle ASTs now if not */
 
 doreti_ast:
 	/*
