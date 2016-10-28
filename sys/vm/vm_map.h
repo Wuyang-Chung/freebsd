@@ -188,8 +188,10 @@ struct vm_map {
 	vm_flags_t flags;		/* flags for this vm_map */
 	vm_map_entry_t root;		/* Root of a binary search tree */
 	pmap_t pmap;			/* (c) Physical map */
-#define	min_offset	header.start	/* (c) */
-#define	max_offset	header.end	/* (c) */
+//#define	min_offset	header.start	/* (c) */
+//#define	max_offset	header.end	/* (c) */
+	vm_offset_t min_offset;	// WYC
+	vm_offset_t max_offset;	// WYC
 	int busy;
 };
 
