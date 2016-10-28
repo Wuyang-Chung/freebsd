@@ -51,7 +51,7 @@
 #define	I386_SET_GSBASE		10
 #define	I386_GET_XFPUSTATE	11
 
-/* Leave space for 0-127 for to avoid translating syscalls */
+/* Leave space for 0-127 to avoid translating syscalls */
 #define	AMD64_GET_FSBASE	128
 #define	AMD64_SET_FSBASE	129
 #define	AMD64_GET_GSBASE	130

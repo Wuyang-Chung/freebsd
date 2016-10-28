@@ -517,9 +517,9 @@ struct munmap_args {
  * MPSAFE
  */
 int
-sys_munmap(td, uap)
-	struct thread *td;
-	struct munmap_args *uap;
+sys_munmap(
+	struct thread *td,
+	struct munmap_args *uap)
 {
 #ifdef HWPMC_HOOKS
 	struct pmckern_map_out pkm;

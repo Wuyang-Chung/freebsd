@@ -614,12 +614,12 @@ vm_thread_swapin(struct thread *td)
  * to user mode to avoid stack copying and relocation problems.
  */
 int
-vm_forkproc(td, p2, td2, vm2, flags)
-	struct thread *td;
-	struct proc *p2;
-	struct thread *td2;
-	struct vmspace *vm2;
-	int flags;
+vm_forkproc(
+	struct thread *td,
+	struct proc *p2,
+	struct thread *td2,
+	struct vmspace *vm2,
+	int flags)
 {
 	struct proc *p1 = td->td_proc;
 	int error;

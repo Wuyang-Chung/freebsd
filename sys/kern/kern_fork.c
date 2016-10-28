@@ -480,7 +480,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	td2->td_flags = TDF_INMEM;
 	td2->td_lend_user_pri = PRI_MAX;
 
-#ifdef VIMAGE
+#ifdef VIMAGE	// WYC: Network stack virtualization
 	td2->td_vnet = NULL;
 	td2->td_vnet_lpush = NULL;
 #endif
@@ -947,7 +947,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		goto fail1;
 	}
 
-#ifdef MAC
+#ifdef MAC	// WYC: Mandatory Access Control
 	mac_proc_init(newproc);
 #endif
 	newproc->p_klist = knlist_alloc(&newproc->p_mtx);

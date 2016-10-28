@@ -173,14 +173,14 @@ alloc_fpusave(int flags)
 /*
  * Finish a fork operation, with process p2 nearly set up.
  * Copy and update the pcb, set up the stack so that the child
- * ready to run and return to user mode.
+ * is ready to run and return to user mode.
  */
 void
-cpu_fork(td1, p2, td2, flags)
-	register struct thread *td1;
-	register struct proc *p2;
-	struct thread *td2;
-	int flags;
+cpu_fork(
+	register struct thread *td1,
+	register struct proc *p2,
+	struct thread *td2,
+	int flags)
 {
 	register struct proc *p1;
 	struct pcb *pcb2;
