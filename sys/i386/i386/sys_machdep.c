@@ -98,9 +98,9 @@ struct sysarch_args {
 #endif
 
 int
-sysarch(td, uap)
-	struct thread *td;
-	register struct sysarch_args *uap;
+sysarch(
+	struct thread *td,
+	register struct sysarch_args *uap)
 {
 	int error;
 	union descriptor *lp;
@@ -112,6 +112,7 @@ sysarch(td, uap)
 	uint32_t base;
 	struct segment_descriptor sd, *sdp;
 
+	//return ENOSYS;	// WYC: Will fail to boot if added here
 	AUDIT_ARG_CMD(uap->op);
 
 #ifdef CAPABILITY_MODE
@@ -152,6 +153,7 @@ sysarch(td, uap)
 		break;
 	case I386_GET_LDT:
 	case I386_SET_LDT:
+		return ENOSYS;	// WYC: However we can add it here to not support LDT related op
 		if ((error = copyin(uap->parms, &kargs.largs,
 		    sizeof(struct i386_ldt_args))) != 0)
 			return (error);
@@ -503,9 +505,9 @@ user_ldt_deref(struct proc_ldt *pldt)
  * the OS-specific one.
  */
 int
-i386_get_ldt(td, uap)
-	struct thread *td;
-	struct i386_ldt_args *uap;
+i386_get_ldt(
+	struct thread *td,
+	struct i386_ldt_args *uap)
 {
 	int error = 0;
 	struct proc_ldt *pldt;
@@ -543,10 +545,10 @@ i386_get_ldt(td, uap)
 }
 
 int
-i386_set_ldt(td, uap, descs)
-	struct thread *td;
-	struct i386_ldt_args *uap;
-	union descriptor *descs;
+i386_set_ldt(
+	struct thread *td,
+	struct i386_ldt_args *uap,
+	union descriptor *descs)
 {
 	int error = 0, i;
 	int largest_ld;
