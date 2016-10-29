@@ -37,8 +37,8 @@
 
 #include <sys/cdefs.h>
 
-#define I386_GET_LDT	0
-#define I386_SET_LDT	1
+//#define I386_GET_LDT	0
+//#define I386_SET_LDT	1
 #define	LDT_AUTO_ALLOC	0xffffffff
 				/* I386_IOPL */
 #define I386_GET_IOPERM	3

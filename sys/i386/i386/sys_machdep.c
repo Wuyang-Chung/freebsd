@@ -103,16 +103,16 @@ sysarch(
 	register struct sysarch_args *uap)
 {
 	int error;
-	union descriptor *lp;
+	//union descriptor *lp;		// WYC: unused variable
 	union {
-		struct i386_ldt_args largs;
+		//struct i386_ldt_args largs;	// WYC
 		struct i386_ioperm_args iargs;
 		struct i386_get_xfpustate xfpu;
 	} kargs;
 	uint32_t base;
 	struct segment_descriptor sd, *sdp;
 
-	//return ENOSYS;	// WYC: Will fail to boot if added here
+	//return ENOSYS;	// WYC: Will fail to boot if disable sysarch entirely
 	AUDIT_ARG_CMD(uap->op);
 
 #ifdef CAPABILITY_MODE
@@ -123,8 +123,8 @@ sysarch(
 	 */
 	if (IN_CAPABILITY_MODE(td)) {
 		switch (uap->op) {
-		case I386_GET_LDT:
-		case I386_SET_LDT:
+		//case I386_GET_LDT:
+		//case I386_SET_LDT:
 		case I386_GET_IOPERM:
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
@@ -151,15 +151,16 @@ sysarch(
 		    sizeof(struct i386_ioperm_args))) != 0)
 			return (error);
 		break;
+#if 0	// WYC: Not support LDT related operations
 	case I386_GET_LDT:
 	case I386_SET_LDT:
-		return ENOSYS;	// WYC: However we can add it here to not support LDT related op
 		if ((error = copyin(uap->parms, &kargs.largs,
 		    sizeof(struct i386_ldt_args))) != 0)
 			return (error);
 		if (kargs.largs.num > MAX_LD || kargs.largs.num <= 0)
 			return (EINVAL);
 		break;
+#endif
 	case I386_GET_XFPUSTATE:
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
@@ -170,6 +171,7 @@ sysarch(
 	}
 
 	switch(uap->op) {
+#if 0	// WYC: Not support LDT related operations
 	case I386_GET_LDT:
 		error = i386_get_ldt(td, &kargs.largs);
 		break;
@@ -187,6 +189,7 @@ sysarch(
 			error = i386_set_ldt(td, &kargs.largs, NULL);
 		}
 		break;
+#endif
 	case I386_GET_IOPERM:
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
@@ -393,6 +396,7 @@ set_user_ldt(struct mdproc *mdp)
 	struct proc_ldt *pldt;
 	int dtlocked;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	dtlocked = 0;
 	if (!mtx_owned(&dt_lock)) {
 		mtx_lock_spin(&dt_lock);
@@ -417,6 +421,7 @@ set_user_ldt_rv(struct vmspace *vmsp)
 {
 	struct thread *td;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	td = curthread;
 	if (vmsp != td->td_proc->p_vmspace)
 		return;
@@ -433,6 +438,7 @@ user_ldt_alloc(struct mdproc *mdp, int len)
 {
 	struct proc_ldt *pldt, *new_ldt;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	mtx_assert(&dt_lock, MA_OWNED);
 	mtx_unlock_spin(&dt_lock);
 	new_ldt = malloc(sizeof(struct proc_ldt),
@@ -469,6 +475,7 @@ user_ldt_free(struct thread *td)
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	mtx_assert(&dt_lock, MA_OWNED);
 	if ((pldt = mdp->md_ldt) == NULL) {
 		mtx_unlock_spin(&dt_lock);
@@ -487,7 +494,7 @@ user_ldt_free(struct thread *td)
 void
 user_ldt_deref(struct proc_ldt *pldt)
 {
-
+	panic("%s called", __FUNCTION__);	// WYC
 	mtx_assert(&dt_lock, MA_OWNED);
 	if (--pldt->ldt_refcnt == 0) {
 		mtx_unlock_spin(&dt_lock);
@@ -514,6 +521,7 @@ i386_get_ldt(
 	int nldt, num;
 	union descriptor *lp;
 
+	return ENOSYS;	// WYC
 #ifdef	DEBUG
 	printf("i386_get_ldt: start=%d num=%d descs=%p\n",
 	    uap->start, uap->num, (void *)uap->descs);
@@ -556,6 +564,7 @@ i386_set_ldt(
 	struct proc_ldt *pldt;
 	union descriptor *dp;
 
+	return ENOSYS;	// WYC
 #ifdef	DEBUG
 	printf("i386_set_ldt: start=%d num=%d descs=%p\n",
 	    uap->start, uap->num, (void *)uap->descs);
@@ -711,6 +720,7 @@ i386_set_ldt_data(struct thread *td, int start, int num,
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt = mdp->md_ldt;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	mtx_assert(&dt_lock, MA_OWNED);
 
 	/* Fill in range */
@@ -728,6 +738,7 @@ i386_ldt_grow(struct thread *td, int len)
 	caddr_t old_ldt_base = NULL_LDT_BASE;
 	int old_ldt_len = 0;
 
+	panic("%s called", __FUNCTION__);	// WYC
 	mtx_assert(&dt_lock, MA_OWNED);
 
 	if (len > MAX_LD)

@@ -194,14 +194,16 @@ cpu_fork(
 			struct proc_ldt *pldt, *pldt1;
 
 			mtx_lock_spin(&dt_lock);
-			if ((pldt1 = mdp1->md_ldt) != NULL &&
-			    pldt1->ldt_refcnt > 1) {
+			if ((pldt1 = mdp1->md_ldt) != NULL) {
+			    panic("cpu_fork 1: md_ldt != NULL");	// WYC
+			    if (pldt1->ldt_refcnt > 1) {
 				pldt = user_ldt_alloc(mdp1, pldt1->ldt_len);
 				if (pldt == NULL)
 					panic("could not copy LDT");
 				mdp1->md_ldt = pldt;
 				set_user_ldt(mdp1);
 				user_ldt_deref(pldt1);
+			    }
 			} else
 				mtx_unlock_spin(&dt_lock);
 		}
@@ -291,6 +293,7 @@ cpu_fork(
 	/* Copy the LDT, if necessary. */
 	mtx_lock_spin(&dt_lock);
 	if (mdp2->md_ldt != NULL) {
+		panic("cpu_fork 2: md_ldt != NULL");	// WYC
 		if (flags & RFMEM) {
 			mdp2->md_ldt->ldt_refcnt++;
 		} else {
@@ -344,6 +347,7 @@ cpu_exit(struct thread *td)
 	 */
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
+		panic("cpu_exit: md_ldt != NULL");	// WYC
 		td->td_pcb->pcb_gs = _udatasel;
 		load_gs(_udatasel);
 		user_ldt_free(td);

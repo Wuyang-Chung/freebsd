@@ -1150,9 +1150,10 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	load_gs(_udatasel);
 
 	mtx_lock_spin(&dt_lock);
-	if (td->td_proc->p_md.md_ldt)
+	if (td->td_proc->p_md.md_ldt) {
+		panic("exec_setregs: md_ldt != NULL");	// WYC
 		user_ldt_free(td);
-	else
+	} else
 		mtx_unlock_spin(&dt_lock);
   
 	bzero((char *)regs, sizeof(struct trapframe));
