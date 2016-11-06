@@ -100,7 +100,7 @@ SYSCTL_INT(_vm, OID_AUTO, old_mlock, CTLFLAG_RWTUN, &old_mlock, 0,
 #define	MAP_32BIT_MAX_ADDR	((vm_offset_t)1 << 31)
 #endif
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct sbrk_args {
 	int incr;
 };
@@ -111,15 +111,15 @@ struct sbrk_args {
  */
 /* ARGSUSED */
 int
-sys_sbrk(td, uap)
-	struct thread *td;
-	struct sbrk_args *uap;
+sys_sbrk(
+	struct thread *td,
+	struct sbrk_args *uap)
 {
 	/* Not yet implemented */
 	return (EOPNOTSUPP);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct sstk_args {
 	int incr;
 };
@@ -130,9 +130,9 @@ struct sstk_args {
  */
 /* ARGSUSED */
 int
-sys_sstk(td, uap)
-	struct thread *td;
-	struct sstk_args *uap;
+sys_sstk(
+	struct thread *td,
+	struct sstk_args *uap)
 {
 	/* Not yet implemented */
 	return (EOPNOTSUPP);
@@ -170,7 +170,7 @@ ogetpagesize(td, uap)
  * there would be no cache coherency between a descriptor and a VM mapping
  * both to the same character device.
  */
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct mmap_args {
 	void *addr;
 	size_t len;
@@ -186,9 +186,9 @@ struct mmap_args {
  * MPSAFE
  */
 int
-sys_mmap(td, uap)
-	struct thread *td;
-	struct mmap_args *uap;
+sys_mmap(
+	struct thread *td,
+	struct mmap_args *uap)
 {
 	struct file *fp;
 	vm_offset_t addr;
@@ -451,7 +451,7 @@ ommap(td, uap)
 #endif				/* COMPAT_43 */
 
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct msync_args {
 	void *addr;
 	size_t len;
@@ -462,9 +462,9 @@ struct msync_args {
  * MPSAFE
  */
 int
-sys_msync(td, uap)
-	struct thread *td;
-	struct msync_args *uap;
+sys_msync(
+	struct thread *td,
+	struct msync_args *uap)
 {
 	vm_offset_t addr;
 	vm_size_t size, pageoff;
@@ -507,7 +507,7 @@ sys_msync(td, uap)
 	}
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct munmap_args {
 	void *addr;
 	size_t len;
@@ -582,7 +582,7 @@ sys_munmap(
 	return (0);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct mprotect_args {
 	const void *addr;
 	size_t len;
@@ -593,9 +593,9 @@ struct mprotect_args {
  * MPSAFE
  */
 int
-sys_mprotect(td, uap)
-	struct thread *td;
-	struct mprotect_args *uap;
+sys_mprotect(
+	struct thread *td,
+	struct mprotect_args *uap)
 {
 	vm_offset_t addr;
 	vm_size_t size, pageoff;
@@ -624,7 +624,7 @@ sys_mprotect(td, uap)
 	return (EINVAL);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct minherit_args {
 	void *addr;
 	size_t len;
@@ -635,9 +635,9 @@ struct minherit_args {
  * MPSAFE
  */
 int
-sys_minherit(td, uap)
-	struct thread *td;
-	struct minherit_args *uap;
+sys_minherit(
+	struct thread *td,
+	struct minherit_args *uap)
 {
 	vm_offset_t addr;
 	vm_size_t size, pageoff;
@@ -664,7 +664,7 @@ sys_minherit(td, uap)
 	return (EINVAL);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct madvise_args {
 	void *addr;
 	size_t len;
@@ -676,9 +676,9 @@ struct madvise_args {
  * MPSAFE
  */
 int
-sys_madvise(td, uap)
-	struct thread *td;
-	struct madvise_args *uap;
+sys_madvise(
+	struct thread *td,
+	struct madvise_args *uap)
 {
 	vm_offset_t start, end;
 	vm_map_t map;
@@ -722,7 +722,7 @@ sys_madvise(td, uap)
 	return (0);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct mincore_args {
 	const void *addr;
 	size_t len;
@@ -734,9 +734,9 @@ struct mincore_args {
  * MPSAFE
  */
 int
-sys_mincore(td, uap)
-	struct thread *td;
-	struct mincore_args *uap;
+sys_mincore(
+	struct thread *td,
+	struct mincore_args *uap)
 {
 	vm_offset_t addr, first_addr;
 	vm_offset_t end, cend;
@@ -983,7 +983,7 @@ done2:
 	return (error);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct mlock_args {
 	const void *addr;
 	size_t len;
@@ -993,9 +993,9 @@ struct mlock_args {
  * MPSAFE
  */
 int
-sys_mlock(td, uap)
-	struct thread *td;
-	struct mlock_args *uap;
+sys_mlock(
+	struct thread *td,
+	struct mlock_args *uap)
 {
 
 	return (vm_mlock(td->td_proc, td->td_ucred, uap->addr, uap->len));
@@ -1055,7 +1055,7 @@ vm_mlock(struct proc *proc, struct ucred *cred, const void *addr0, size_t len)
 	return (error == KERN_SUCCESS ? 0 : ENOMEM);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct mlockall_args {
 	int	how;
 };
@@ -1065,9 +1065,9 @@ struct mlockall_args {
  * MPSAFE
  */
 int
-sys_mlockall(td, uap)
-	struct thread *td;
-	struct mlockall_args *uap;
+sys_mlockall(
+	struct thread *td,
+	struct mlockall_args *uap)
 {
 	vm_map_t map;
 	int error;
@@ -1132,7 +1132,7 @@ sys_mlockall(td, uap)
 	return (error);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct munlockall_args {
 	register_t dummy;
 };
@@ -1142,9 +1142,9 @@ struct munlockall_args {
  * MPSAFE
  */
 int
-sys_munlockall(td, uap)
-	struct thread *td;
-	struct munlockall_args *uap;
+sys_munlockall(
+	struct thread *td,
+	struct munlockall_args *uap)
 {
 	vm_map_t map;
 	int error;
@@ -1173,7 +1173,7 @@ sys_munlockall(td, uap)
 	return (error);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	// WYC: already defined in sys/sysproto.h
 struct munlock_args {
 	const void *addr;
 	size_t len;
@@ -1183,9 +1183,9 @@ struct munlock_args {
  * MPSAFE
  */
 int
-sys_munlock(td, uap)
-	struct thread *td;
-	struct munlock_args *uap;
+sys_munlock(
+	struct thread *td,
+	struct munlock_args *uap)
 {
 	vm_offset_t addr, end, last, start;
 	vm_size_t size;
