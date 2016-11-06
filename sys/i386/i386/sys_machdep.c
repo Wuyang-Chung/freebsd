@@ -112,7 +112,7 @@ sysarch(
 	uint32_t base;
 	struct segment_descriptor sd, *sdp;
 
-	//return ENOSYS;	// WYC: Will fail to boot if disable sysarch entirely
+	//return EOPNOTSUPP;	// WYC: Will fail to boot if disable sysarch entirely
 	AUDIT_ARG_CMD(uap->op);
 
 #ifdef CAPABILITY_MODE
@@ -521,7 +521,7 @@ i386_get_ldt(
 	int nldt, num;
 	union descriptor *lp;
 
-	return ENOSYS;	// WYC
+	return EOPNOTSUPP;	// WYC
 #ifdef	DEBUG
 	printf("i386_get_ldt: start=%d num=%d descs=%p\n",
 	    uap->start, uap->num, (void *)uap->descs);
@@ -564,7 +564,7 @@ i386_set_ldt(
 	struct proc_ldt *pldt;
 	union descriptor *dp;
 
-	return ENOSYS;	// WYC
+	return EOPNOTSUPP;	// WYC
 #ifdef	DEBUG
 	printf("i386_set_ldt: start=%d num=%d descs=%p\n",
 	    uap->start, uap->num, (void *)uap->descs);
