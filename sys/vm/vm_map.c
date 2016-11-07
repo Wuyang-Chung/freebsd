@@ -318,7 +318,7 @@ vmspace_container_reset(struct proc *p)
 static inline void
 vmspace_dofree(struct vmspace *vm)
 {
-
+	KASSERT(&vm->vm_pmap == vm->vm_map.pmap, "vmspace_dofree: &vm_pmap != vm_map.pmap");	// WYC
 	CTR1(KTR_VM, "vmspace_free: %p", vm);
 
 	/*
@@ -1978,8 +1978,10 @@ vm_map_protect(vm_map_t map, vm_offset_t start, vm_offset_t end,
 	/*
 	 * Make a first pass to check for protection violations.
 	 */
-	current = entry;
-	while ((current != &map->header) && (current->start < end)) {
+	//current = entry;
+	for (current = entry;
+	     (current != &map->header) && (current->start < end);
+	     current = current->next) {
 		if (current->eflags & MAP_ENTRY_IS_SUB_MAP) {
 			vm_map_unlock(map);
 			return (KERN_INVALID_ARGUMENT);
@@ -1988,7 +1990,7 @@ vm_map_protect(vm_map_t map, vm_offset_t start, vm_offset_t end,
 			vm_map_unlock(map);
 			return (KERN_PROTECTION_FAILURE);
 		}
-		current = current->next;
+		//current = current->next;
 	}
 
 
@@ -2051,8 +2053,10 @@ vm_map_protect(vm_map_t map, vm_offset_t start, vm_offset_t end,
 	 * Go back and fix up protections. [Note that clipping is not
 	 * necessary the second time.]
 	 */
-	current = entry;
-	while ((current != &map->header) && (current->start < end)) {
+	//current = entry;
+	for (current = entry;
+	     (current != &map->header) && (current->start < end);
+	     current = current->next) {
 		old_prot = current->protection;
 
 		if (set_max)
@@ -2086,7 +2090,7 @@ vm_map_protect(vm_map_t map, vm_offset_t start, vm_offset_t end,
 #undef	MASK
 		}
 		vm_map_simplify_entry(map, current);
-		current = current->next;
+		//current = current->next;
 	}
 	vm_map_unlock(map);
 	return (KERN_SUCCESS);
@@ -2161,8 +2165,8 @@ vm_map_madvise(
 		 */
 		for (current = entry;
 		     (current != &map->header) && (current->start < end);
-		     current = current->next
-		) {
+		     current = current->next)
+		{
 			if (current->eflags & MAP_ENTRY_IS_SUB_MAP)
 				continue;
 
@@ -2208,8 +2212,8 @@ vm_map_madvise(
 		 */
 		for (current = entry;
 		     (current != &map->header) && (current->start < end);
-		     current = current->next
-		) {
+		     current = current->next)
+		{
 			vm_offset_t useEnd, useStart;
 
 			if (current->eflags & MAP_ENTRY_IS_SUB_MAP)
@@ -2343,8 +2347,10 @@ vm_map_unwire(vm_map_t map, vm_offset_t start, vm_offset_t end,
 		}
 	}
 	last_timestamp = map->timestamp;
-	entry = first_entry;
-	while (entry != &map->header && entry->start < end) {
+	//entry = first_entry;
+	for (entry = first_entry;
+	     entry != &map->header && entry->start < end;
+	     entry = entry->next) {
 		if (entry->eflags & MAP_ENTRY_IN_TRANSITION) {
 			/*
 			 * We have not yet clipped the entry.
@@ -2422,7 +2428,7 @@ vm_map_unwire(vm_map_t map, vm_offset_t start, vm_offset_t end,
 			rv = KERN_INVALID_ARGUMENT;
 			goto done;
 		}
-		entry = entry->next;
+		//entry = entry->next;
 	}
 	rv = KERN_SUCCESS;
 done:
@@ -2548,8 +2554,10 @@ vm_map_wire(vm_map_t map, vm_offset_t start, vm_offset_t end,
 		}
 	}
 	last_timestamp = map->timestamp;
-	entry = first_entry;
-	while (entry != &map->header && entry->start < end) {
+	//entry = first_entry;
+	for (entry = first_entry;
+	     entry != &map->header && entry->start < end;
+	     entry = entry->next) {
 		if (entry->eflags & MAP_ENTRY_IN_TRANSITION) {
 			/*
 			 * We have not yet clipped the entry.
@@ -2692,7 +2700,7 @@ vm_map_wire(vm_map_t map, vm_offset_t start, vm_offset_t end,
 			rv = KERN_INVALID_ADDRESS;
 			goto done;
 		}
-		entry = entry->next;
+		//entry = entry->next;
 	}
 	rv = KERN_SUCCESS;
 done:
@@ -3315,9 +3323,11 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	locked = vm_map_trylock(new_map); /* trylock to silence WITNESS */
 	KASSERT(locked, ("vmspace_fork: lock failed"));
 
-	old_entry = old_map->header.next;
+	//old_entry = old_map->header.next;	//WYC: change while to for loop
 
-	while (old_entry != &old_map->header) {
+	for (old_entry = old_map->header.next;
+	     old_entry != &old_map->header;
+	     old_entry = old_entry->next) {
 		if (old_entry->eflags & MAP_ENTRY_IS_SUB_MAP)
 			panic("vm_map_fork: encountered a submap");
 
@@ -3444,7 +3454,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			    new_entry, fork_charge);
 			break;
 		}
-		old_entry = old_entry->next;
+		//old_entry = old_entry->next;	//WYC: change while to for loop
 	}
 	/*
 	 * Use inlined vm_map_unlock() to postpone handling the deferred
