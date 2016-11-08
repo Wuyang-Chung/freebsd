@@ -749,13 +749,23 @@ static int
 __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 {
 	struct thread *td;
+#if defined(WYC)
+	const Elf32_Ehdr *hdr;
+	const Elf32_Phdr *phdr;
+	Elf32_Auxargs *elf_auxargs;
+#else
 	const Elf_Ehdr *hdr;
 	const Elf_Phdr *phdr;
 	Elf_Auxargs *elf_auxargs;
+#endif
 	struct vmspace *vmspace;
 	const char *err_str, *newinterp;
 	char *interp, *interp_buf, *path;
+#if defined(WYC)
+	Elf32_Brandinfo *brand_info;
+#else
 	Elf_Brandinfo *brand_info;
+#endif
 	struct sysentvec *sv;
 	vm_prot_t prot;
 	u_long text_size, data_size, total_size, text_addr, data_addr;
@@ -763,7 +773,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	int32_t osrel;
 	int error, i, n, interp_name_len, have_interp;
 
+#if defined(WYC)
+	hdr = (const Elf32_Ehdr *)imgp->image_header;
+#else
 	hdr = (const Elf_Ehdr *)imgp->image_header;
+#endif
 
 	/*
 	 * Do we have a valid ELF header ?
@@ -771,7 +785,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	 * Only allow ET_EXEC & ET_DYN here, reject ET_DYN later
 	 * if particular brand doesn't support it.
 	 */
+#if defined(WYC)
+	if (elf32_check_header(hdr) != 0 ||
+#else
 	if (__elfN(check_header)(hdr) != 0 ||
+#endif
 	    (hdr->e_type != ET_EXEC && hdr->e_type != ET_DYN))
 		return (-1);
 
@@ -786,8 +804,13 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		uprintf("Program headers not in the first page\n");
 		return (ENOEXEC);
 	}
+#if defined(WYC)
+	phdr = (const Elf32_Phdr *)(imgp->image_header + hdr->e_phoff); 
+	if (!aligned(phdr, Elf32_Addr)) {
+#else
 	phdr = (const Elf_Phdr *)(imgp->image_header + hdr->e_phoff); 
 	if (!aligned(phdr, Elf_Addr)) {
+#endif
 		uprintf("Unaligned program headers\n");
 		return (ENOEXEC);
 	}
@@ -844,15 +867,25 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			}
 			break;
 		case PT_GNU_STACK:
+#if defined(WYC)
+			if (elf32_nxstack)
+				imgp->stack_prot =
+				    elf32_trans_prot(phdr[i].p_flags);
+#else
 			if (__elfN(nxstack))
 				imgp->stack_prot =
 				    __elfN(trans_prot)(phdr[i].p_flags);
+#endif
 			imgp->stack_sz = phdr[i].p_memsz;
 			break;
 		}
 	}
 
+#if defined(WYC)
+	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
+#else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
+#endif
 	    &osrel);
 	if (brand_info == NULL) {
 		uprintf("ELF binary type \"%u\" not known.\n",
@@ -905,8 +938,13 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		case PT_LOAD:	/* Loadable segment */
 			if (phdr[i].p_memsz == 0)
 				break;
+#if defined(WYC)
+			prot = elf32_trans_prot(phdr[i].p_flags);
+			error = elf32_load_section(imgp, phdr[i].p_offset,
+#else
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
 			error = __elfN(load_section)(imgp, phdr[i].p_offset,
+#endif
 			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr,
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
@@ -1013,7 +1051,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			path = malloc(MAXPATHLEN, M_TEMP, M_WAITOK);
 			snprintf(path, MAXPATHLEN, "%s%s",
 			    brand_info->emul_path, interp);
+#if defined(WYC)
+			error = elf32_load_file(imgp->proc, path, &addr,
+#else
 			error = __elfN(load_file)(imgp->proc, path, &addr,
+#endif
 			    &imgp->entry_addr, sv->sv_pagesize);
 			free(path, M_TEMP);
 			if (error == 0)
@@ -1022,13 +1064,21 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		if (!have_interp && newinterp != NULL &&
 		    (brand_info->interp_path == NULL ||
 		    strcmp(interp, brand_info->interp_path) == 0)) {
+#if defined(WYC)
+			error = elf32_load_file(imgp->proc, newinterp, &addr,
+#else
 			error = __elfN(load_file)(imgp->proc, newinterp, &addr,
+#endif
 			    &imgp->entry_addr, sv->sv_pagesize);
 			if (error == 0)
 				have_interp = TRUE;
 		}
 		if (!have_interp) {
+#if defined(WYC)
+			error = elf32_load_file(imgp->proc, interp, &addr,
+#else
 			error = __elfN(load_file)(imgp->proc, interp, &addr,
+#endif
 			    &imgp->entry_addr, sv->sv_pagesize);
 		}
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
