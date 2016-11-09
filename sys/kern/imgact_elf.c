@@ -746,7 +746,11 @@ fail:
 }
 
 static int
+#if defined(WYC)
+exec_elf32_imgact(struct image_params *imgp)
+#else
 __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
+#endif
 {
 	struct thread *td;
 #if defined(WYC)
