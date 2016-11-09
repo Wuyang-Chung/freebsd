@@ -277,8 +277,9 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
 
+	//WYC: tested 'pinit' is always NULL
+	//KASSERT(pinit==NULL, "vmspace_alloc: pinit not NULL");	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
-
 	if (pinit == NULL)
 		pinit = &pmap_pinit;
 

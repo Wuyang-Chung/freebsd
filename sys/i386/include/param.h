@@ -93,11 +93,11 @@
 #if defined(PAE) || defined(PAE_TABLES)
 #define NPGPTD		4
 #define PDRSHIFT	21		/* LOG2(NBPDR) */
-#define NPGPTD_SHIFT	9
+//#define NPGPTD_SHIFT	9	//WYC: not referenced
 #else
 #define NPGPTD		1
 #define PDRSHIFT	22		/* LOG2(NBPDR) */
-#define NPGPTD_SHIFT	10
+//#define NPGPTD_SHIFT	10	//WYC: not referenced
 #endif
 
 #define NBPTD		(NPGPTD<<PAGE_SHIFT)

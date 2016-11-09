@@ -207,8 +207,8 @@ int pseflag = 0;		/* PG_PS or-in. 4M page */
 
 static int nkpt = NKPT;
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
-extern u_int32_t KERNend;
-extern u_int32_t KPTphys;
+extern u_int32_t KERNend;	//WYC: phys addr end of kernel (just after bss)
+extern u_int32_t KPTphys;	//WYC: phys addr of kernel page tables
 
 #if defined(PAE) || defined(PAE_TABLES)
 pt_entry_t pg_nx;

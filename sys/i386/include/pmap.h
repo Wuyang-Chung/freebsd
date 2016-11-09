@@ -76,7 +76,8 @@
 #define	PG_PS_FRAME	(0x000fffffffe00000ull)
 #else
 #define	PG_FRAME	(~PAGE_MASK)
-#define	PG_PS_FRAME	(0xffc00000)
+//#define	PG_PS_FRAME	(0xffc00000)
+#define	PG_PS_FRAME	(~PDRMASK)	//WYC: make this definition symmetric to PG_FRAME
 #endif
 #define	PG_PROT		(PG_RW|PG_U)	/* all protection bits . */
 #define PG_N		(PG_NC_PWT|PG_NC_PCD)	/* Non-cacheable */
