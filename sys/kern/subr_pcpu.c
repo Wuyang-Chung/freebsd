@@ -101,8 +101,8 @@ dpcpu_init(void *dpcpu, int cpuid)
 	struct pcpu *pcpu;
 
 	pcpu = pcpu_find(cpuid);
-	// WYC: pre subtract DPCPU_START here so that it won't have to 
-	//      do the substraction for every reference to pc_dynamic
+	//WYC: pre subtract DPCPU_START here so that it won't have to 
+	//     do the substraction for every reference to pc_dynamic
 	pcpu->pc_dynamic = (uintptr_t)dpcpu - DPCPU_START;
 
 	/*

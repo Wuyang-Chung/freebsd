@@ -277,7 +277,7 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
 
-	//WYC: tested 'pinit' is always NULL
+	//WYC: tested. 'pinit' is always NULL
 	//KASSERT(pinit==NULL, "vmspace_alloc: pinit not NULL");	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
 	if (pinit == NULL)
@@ -319,7 +319,8 @@ vmspace_container_reset(struct proc *p)
 static inline void
 vmspace_dofree(struct vmspace *vm)
 {
-	KASSERT(&vm->vm_pmap == vm->vm_map.pmap, "vmspace_dofree: &vm_pmap != vm_map.pmap");	// WYC
+	//WYC: tested. vm->vm_map.pmap == &vm->vm_pmap
+	//KASSERT(vm->vm_map.pmap == &vm->vm_pmap, "vmspace_dofree: &vm_pmap != vm_map.pmap");
 	CTR1(KTR_VM, "vmspace_free: %p", vm);
 
 	/*
@@ -1206,7 +1207,7 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	if (vm_map_lookup_entry(map, start, &prev_entry))
 		return (KERN_NO_SPACE);
 
-	//prev_entry = temp_entry;	// WYC
+	//prev_entry = temp_entry;	//WYC
 
 	/*
 	 * Assert that the next entry doesn't overlap the end point.

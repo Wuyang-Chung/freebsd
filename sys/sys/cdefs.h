@@ -777,7 +777,7 @@
 #endif
 #endif
 
-// WYC: should be __mips__
+//WYC: should be __mips__
 #if defined(__mips) || defined(__powerpc64__) || defined(__riscv__)
 #define	__NO_TLS 1
 #endif
