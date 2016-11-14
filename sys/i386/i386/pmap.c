@@ -173,7 +173,7 @@ __FBSDID("$FreeBSD$");
 #ifdef PV_STATS
 #define PV_STAT(x)	do { x ; } while (0)
 #else
-#define PV_STAT(x)	do { } while (0)
+#define PV_STAT(x)	//WYC do { } while (0)
 #endif
 
 #define	pa_index(pa)	((pa) >> PDRSHIFT)
@@ -202,8 +202,8 @@ static struct mtx allpmaps_lock;
 
 vm_offset_t virtual_avail;	/* VA of first avail page (after kernel bss) */
 vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
-int pgeflag = 0;		/* PG_G or-in.  Global page */
-int pseflag = 0;		/* PG_PS or-in. 4M page */
+int pgeflag = 0;		/* PG_G or-in.  WYC: Global page */
+int pseflag = 0;		/* PG_PS or-in. WYC: 4M page */
 
 static int nkpt = NKPT;
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
@@ -2189,8 +2189,8 @@ pmap_pv_reclaim(pmap_t locked_pmap)
 	m_pc = NULL;
 	SLIST_INIT(&free);
 	TAILQ_INIT(&newtail);
-	while ((pc = TAILQ_FIRST(&pv_chunks)) != NULL && (pv_vafree == 0 ||
-	    SLIST_EMPTY(&free))) {
+	while ((pc = TAILQ_FIRST(&pv_chunks)) != NULL && 
+	    (pv_vafree == 0 || SLIST_EMPTY(&free))) {
 		TAILQ_REMOVE(&pv_chunks, pc, pc_lru);
 		if (pmap != pc->pc_pmap) {
 			if (pmap != NULL) {

@@ -60,6 +60,8 @@ breakpoint(void)
 	__asm __volatile("int $3");
 }
 
+//WYC: Bit Scan Forward
+//     Searches for the least significant set bit
 static __inline u_int
 bsfl(u_int mask)
 {
@@ -69,6 +71,8 @@ bsfl(u_int mask)
 	return (result);
 }
 
+//WYC: Bit Scan Reverse
+//     Searches for the most significant set bit
 static __inline u_int
 bsrl(u_int mask)
 {
@@ -78,6 +82,7 @@ bsrl(u_int mask)
 	return (result);
 }
 
+//WYC: Flush Cache Line
 static __inline void
 clflush(u_long addr)
 {
@@ -92,6 +97,10 @@ clflushopt(u_long addr)
 	__asm __volatile(".byte 0x66;clflush %0" : : "m" (*(char *)addr));
 }
 
+/*
+   WYC: Clears the task-switched (TS) flag in the CR0 register. The flag is 
+	used to synchronize the saving of FPU context in multitasking applications.
+*/
 static __inline void
 clts(void)
 {
@@ -144,6 +153,7 @@ cpu_mwait(u_long extensions, u_int hints)
 	__asm __volatile("mwait" : : "a" (hints), "c" (extensions));
 }
 
+//WYC: Load Fence
 static __inline void
 lfence(void)
 {
@@ -151,6 +161,7 @@ lfence(void)
 	__asm __volatile("lfence" : : : "memory");
 }
 
+//WYC: Memory Fence
 static __inline void
 mfence(void)
 {
@@ -251,6 +262,7 @@ insl(u_int port, void *addr, size_t count)
 			 : "memory");
 }
 
+//WYC: Invalidate Internal Caches
 static __inline void
 invd(void)
 {

@@ -129,8 +129,7 @@ kva_import(void *unused, vmem_size_t size, int flags, vmem_addr_t *addrp)
  */
 /* ARGSUSED*/
 static void
-vm_mem_init(dummy)
-	void *dummy;
+vm_mem_init(void *dummy)
 {
 
 	/*
