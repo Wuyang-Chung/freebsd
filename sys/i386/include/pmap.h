@@ -143,7 +143,7 @@
 #endif
 
 #ifndef NKPDE
-#define NKPDE	(KVA_PAGES)	/* number of page tables/pde's */
+#define NKPDE	(KVA_PAGES)	/* WYC:256 number of kernel page tables/PDEs */
 #endif
 
 /*
@@ -152,8 +152,8 @@
  * XXX This works for now, but I am not real happy with it, I'll fix it
  * right after I fix locore.s and the magic 28K hole
  */
-#define	KPTDI		(NPDEPTD-NKPDE)	/* start of kernel virtual pde's */
-#define	PTDPTDI		(KPTDI-NPGPTD)	/* ptd entry that points to ptd! */
+#define	KPTDI		(NPDEPTD-NKPDE)	/* WYC:768 start of kernel virtual pde's */
+#define	PTDPTDI		(KPTDI-NPGPTD)	/* WYC:767 ptd entry that points to ptd! */
 
 /*
  * XXX doesn't really belong here I guess...
@@ -342,9 +342,10 @@ typedef struct pv_entry {
  * pv_entries are allocated in chunks per-process.  This avoids the
  * need to track per-pmap assignments.
  */
+//WYC: the constant _NPCM and _NPCPV are defined to make sizeof(pv_chunk) equal to 1 page
 #define	_NPCM	11
-#define	_NPCPV	336
-struct pv_chunk {
+#define	_NPCPV	336	//WYC: this should be calculated instead of constant
+struct pv_chunk {	//WYC: sizeof(pv_chunk) must be PAGE_SIZE(4K)
 	pmap_t			pc_pmap;
 	TAILQ_ENTRY(pv_chunk)	pc_list;
 	uint32_t		pc_map[_NPCM];	/* bitmap; 1 = free */

@@ -87,7 +87,7 @@
  *
  *	In addition, the structure contains the object
  *	and offset to which this page belongs (for pageout),
- *	and sundry status bits.
+ *	and sundry (WYC: various items not important enough to be mentioned individually) status bits.
  *
  *	In general, operations on this structure's mutable fields are
  *	synchronized using either one of or a combination of the lock on the

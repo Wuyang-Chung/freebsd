@@ -278,7 +278,8 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
 
 	//WYC: tested. 'pinit' is always NULL
-	//KASSERT(pinit==NULL, "vmspace_alloc: pinit not NULL");	
+	//if (pinit != NULL)
+	//	panic("vmspace_alloc: pinit not NULL");	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
 	if (pinit == NULL)
 		pinit = &pmap_pinit;
@@ -320,7 +321,8 @@ static inline void
 vmspace_dofree(struct vmspace *vm)
 {
 	//WYC: tested. vm->vm_map.pmap == &vm->vm_pmap
-	//KASSERT(vm->vm_map.pmap == &vm->vm_pmap, "vmspace_dofree: &vm_pmap != vm_map.pmap");
+	//if (vm->vm_map.pmap != &vm->vm_pmap)
+	//	panic("vmspace_dofree: &vm_pmap != vm_map.pmap");
 	CTR1(KTR_VM, "vmspace_free: %p", vm);
 
 	/*

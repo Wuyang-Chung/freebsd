@@ -202,8 +202,8 @@ static struct mtx allpmaps_lock;
 
 vm_offset_t virtual_avail;	/* VA of first avail page (after kernel bss) */
 vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
-int pgeflag = 0;		/* PG_G or-in.  WYC: Global page */
-int pseflag = 0;		/* PG_PS or-in. WYC: 4M page */
+int pgeflag = 0;		/* PG_G or-in.  WYC: == PG_G if hw supports global page */
+int pseflag = 0;		/* PG_PS or-in. WYC: == PG_PS if hw supports superpage */
 
 static int nkpt = NKPT;
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
@@ -221,7 +221,7 @@ static int pat_works = 1;
 SYSCTL_INT(_vm_pmap, OID_AUTO, pat_works, CTLFLAG_RD, &pat_works, 1,
     "Is page attribute table fully functional?");
 
-static int pg_ps_enabled = 1;
+static int pg_ps_enabled = 1;	//WYC: superpage enabled? Will be set to 0 if hw does not support it.
 SYSCTL_INT(_vm_pmap, OID_AUTO, pg_ps_enabled, CTLFLAG_RDTUN | CTLFLAG_NOFETCH,
     &pg_ps_enabled, 0, "Are large page mappings enabled?");
 
@@ -232,7 +232,7 @@ static int pat_index[PAT_INDEX_SIZE];	/* cache mode to PAT index conversion */
  * pmap_mapdev support pre initialization (i.e. console)
  */
 #define	PMAP_PREINIT_MAPPING_COUNT	8
-static struct pmap_preinit_mapping {
+static struct _pmap_preinit_mapping {
 	vm_paddr_t	pa;
 	vm_offset_t	va;
 	vm_size_t	sz;
@@ -248,7 +248,7 @@ static struct rwlock_padalign pvh_global_lock;
 static TAILQ_HEAD(pch, pv_chunk) pv_chunks = TAILQ_HEAD_INITIALIZER(pv_chunks);
 static int pv_entry_count = 0, pv_entry_max = 0, pv_entry_high_water = 0;
 static struct md_page *pv_table;
-static int shpgperproc = PMAP_SHPGPERPROC;
+static int shpgperproc = PMAP_SHPGPERPROC;	//WYC: share pages per proc I presume.
 
 struct pv_chunk *pv_chunkbase;		/* KVA block for pv_chunks */
 int pv_maxchunks;			/* How many chunks we have KVA for */
@@ -528,7 +528,7 @@ pmap_init_qpages(void)
 
 	CPU_FOREACH(i) {
 		pc = pcpu_find(i);
-		pc->pc_qmap_addr = kva_alloc(PAGE_SIZE);
+		pc->pc_qmap_addr = kva_alloc(PAGE_SIZE); //WYC: pc_qmap_addr: KVA for temporary mappings
 		if (pc->pc_qmap_addr == 0)
 			panic("pmap_init_qpages: unable to allocate KVA");
 	}
@@ -756,7 +756,7 @@ pmap_ptelist_init(vm_offset_t *head, void *base, int npages)
 void
 pmap_init(void)
 {
-	struct pmap_preinit_mapping *ppim;
+	struct _pmap_preinit_mapping *ppim;
 	vm_page_t mpte;
 	vm_size_t s;
 	int i, pv_npg;
@@ -1942,6 +1942,7 @@ _pmap_allocpte(pmap_t pmap, u_int ptepindex, u_int flags)
 	pmap->pm_stats.resident_count++;
 
 	ptepa = VM_PAGE_TO_PHYS(m);
+	//WYC???: why PG_U? If PG_U is removed, the system cannot boot.
 	pmap->pm_pdir[ptepindex] =
 		(pd_entry_t) (ptepa | PG_U | PG_RW | PG_V | PG_A | PG_M);
 
@@ -3428,9 +3429,9 @@ setpte:
 }
 
 /*
- *	Insert the given physical page (p) at
+ *	Insert the given physical page (m) at
  *	the specified virtual address (v) in the
- *	target physical map with the protection requested.
+ *	target physical map (pmap) with the protection requested.
  *
  *	If specified, the page will be wired down, meaning
  *	that the related pte can not be reclaimed.
@@ -3441,7 +3442,7 @@ setpte:
  */
 int
 pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
-    u_int flags, int8_t psind)
+    u_int flags, int8_t psind)	//WYC: psind(page size index)
 {
 	pd_entry_t *pde;
 	pt_entry_t *pte;
@@ -3451,11 +3452,15 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 	vm_page_t mpte, om;
 	boolean_t invlva, wired;
 
+	//WYC: tested. psind is always 0
+	//if (psind != 0)
+	//	panic("WYC: psind is not 0");
 	va = trunc_page(va);
 	mpte = NULL;
 	wired = (flags & PMAP_ENTER_WIRED) != 0;
 
 	KASSERT(va <= VM_MAX_KERNEL_ADDRESS, ("pmap_enter: toobig"));
+	//WYC???: should it be (va < 3G-4M)?
 	KASSERT(va < UPT_MIN_ADDRESS || va >= UPT_MAX_ADDRESS,
 	    ("pmap_enter: invalid to pmap_enter page table pages (va: 0x%x)",
 	    va));
@@ -3730,10 +3735,12 @@ pmap_enter_object(pmap_t pmap, vm_offset_t start, vm_offset_t end,
 	PMAP_LOCK(pmap);
 	while (m != NULL && (diff = m->pindex - m_start->pindex) < psize) {
 		va = start + ptoa(diff);
-		if ((va & PDRMASK) == 0 && va + NBPDR <= end &&
-		    m->psind == 1 && pg_ps_enabled &&
+		if ((va & PDRMASK) == 0 && 	//WYC: aligned on superpage
+		    va + NBPDR <= end &&	//WYC: less than 1 superpage
+		    m->psind == 1 && 		//WYC: it is a superpage
+		    pg_ps_enabled &&		//WYC: superpage enabled
 		    pmap_enter_pde(pmap, va, m, prot))
-			m = &m[NBPDR / PAGE_SIZE - 1];
+			m = &m[NBPDR / PAGE_SIZE - 1];	//WYC: == 1023
 		else
 			mpte = pmap_enter_quick_locked(pmap, va, m, prot,
 			    mpte);
@@ -4457,6 +4464,7 @@ pmap_page_is_mapped(vm_page_t m)
  * is special cased for current process only, but
  * can have the more generic (and slightly slower)
  * mode enabled.  This is much faster than pmap_remove
+ *     void pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
  * in the case of running down an entire address space.
  */
 void
@@ -5138,7 +5146,7 @@ pmap_pde_attr(pd_entry_t *pde, int cache_bits)
 void *
 pmap_mapdev_attr(vm_paddr_t pa, vm_size_t size, int mode)
 {
-	struct pmap_preinit_mapping *ppim;
+	struct _pmap_preinit_mapping *ppim;
 	vm_offset_t va, offset;
 	vm_size_t tmpsize;
 	int i;
@@ -5203,7 +5211,7 @@ pmap_mapbios(vm_paddr_t pa, vm_size_t size)
 void
 pmap_unmapdev(vm_offset_t va, vm_size_t size)
 {
-	struct pmap_preinit_mapping *ppim;
+	struct _pmap_preinit_mapping *ppim;
 	vm_offset_t offset;
 	int i;
 
