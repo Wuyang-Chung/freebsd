@@ -118,8 +118,7 @@ SYSCTL_ULONG(_vm, OID_AUTO, max_kernel_address, CTLFLAG_RD,
  *	a mapping on demand through vm_fault() will result in a panic. 
  */
 vm_offset_t
-kva_alloc(size)
-	vm_size_t size;
+kva_alloc(vm_size_t size)
 {
 	vm_offset_t addr;
 
