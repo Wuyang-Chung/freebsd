@@ -98,10 +98,10 @@ void mi_startup(void);				/* Should be elsewhere */
 /* Components of the first process -- never freed. */
 static struct session session0;
 static struct pgrp pgrp0;
-struct	proc proc0;
+struct	proc proc0;		//wyc: proc 0 swapper process
 struct thread0_storage thread0_st __aligned(16);
-struct	vmspace vmspace0;
-struct	proc *initproc;
+struct	vmspace vmspace0;	//wyc: vmspace for swapper
+struct	proc *initproc;		//wyc: proc 1 init process
 
 #ifndef BOOTHOWTO
 #define	BOOTHOWTO	0
@@ -698,7 +698,7 @@ SYSCTL_INT(_kern, OID_AUTO, init_shutdown_timeout,
 
 /*
  * Start the initial user process; try exec'ing each pathname in init_path.
- * The program is invoked with one argument containing the boot flags.
+ * wyc: The program is invoked with no argument
  */
 static void
 start_init(void *dummy)

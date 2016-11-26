@@ -277,7 +277,7 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
 
-	//WYC: tested. 'pinit' is always NULL
+	//wyc: tested. 'pinit' is always NULL
 	//if (pinit != NULL)
 	//	panic("vmspace_alloc: pinit not NULL");	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
@@ -320,7 +320,7 @@ vmspace_container_reset(struct proc *p)
 static inline void
 vmspace_dofree(struct vmspace *vm)
 {
-	//WYC: tested. vm->vm_map.pmap == &vm->vm_pmap
+	//wyc: tested. vm->vm_map.pmap == &vm->vm_pmap
 	//if (vm->vm_map.pmap != &vm->vm_pmap)
 	//	panic("vmspace_dofree: &vm_pmap != vm_map.pmap");
 	CTR1(KTR_VM, "vmspace_free: %p", vm);
@@ -1183,7 +1183,7 @@ int
 vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot, vm_prot_t max, int cow)
 {
-	vm_map_entry_t new_entry, prev_entry/*WYC, temp_entry*/;
+	vm_map_entry_t new_entry, prev_entry/*wyc, temp_entry*/;
 	vm_eflags_t protoeflags;
 	struct ucred *cred;
 	vm_inherit_t inheritance;
@@ -1209,7 +1209,7 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	if (vm_map_lookup_entry(map, start, &prev_entry))
 		return (KERN_NO_SPACE);
 
-	//prev_entry = temp_entry;	//WYC
+	//prev_entry = temp_entry;	//wyc
 
 	/*
 	 * Assert that the next entry doesn't overlap the end point.
@@ -3327,7 +3327,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	locked = vm_map_trylock(new_map); /* trylock to silence WITNESS */
 	KASSERT(locked, ("vmspace_fork: lock failed"));
 
-	//old_entry = old_map->header.next;	//WYC: change while to for loop
+	//old_entry = old_map->header.next;	//wyc: change while to for loop
 
 	for (old_entry = old_map->header.next;
 	     old_entry != &old_map->header;
@@ -3458,7 +3458,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			    new_entry, fork_charge);
 			break;
 		}
-		//old_entry = old_entry->next;	//WYC: change while to for loop
+		//old_entry = old_entry->next;	//wyc: change while to for loop
 	}
 	/*
 	 * Use inlined vm_map_unlock() to postpone handling the deferred

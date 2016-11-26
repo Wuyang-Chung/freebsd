@@ -52,8 +52,8 @@
 #define	PG_V		0x001	/* P	Valid			*/
 #define PG_RW		0x002	/* R/W	Read/Write		*/
 #define PG_U		0x004	/* U/S  User/Supervisor		*/
-#define	PG_NC_PWT	0x008	/* PWT	Write through		*/
-#define	PG_NC_PCD	0x010	/* PCD	Cache disable		*/
+#define	PG_NC_PWT	0x008	/* PWT	Page-level Write through*/
+#define	PG_NC_PCD	0x010	/* PCD	Page-level Cache disable*/
 #define PG_A		0x020	/* A	Accessed		*/
 #define	PG_M		0x040	/* D	Dirty			*/
 #define	PG_PS		0x080	/* PS	Page size (0=4k,1=4M)	*/
@@ -77,7 +77,7 @@
 #else
 #define	PG_FRAME	(~PAGE_MASK)
 //#define	PG_PS_FRAME	(0xffc00000)
-#define	PG_PS_FRAME	(~PDRMASK)	//WYC: make this definition symmetric to PG_FRAME
+#define	PG_PS_FRAME	(~PDRMASK)	//wyc: make this definition symmetric to PG_FRAME
 #endif
 #define	PG_PROT		(PG_RW|PG_U)	/* all protection bits . */
 #define PG_N		(PG_NC_PWT|PG_NC_PCD)	/* Non-cacheable */
@@ -143,7 +143,7 @@
 #endif
 
 #ifndef NKPDE
-#define NKPDE	(KVA_PAGES)	/* WYC:256 number of kernel page tables/PDEs */
+#define NKPDE	(KVA_PAGES)	/* wyc:256 number of kernel page tables/PDEs */
 #endif
 
 /*
@@ -152,8 +152,8 @@
  * XXX This works for now, but I am not real happy with it, I'll fix it
  * right after I fix locore.s and the magic 28K hole
  */
-#define	KPTDI		(NPDEPTD-NKPDE)	/* WYC:768 start of kernel virtual pde's */
-#define	PTDPTDI		(KPTDI-NPGPTD)	/* WYC:767 ptd entry that points to ptd! */
+#define	KPTDI		(NPDEPTD-NKPDE)	/* wyc:768 start of kernel virtual pde's */
+#define	PTDPTDI		(KPTDI-NPGPTD)	/* wyc:767 ptd entry that points to ptd! */
 
 /*
  * XXX doesn't really belong here I guess...
@@ -342,10 +342,10 @@ typedef struct pv_entry {
  * pv_entries are allocated in chunks per-process.  This avoids the
  * need to track per-pmap assignments.
  */
-//WYC: the constant _NPCM and _NPCPV are defined to make sizeof(pv_chunk) equal to 1 page
+//wyc: the constant _NPCM and _NPCPV are defined to make sizeof(pv_chunk) equal to 1 page
 #define	_NPCM	11
-#define	_NPCPV	336	//WYC: this should be calculated instead of constant
-struct pv_chunk {	//WYC: sizeof(pv_chunk) must be PAGE_SIZE(4K)
+#define	_NPCPV	336	//wyc: this should be calculated instead of constant
+struct pv_chunk {	//wyc: sizeof(pv_chunk) must be PAGE_SIZE(4K)
 	pmap_t			pc_pmap;
 	TAILQ_ENTRY(pv_chunk)	pc_list;
 	uint32_t		pc_map[_NPCM];	/* bitmap; 1 = free */

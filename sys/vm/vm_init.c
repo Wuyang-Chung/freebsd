@@ -226,7 +226,7 @@ again:
 	    (long)bio_transient_maxcnt * MAXPHYS;
 	kmi->clean_sva = firstaddr = kva_alloc(size);
 	kmi->clean_eva = firstaddr + size;
-
+	//wyc???: why there is no "firstaddr += size" here
 	/*
 	 * Allocate the buffer arena.
 	 *

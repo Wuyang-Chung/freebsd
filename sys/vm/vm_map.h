@@ -190,8 +190,8 @@ struct vm_map {
 	pmap_t pmap;			/* (c) Physical map */
 //#define	min_offset	header.start	/* (c) */
 //#define	max_offset	header.end	/* (c) */
-	vm_offset_t min_offset;	//WYC
-	vm_offset_t max_offset;	//WYC
+	vm_offset_t min_offset;	//wyc
+	vm_offset_t max_offset;	//wyc
 	int busy;
 };
 

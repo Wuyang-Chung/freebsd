@@ -88,11 +88,11 @@ ENTRY(cpu_throw)
 	movl	8(%esp),%ecx			/* New thread */
 	movl	TD_PCB(%ecx),%edx
 	movl	PCB_CR3(%edx),%eax
-	movl	%eax,%cr3
+	movl	%eax,%cr3		//wyc: %cr3 = newtd->td_pcb->pcb_cr3
 	/* set bit in new pm_active */
 	movl	TD_PROC(%ecx),%eax
 	movl	P_VMSPACE(%eax), %ebx
-	addl	$VM_PMAP, %ebx
+	addl	$VM_PMAP, %ebx		//wyc: %ebx = &newtd->td_proc->p_vmspace.vm_pmap
 	movl	%ebx, PCPU(CURPMAP)
 #ifdef SMP
 	lock
@@ -265,7 +265,7 @@ sw1:
 	popfl
 
 	movl	%edx, PCPU(CURPCB)
-	movl	TD_TID(%ecx),%eax	/* WYC: TD_TID is not used after loaded to eax */
+	movl	TD_TID(%ecx),%eax	/* wyc: TD_TID is not used after loaded to eax */
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
 	/*
@@ -406,7 +406,7 @@ END(savectx)
 /*
  * resumectx(pcb) __fastcall
  * Resuming processor state from pcb.
- * WYC:
+ * wyc:
  * ecx = pcb
  */
 ENTRY(resumectx)

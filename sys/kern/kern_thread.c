@@ -83,7 +83,7 @@ static int thread_unsuspend_one(struct thread *td, struct proc *p,
 #define TID_BUFFER_SIZE	1024
 
 struct mtx tid_lock;
-static struct unrhdr *tid_unrhdr;
+static struct unrhdr *tid_unrhdr;	//wyc: unrhdr: unit number header
 static lwpid_t tid_buffer[TID_BUFFER_SIZE];
 static int tid_head, tid_tail;
 static MALLOC_DEFINE(M_TIDHASH, "tidhash", "thread hash");

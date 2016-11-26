@@ -480,7 +480,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	td2->td_flags = TDF_INMEM;
 	td2->td_lend_user_pri = PRI_MAX;
 
-#ifdef VIMAGE	//WYC: Network stack virtualization
+#ifdef VIMAGE	//wyc: Network stack virtualization
 	td2->td_vnet = NULL;
 	td2->td_vnet_lpush = NULL;
 #endif
@@ -663,15 +663,15 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 */
 	vm_forkproc(td, p2, td2, vm2, fr->fr_flags);
 
-	if (fr->fr_flags == (RFFDG | RFPROC)) {
+	if (fr->fr_flags == (RFFDG | RFPROC)) {	//wyc: sys_fork
 		PCPU_INC(cnt.v_forks);
 		PCPU_ADD(cnt.v_forkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
-	} else if (fr->fr_flags == (RFFDG | RFPROC | RFPPWAIT | RFMEM)) {
+	} else if (fr->fr_flags == (RFFDG | RFPROC | RFPPWAIT | RFMEM)) { //wyc: sys_vfork
 		PCPU_INC(cnt.v_vforks);
 		PCPU_ADD(cnt.v_vforkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
-	} else if (p1 == &proc0) {
+	} else if (p1 == &proc0) {		//wyc: kproc_create
 		PCPU_INC(cnt.v_kthreads);
 		PCPU_ADD(cnt.v_kthreadpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
@@ -947,7 +947,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		goto fail1;
 	}
 
-#ifdef MAC	//WYC: Mandatory Access Control
+#ifdef MAC	//wyc: Mandatory Access Control
 	mac_proc_init(newproc);
 #endif
 	newproc->p_klist = knlist_alloc(&newproc->p_mtx);

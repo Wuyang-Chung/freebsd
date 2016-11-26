@@ -557,7 +557,7 @@
 /*
  * PAT modes.
  */
-//WYC: Page Attribute Table
+//wyc: Page Attribute Table
 #define	PAT_UNCACHEABLE		0x00
 #define	PAT_WRITE_COMBINING	0x01
 #define	PAT_WRITE_THROUGH	0x04
@@ -570,7 +570,7 @@
 /*
  * Constants related to MTRRs
  */
-//WYC: Memory Type Range Registers
+//wyc: Memory Type Range Registers
 #define	MTRR_UNCACHEABLE	0x00
 #define	MTRR_WRITE_COMBINING	0x01
 #define	MTRR_WRITE_THROUGH	0x04

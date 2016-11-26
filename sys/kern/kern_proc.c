@@ -151,7 +151,7 @@ const int thread_off_td_oncpu = offsetof(struct thread, td_oncpu);
 const int thread_off_td_pcb = offsetof(struct thread, td_pcb);
 const int thread_off_td_plist = offsetof(struct thread, td_plist);
 
-int kstack_pages = KSTACK_PAGES;
+int kstack_pages = KSTACK_PAGES;	//wyc: == 2
 SYSCTL_INT(_kern, OID_AUTO, kstack_pages, CTLFLAG_RD, &kstack_pages, 0,
     "Kernel stack size in pages");
 static int vmmap_skip_res_cnt = 0;

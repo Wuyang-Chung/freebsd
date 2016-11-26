@@ -52,7 +52,7 @@
 #define	CPU_ISFULLSET(p)		BIT_ISFULLSET(CPU_SETSIZE, p)
 #define	CPU_SUBSET(p, c)		BIT_SUBSET(CPU_SETSIZE, p, c)
 #define	CPU_OVERLAP(p, c)		BIT_OVERLAP(CPU_SETSIZE, p, c)
-#define	CPU_CMP(p, c)			BIT_CMP(CPU_SETSIZE, p, c)
+#define	CPU_CMP(p, c)			BIT_CMP(CPU_SETSIZE, p, c) //wyc: return 0 if equal
 #define	CPU_OR(d, s)			BIT_OR(CPU_SETSIZE, d, s)
 #define	CPU_AND(d, s)			BIT_AND(CPU_SETSIZE, d, s)
 #define	CPU_NAND(d, s)			BIT_NAND(CPU_SETSIZE, d, s)

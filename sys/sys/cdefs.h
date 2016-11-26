@@ -777,9 +777,9 @@
 #endif
 #endif
 
-//WYC: __mips should be removed
+//wyc: __mips should be removed
 #if defined(__mips) || defined(__powerpc64__) || defined(__riscv__)
-#define	__NO_TLS 1	//WYC: not referenced
+#define	__NO_TLS 1	//wyc: not referenced
 #endif
 
 /*
