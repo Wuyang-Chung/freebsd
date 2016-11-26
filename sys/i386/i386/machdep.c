@@ -1151,7 +1151,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
-		//WYC: tested, md_ldt is always NULL
+		//wyc: panic if md_ldt != NULL
 		panic("exec_setregs: md_ldt != NULL");
 		user_ldt_free(td);
 	} else
@@ -1506,12 +1506,12 @@ static struct soft_segment_descriptor ldt_segs[] = {
 };
 
 void
-setidt(idx, func, typ, dpl, selec)
-	int idx;
-	inthand_t *func;
-	int typ;
-	int dpl;
-	int selec;
+setidt(
+	int idx,
+	inthand_t *func,
+	int typ,
+	int dpl,
+	int selec)
 {
 	struct gate_descriptor *ip;
 
@@ -1607,9 +1607,9 @@ DB_SHOW_COMMAND(dbregs, db_show_dbregs)
 #endif
 
 void
-sdtossd(sd, ssd)
-	struct segment_descriptor *sd;
-	struct soft_segment_descriptor *ssd;
+sdtossd(
+	struct segment_descriptor *sd,
+	struct soft_segment_descriptor *ssd)
 {
 	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;
