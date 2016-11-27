@@ -1976,7 +1976,7 @@ swp_pager_meta_ctl(vm_object_t object, vm_pindex_t pindex, int flags)
  * which must be in the swdevsw.  Return EBUSY
  * if already swapping on this device.
  */
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct swapon_args {
 	char *name;
 };
@@ -2141,7 +2141,7 @@ swaponsomething(struct vnode *vp, void *id, u_long nblks,
  * rather than filename as specification.  We keep sw_vp around
  * only to make this work.
  */
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct swapoff_args {
 	char *name;
 };
