@@ -90,6 +90,16 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_gran = 1;
 }
 
+#define I386_GET_VAL	20
+#define I386_SET_VAL	21
+
+struct i386_wyc_args {
+	unsigned long	a0;
+	unsigned long	a1;
+	unsigned long	a2;
+	unsigned long	a3;
+};
+
 #if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct sysarch_args {
 	int op;
@@ -108,6 +118,7 @@ sysarch(
 		//struct i386_ldt_args largs;	//wyc
 		struct i386_ioperm_args iargs;
 		struct i386_get_xfpustate xfpu;
+		struct i386_wyc_args cargs;
 	} kargs;
 	uint32_t base;
 	struct segment_descriptor sd, *sdp;
@@ -123,8 +134,8 @@ sysarch(
 	 */
 	if (IN_CAPABILITY_MODE(td)) {
 		switch (uap->op) {
-		//case I386_GET_LDT:
-		//case I386_SET_LDT:
+		case I386_GET_VAL:
+		case I386_SET_VAL:
 		case I386_GET_IOPERM:
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
@@ -151,16 +162,11 @@ sysarch(
 		    sizeof(struct i386_ioperm_args))) != 0)
 			return (error);
 		break;
-#if 0	//wyc: Not support LDT related operations
-	case I386_GET_LDT:
-	case I386_SET_LDT:
-		if ((error = copyin(uap->parms, &kargs.largs,
-		    sizeof(struct i386_ldt_args))) != 0)
+	//case I386_GET_VAL:
+	case I386_SET_VAL:
+		if ((error = copyin(uap->parms, &kargs.cargs, sizeof(kargs.cargs))) != 0)
 			return (error);
-		if (kargs.largs.num > MAX_LD || kargs.largs.num <= 0)
-			return (EINVAL);
 		break;
-#endif
 	case I386_GET_XFPUSTATE:
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
@@ -171,25 +177,16 @@ sysarch(
 	}
 
 	switch(uap->op) {
-#if 0	//wyc: Not support LDT related operations
-	case I386_GET_LDT:
-		error = i386_get_ldt(td, &kargs.largs);
+	case I386_GET_VAL:
+		kargs.cargs.a0 = (unsigned long)KPTmap;
+		kargs.cargs.a1 = 0x55aa;
+		kargs.cargs.a2 = 0x5a5a;
+		kargs.cargs.a3 = 0xaa55;
+		error = copyout(&kargs.cargs, uap->parms, sizeof(kargs.cargs));
 		break;
-	case I386_SET_LDT:
-		if (kargs.largs.descs != NULL) {
-			lp = (union descriptor *)malloc(
-			    kargs.largs.num * sizeof(union descriptor),
-			    M_TEMP, M_WAITOK);
-			error = copyin(kargs.largs.descs, lp,
-			    kargs.largs.num * sizeof(union descriptor));
-			if (error == 0)
-				error = i386_set_ldt(td, &kargs.largs, lp);
-			free(lp, M_TEMP);
-		} else {
-			error = i386_set_ldt(td, &kargs.largs, NULL);
-		}
+	case I386_SET_VAL:
+		error = EOPNOTSUPP;
 		break;
-#endif
 	case I386_GET_IOPERM:
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
