@@ -1521,7 +1521,7 @@ retry:
  ***************************************************/
 
 /*
- * Add a wired page to the kva.
+ * Add a wired page to the kva. wyc: but why PG_W is not specified?
  * Note: not SMP coherent.
  *
  * This function may be used before pmap_bootstrap() is called.
@@ -3445,7 +3445,7 @@ setpte:
  */
 int
 pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
-    u_int flags, int8_t psind)	//wyc: psind(page size index)
+    u_int flags, int8_t psind)	//wyc: psind(page size index). Always 0
 {
 	pd_entry_t *pde;
 	pt_entry_t *pte;

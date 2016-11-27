@@ -53,7 +53,7 @@
 #include <machine/pmap.h>
 #include <machine/specialreg.h>
 
-#include "assym.s"
+#include "assym.s"	/*wyc: in /usr/obj/"source code path"/sys/"kern conf" */
 
 /*
  *	XXX
@@ -75,6 +75,11 @@
 /*
  * Compiled KERNBASE location and the kernel load address
  */
+/* wyc:
+	KERNBASE and KERNLOAD are defined in sys/i386/include/vmparam.h
+	The actual value can be found in assym.s
+	kernbase and kernload are referenced in sys/conf/ldscript.i386
+*/
 	.globl	kernbase
 	.set	kernbase,KERNBASE
 	.globl	kernload

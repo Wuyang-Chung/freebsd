@@ -1003,8 +1003,10 @@ fail2:
  * is called from the MD fork_trampoline() entry point.
  */
 void
-fork_exit(void (*callout)(void *, struct trapframe *), void *arg,
-    struct trapframe *frame)
+fork_exit(
+    void (*callout)(void *, struct trapframe *),//wyc: esi.
+    void *arg,					//wyc: ebx.
+    struct trapframe *frame)			//wyc: esp. See fork_trampline()
 {
 	struct proc *p;
 	struct thread *td;

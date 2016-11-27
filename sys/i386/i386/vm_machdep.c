@@ -272,10 +272,10 @@ cpu_fork(
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline argument */
-	pcb2->pcb_ebp = 0;	//wyc: arg
-	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *);
-	pcb2->pcb_ebx = (int)td2;		/* fork_trampoline argument */
+	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline() arg */
+	pcb2->pcb_ebp = 0;
+	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* fork_trampoline() arg */
+	pcb2->pcb_ebx = (int)td2;		/* fork_trampoline() arg */
 	pcb2->pcb_eip = (int)fork_trampoline;
 	pcb2->pcb_psl = PSL_KERNEL;		/* ints disabled */
 	/*-
@@ -505,10 +505,10 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * return address on stack.  These are the kernel mode register values.
 	 */
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;		    /* trampoline arg */
-	pcb2->pcb_ebp = 0;	//wyc: arg
-	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* trampoline arg */
-	pcb2->pcb_ebx = (int)td;			    /* trampoline arg */
+	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline() arg */
+	pcb2->pcb_ebp = 0;
+	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* fork_trampoline() arg */
+	pcb2->pcb_ebx = (int)td;		/* fork_trampoline() arg */
 	pcb2->pcb_eip = (int)fork_trampoline;
 	pcb2->pcb_psl &= ~(PSL_I);	/* interrupts must be disabled */
 	pcb2->pcb_gs = rgs();
