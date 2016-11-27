@@ -112,7 +112,7 @@ KPTphys:	.long	0		/* phys addr of kernel page tables */
 
 	.globl	proc0kstack
 proc0kstack:	.long	0		/* address of proc 0 kstack space */
-p0kpa:		.long	0		/* phys addr of proc0's STACK */
+p0kpa:		.long	0		/* phys addr of proc0`s STACK */
 
 vm86phystk:	.long	0		/* PA of vm86/bios stack */
 
@@ -200,12 +200,12 @@ NON_GPROF_ENTRY(btext)
 	pushl	%ebp
 	movl	%esp, %ebp
 
-/* Don't trust what the BIOS gives for eflags. */
+/* Don`t trust what the BIOS gives for eflags. */
 	pushl	$PSL_KERNEL
 	popfl
 
 /*
- * Don't trust what the BIOS gives for %fs and %gs.  Trust the bootstrap
+ * Don`t trust what the BIOS gives for %fs and %gs.  Trust the bootstrap
  * to set %cs, %ds, %es and %ss.
  */
 	mov	%ds, %ax
@@ -215,11 +215,11 @@ NON_GPROF_ENTRY(btext)
 /*
  * Clear the bss.  Not all boot programs do it, and it is our job anyway.
  *
- * XXX we don't check that there is memory for our bss and page tables
+ * XXX we don`t check that there is memory for our bss and page tables
  * before using it.
  *
  * Note: we must be careful to not overwrite an active gdt or idt.  They
- * inactive from now until we switch to new ones, since we don't load any
+ * inactive from now until we switch to new ones, since we don`t load any
  * more segment registers or permit interrupts until after the switch.
  */
 	movl	$R(end),%ecx
@@ -293,7 +293,7 @@ NON_GPROF_ENTRY(btext)
 #endif
 	movl	%cr0,%eax		/* get control word */
 	orl	$CR0_PE|CR0_PG,%eax	/* enable paging */
-	movl	%eax,%cr0		/* and let's page NOW! */
+	movl	%eax,%cr0		/* and let`s page NOW! */
 
 	pushl	$begin			/* jump to high virtualized address */
 	ret
@@ -316,7 +316,7 @@ begin:
 
 	/*
 	 * Clean up the stack in a way that db_numargs() understands, so
-	 * that backtraces in ddb don't underrun the stack.  Traps for
+	 * that backtraces in ddb don`t underrun the stack.  Traps for
 	 * inaccessible memory are more fatal than usual this early.
 	 */
 	addl	$4,%esp
@@ -452,14 +452,14 @@ recover_bootinfo:
 
 	/*
 	 * Seems we have been loaded by the old diskless boot code, we
-	 * don't stand a chance of running as the diskless structure
+	 * don`t stand a chance of running as the diskless structure
 	 * changed considerably between the two, so just halt.
 	 */
 	 hlt
 
 	/*
 	 * We have been loaded by the new uniform boot code.
-	 * Let's check the bootinfo version, and if we do not understand
+	 * Let`s check the bootinfo version, and if we do not understand
 	 * it we return to the loader with a status of 1 to indicate this error
 	 */
 newboot:
@@ -470,8 +470,8 @@ newboot:
 	movl	$1,%eax			/* Return status */
 	leave
 	/*
-	 * XXX this returns to our caller's caller (as is required) since
-	 * we didn't set up a frame and our caller did.
+	 * XXX this returns to our caller`s caller (as is required) since
+	 * we didn`t set up a frame and our caller did.
 	 */
 	ret
 
@@ -496,9 +496,9 @@ newboot:
 
 2:
 	/*
-	 * Determine the size of the boot loader's copy of the bootinfo
+	 * Determine the size of the boot loader`s copy of the bootinfo
 	 * struct.  This is impossible to do properly because old versions
-	 * of the struct don't contain a size field and there are 2 old
+	 * of the struct don`t contain a size field and there are 2 old
 	 * versions with the same version number.
 	 */
 	movl	$BI_ENDCOMMON,%ecx	/* prepare for sizeless version */
@@ -636,9 +636,9 @@ try486:	/* Try to toggle identification flag; does not exist on early 486s. */
 trycyrix:
 	popfl
 	/*
-	 * IBM Bluelighting CPU also doesn't change the undefined flags.
-	 * Because IBM doesn't disclose the information for Bluelighting
-	 * CPU, we couldn't distinguish it from Cyrix's (including IBM
+	 * IBM Bluelighting CPU also doesn`t change the undefined flags.
+	 * Because IBM doesn`t disclose the information for Bluelighting
+	 * CPU, we couldn`t distinguish it from Cyrix`s (including IBM
 	 * brand of Cyrix CPUs).
 	 */
 	movl	$0x69727943,R(cpu_vendor)	# store vendor string
@@ -646,7 +646,7 @@ trycyrix:
 	movl	$0x64616574,R(cpu_vendor+8)
 	jmp	3f
 
-trycpuid:	/* Use the `cpuid' instruction. */
+trycpuid:	/* Use the `cpuid` instruction. */
 	xorl	%eax,%eax
 	cpuid					# cpuid 0
 	movl	%eax,R(cpu_high)		# highest capability
@@ -772,7 +772,7 @@ no_kernend:
  * access.  Write access to the first physical page is required by bios32
  * calls, and write access to the first 1 MB of physical memory is required
  * by ACPI for implementing suspend and resume.  We do this even
- * if we've enabled PSE above, we'll just switch the corresponding kernel
+ * if we`ve enabled PSE above, we`ll just switch the corresponding kernel
  * PDEs before we turn on paging.
  *
  * XXX: We waste some pages here in the PSE case!
@@ -798,7 +798,7 @@ no_kernend:
 	movl	$NPGPTD, %ecx
 	fillkptphys($PG_RW)
 
-/* Map proc0's KSTACK in the physical way ... */
+/* Map proc0`s KSTACK in the physical way ... */
 	movl	R(p0kpa), %eax
 	movl	$(TD0_KSTACK_PAGES), %ecx
 	fillkptphys($PG_RW)
@@ -828,9 +828,9 @@ no_kernend:
 /*
  * Create an identity mapping for low physical memory, including the kernel.
  * The part of this mapping that covers the first 1 MB of physical memory
- * becomes a permanent part of the kernel's address space.  The rest of this
+ * becomes a permanent part of the kernel`s address space.  The rest of this
  * mapping is destroyed in pmap_bootstrap().  Ordinarily, the same page table
- * pages are shared by the identity mapping and the kernel's native mapping.
+ * pages are shared by the identity mapping and the kernel`s native mapping.
  * However, the permanent identity mapping cannot contain PG_G mappings.
  * Thus, if the kernel is loaded within the permanent identity mapping, that
  * page table page must be duplicated and not shared.
