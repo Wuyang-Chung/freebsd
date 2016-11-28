@@ -134,7 +134,7 @@
  * Kernel physical load address.
  */
 #ifndef KERNLOAD
-#define	KERNLOAD		(1 << PDRSHIFT)
+#define	KERNLOAD		(1 << PDRSHIFT)		//wyc: 4M
 #endif /* !defined(KERNLOAD) */
 
 /*
@@ -148,7 +148,7 @@
 
 #define VM_MIN_KERNEL_ADDRESS	VADDR(PTDPTDI, PTDPTDI)	//wyc: (3G-4M)+(3M-4K) == 3G-1M-4K
 
-#define	KERNBASE		VADDR(KPTDI, 0)
+#define	KERNBASE		VADDR(KPTDI, 0)		//wyc: 3G
 
 #define UPT_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)	//wyc: user page table max. 3G-1M-4K
 #define UPT_MIN_ADDRESS		VADDR(PTDPTDI, 0)	//wyc: user page table min. 3G-4M

@@ -89,7 +89,9 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_def32 = 1;
 	sdp->sd_gran = 1;
 }
-
+/* wyc begin
+=============
+*/
 #define I386_GET_VAL	20
 #define I386_SET_VAL	21
 
@@ -99,6 +101,10 @@ struct i386_wyc_args {
 	unsigned long	a2;
 	unsigned long	a3;
 };
+
+/* wyc end
+=============
+*/
 
 #if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct sysarch_args {
@@ -178,10 +184,10 @@ sysarch(
 
 	switch(uap->op) {
 	case I386_GET_VAL:
-		kargs.cargs.a0 = (unsigned long)KPTmap;
-		kargs.cargs.a1 = 0x55aa;
-		kargs.cargs.a2 = 0x5a5a;
-		kargs.cargs.a3 = 0xaa55;
+		kargs.cargs.a0 = 0xa055;
+		kargs.cargs.a1 = 0xa15a;
+		kargs.cargs.a2 = 0xa2a5;
+		kargs.cargs.a3 = 0xa3aa;
 		error = copyout(&kargs.cargs, uap->parms, sizeof(kargs.cargs));
 		break;
 	case I386_SET_VAL:

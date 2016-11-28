@@ -208,7 +208,7 @@ int pseflag = 0;		/* PG_PS or-in. wyc: == PG_PS if hw supports superpage */
 static int nkpt = NKPT;
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
 extern u_int32_t KERNend;	//wyc: phys addr end of kernel (just after bss)
-extern u_int32_t KPTphys;	//wyc: phys addr of kernel page tables
+extern u_int32_t KPTphys;	//wyc: 0x0140_0000 phys addr of kernel page tables
 
 #if defined(PAE) || defined(PAE_TABLES)
 pt_entry_t pg_nx;
@@ -476,7 +476,7 @@ pmap_bootstrap(vm_paddr_t firstaddr)
 	 * KPTmap can only support NKPT page table pages.  Here, a larger
 	 * KPTmap is created that can support KVA_PAGES page table pages.
 	 */
-	SYSMAP(pt_entry_t *, KPTD, KPTmap, KVA_PAGES)
+	SYSMAP(pt_entry_t *, KPTD, KPTmap, KVA_PAGES)	//wyc: KVA_PAGES==256
 
 	for (i = 0; i < NKPT; i++)
 		KPTD[i] = (KPTphys + (i << PAGE_SHIFT)) | pgeflag | PG_RW | PG_V;
