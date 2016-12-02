@@ -184,10 +184,10 @@ sysarch(
 
 	switch(uap->op) {
 	case I386_GET_VAL:
-		kargs.cargs.a0 = 0xa055;
-		kargs.cargs.a1 = 0xa15a;
-		kargs.cargs.a2 = 0xa2a5;
-		kargs.cargs.a3 = 0xa3aa;
+		kargs.cargs.a0 = (unsigned long)PTmap;
+		kargs.cargs.a1 = (unsigned long)PTD;
+		kargs.cargs.a2 = (unsigned long)PTDpde;
+		kargs.cargs.a3 = (unsigned long)0xa3aa;
 		error = copyout(&kargs.cargs, uap->parms, sizeof(kargs.cargs));
 		break;
 	case I386_SET_VAL:
@@ -399,7 +399,7 @@ set_user_ldt(struct mdproc *mdp)
 	struct proc_ldt *pldt;
 	int dtlocked;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	dtlocked = 0;
 	if (!mtx_owned(&dt_lock)) {
 		mtx_lock_spin(&dt_lock);
@@ -424,7 +424,7 @@ set_user_ldt_rv(struct vmspace *vmsp)
 {
 	struct thread *td;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	td = curthread;
 	if (vmsp != td->td_proc->p_vmspace)
 		return;
@@ -441,7 +441,7 @@ user_ldt_alloc(struct mdproc *mdp, int len)
 {
 	struct proc_ldt *pldt, *new_ldt;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	mtx_assert(&dt_lock, MA_OWNED);
 	mtx_unlock_spin(&dt_lock);
 	new_ldt = malloc(sizeof(struct proc_ldt),
@@ -478,7 +478,7 @@ user_ldt_free(struct thread *td)
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	mtx_assert(&dt_lock, MA_OWNED);
 	if ((pldt = mdp->md_ldt) == NULL) {
 		mtx_unlock_spin(&dt_lock);
@@ -497,7 +497,7 @@ user_ldt_free(struct thread *td)
 void
 user_ldt_deref(struct proc_ldt *pldt)
 {
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	mtx_assert(&dt_lock, MA_OWNED);
 	if (--pldt->ldt_refcnt == 0) {
 		mtx_unlock_spin(&dt_lock);
@@ -567,7 +567,7 @@ i386_set_ldt(
 	struct proc_ldt *pldt;
 	union descriptor *dp;
 
-	panic("%s called", __FUNCTION__); //wyc
+	panic("%s called", __func__); //wyc
 #ifdef	DEBUG
 	printf("i386_set_ldt: start=%d num=%d descs=%p\n",
 	    uap->start, uap->num, (void *)uap->descs);
@@ -723,7 +723,7 @@ i386_set_ldt_data(struct thread *td, int start, int num,
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt = mdp->md_ldt;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	mtx_assert(&dt_lock, MA_OWNED);
 
 	/* Fill in range */
@@ -741,7 +741,7 @@ i386_ldt_grow(struct thread *td, int len)
 	caddr_t old_ldt_base = NULL_LDT_BASE;
 	int old_ldt_len = 0;
 
-	panic("%s called", __FUNCTION__);	//wyc
+	panic("%s called", __func__);	//wyc
 	mtx_assert(&dt_lock, MA_OWNED);
 
 	if (len > MAX_LD)

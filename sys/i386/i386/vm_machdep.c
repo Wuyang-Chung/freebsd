@@ -195,7 +195,7 @@ cpu_fork(
 
 			mtx_lock_spin(&dt_lock);
 			if ((pldt1 = mdp1->md_ldt) != NULL) {
-			    panic("%s 1: md_ldt != NULL", __FUNCTION__); //wyc
+			    panic("%s 1: md_ldt != NULL", __func__); //wyc
 			    if (pldt1->ldt_refcnt > 1) {
 				pldt = user_ldt_alloc(mdp1, pldt1->ldt_len);
 				if (pldt == NULL)
@@ -234,7 +234,7 @@ cpu_fork(
 
 	/* Point mdproc and then copy over td1's contents */
 	if (p1->p_md.md_ldt != NULL)
-		panic("%s", __FUNCTION__); //wyc
+		panic("%s", __func__); //wyc
 	mdp2 = &p2->p_md;
 	bcopy(&p1->p_md, mdp2, sizeof(*mdp2));
 
@@ -295,7 +295,7 @@ cpu_fork(
 	/* Copy the LDT, if necessary. */
 	mtx_lock_spin(&dt_lock);
 	if (mdp2->md_ldt != NULL) {
-		panic("%s 2: md_ldt != NULL", __FUNCTION__);	//wyc
+		panic("%s 2: md_ldt != NULL", __func__);	//wyc
 		if (flags & RFMEM) {
 			mdp2->md_ldt->ldt_refcnt++;
 		} else {
@@ -349,7 +349,7 @@ cpu_exit(struct thread *td)
 	 */
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
-		panic("%s: md_ldt != NULL", __FUNCTION__);	//wyc
+		panic("%s: md_ldt != NULL", __func__);	//wyc
 		td->td_pcb->pcb_gs = _udatasel;
 		load_gs(_udatasel);
 		user_ldt_free(td);
