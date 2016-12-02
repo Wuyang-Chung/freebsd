@@ -193,9 +193,9 @@ typedef uint32_t pt_entry_t;
  * Address of current address space page table maps and directories.
  */
 #ifdef _KERNEL
-extern pt_entry_t PTmap[];
-extern pd_entry_t PTD[];
-extern pd_entry_t PTDpde[];
+extern pt_entry_t PTmap[];	//wyc: == 3G-4M      == 0xBFC0_0000
+extern pd_entry_t PTD[];	//wyc: == 3G-1M-4K   == 0xBFEF_F000
+extern pd_entry_t PTDpde[];	//wyc: == 3G-1M-1K-4 == 0xBFEF_FBFC
 
 #if defined(PAE) || defined(PAE_TABLES)
 extern pdpt_entry_t *IdlePDPT;
@@ -231,7 +231,7 @@ extern pd_entry_t *IdlePTD;	/* physical address of "Idle" state directory */
  * pages.  Later, it is reinitialized by pmap_bootstrap() to allow for
  * expansion of the kernel page table.
  */
-extern pt_entry_t *KPTmap;	//wyc: == 0xC119_2000
+extern pt_entry_t *KPTmap;	//wyc: == 0xC119_2000. Virtual address of kernel page table map
 
 /*
  * Extract from the kernel page table the physical address that is mapped by

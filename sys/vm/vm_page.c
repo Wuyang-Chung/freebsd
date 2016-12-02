@@ -1171,7 +1171,7 @@ vm_page_insert_after(vm_page_t m, vm_object_t object, vm_pindex_t pindex,
 	/*
 	 * Now link into the object's ordered list of backed pages.
 	 */
-	if (vm_radix_insert(&object->rtree, m)) {
+	if (vm_radix_insert(&object->rtree, m)) { //wyc: root of resident page tree
 		m->object = NULL;
 		m->pindex = 0;
 		return (1);
@@ -1424,7 +1424,7 @@ vm_page_rename(vm_page_t m, vm_object_t new_object, vm_pindex_t new_pindex)
 	 */
 	opidx = m->pindex;
 	m->pindex = new_pindex;
-	if (vm_radix_insert(&new_object->rtree, m)) {
+	if (vm_radix_insert(&new_object->rtree, m)) { //wyc: root of resident page tree
 		m->pindex = opidx;
 		return (1);
 	}
@@ -1549,7 +1549,7 @@ vm_page_cache_transfer(vm_object_t orig_object, vm_pindex_t offidxstart,
 		/* Update the page's object and offset. */
 		m->object = new_object;
 		m->pindex -= offidxstart;
-		if (vm_radix_insert(&new_object->cache, m))
+		if (vm_radix_insert(&new_object->cache, m)) //wyc: root of cache page tree
 			vm_page_cache_turn_free(m);
 	}
 	mtx_unlock(&vm_page_queue_free_mtx);
@@ -3326,7 +3326,7 @@ vm_page_cache(vm_page_t m)
 	m->flags &= ~PG_ZERO;
 	mtx_lock(&vm_page_queue_free_mtx);
 	cache_was_empty = vm_radix_is_empty(&object->cache);
-	if (vm_radix_insert(&object->cache, m)) {
+	if (vm_radix_insert(&object->cache, m)) { //wyc: root of cache page tree
 		mtx_unlock(&vm_page_queue_free_mtx);
 		if (object->type == OBJT_VNODE &&
 		    object->resident_page_count == 0)
