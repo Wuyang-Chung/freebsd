@@ -89,7 +89,12 @@ struct sysentvec elf32_freebsd_sysvec = {
 	.sv_thread_detach = NULL,
 	.sv_trap	= NULL,
 };
+#if defined(WYC) //expand the macro here
+SYSINIT(elf32_sysvec, SI_SUB_EXEC, SI_ORDER_ANY,
+	(sysinit_cfunc_t)exec_sysvec_init, &elf32_freebsd_sysvec);
+#else
 INIT_SYSENTVEC(elf32_sysvec, &elf32_freebsd_sysvec);
+#endif
 
 static Elf32_Brandinfo freebsd_brand_info = {
 	.brand		= ELFOSABI_FREEBSD,

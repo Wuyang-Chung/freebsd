@@ -989,7 +989,12 @@ struct sysentvec linux_sysvec = {
 	.sv_thread_detach = linux_thread_detach,
 	.sv_trap	= NULL,
 };
+#if defined(WYC) //expand the macro here
+SYSINIT(aout_sysvec, SI_SUB_EXEC, SI_ORDER_ANY,
+	(sysinit_cfunc_t)exec_sysvec_init, &linux_sysvec);
+#else
 INIT_SYSENTVEC(aout_sysvec, &linux_sysvec);
+#endif
 
 struct sysentvec elf_linux_sysvec = {
 	.sv_size	= LINUX_SYS_MAXSYSCALL,

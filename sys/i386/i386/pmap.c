@@ -1110,6 +1110,10 @@ struct pde_action {
 	u_int store;		/* processor that updates the PDE */
 };
 
+#if !defined(WYC)	// Don't parse it in SI
+// This function will only be called by pmap_update_pde()
+// And that function will only be called if (workaround_erratum383 == 1)
+// workaround_erratum383 is a workaround for AMD CPU
 static void
 pmap_update_pde_kernel(void *arg)
 {
@@ -1130,6 +1134,7 @@ pmap_update_pde_kernel(void *arg)
 		}
 	}
 }
+#endif
 
 static void
 pmap_update_pde_user(void *arg)
@@ -1149,6 +1154,9 @@ pmap_update_pde_teardown(void *arg)
 		pmap_update_pde_invalidate(act->va, act->newpde);
 }
 
+#if !defined(WYC)	// Don't parse it in SI
+// This function will only be called if (workaround_erratum383 == 1)
+// workaround_erratum383 is a workaround for AMD CPU
 /*
  * Change the page size for the specified virtual address in a way that
  * prevents any possibility of the TLB ever having two entries that map the
@@ -1193,6 +1201,7 @@ pmap_update_pde(pmap_t pmap, vm_offset_t va, pd_entry_t *pde, pd_entry_t newpde)
 	}
 	sched_unpin();
 }
+#endif
 #else /* !SMP */
 /*
  * Normal, non-SMP, 486+ invalidation functions.
