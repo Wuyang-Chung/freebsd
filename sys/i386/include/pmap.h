@@ -231,7 +231,7 @@ extern pd_entry_t *IdlePTD;	/* physical address of "Idle" state directory */
  * pages.  Later, it is reinitialized by pmap_bootstrap() to allow for
  * expansion of the kernel page table.
  */
-extern pt_entry_t *KPTmap;	//wyc: == 0xC119_2000. Virtual address of kernel page table map
+extern pt_entry_t *KPTmap; //wyc: ==0xC119_2000. kernel PTmap in kernel virtual address space
 
 /*
  * Extract from the kernel page table the physical address that is mapped by

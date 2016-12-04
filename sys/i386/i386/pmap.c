@@ -205,7 +205,7 @@ vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
 int pgeflag = 0;		/* PG_G or-in.  wyc: == PG_G if hw supports global page */
 int pseflag = 0;		/* PG_PS or-in. wyc: == PG_PS if hw supports superpage */
 
-static int nkpt = NKPT;
+static int nkpt = NKPT;		//wyc: ==30 number of kernel page table pages
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
 extern u_int32_t KERNend;	//wyc: phys addr end of kernel (just after bss)
 extern u_int32_t KPTphys;	//wyc: 0x0140_0000 phys addr of kernel page tables
@@ -266,7 +266,7 @@ struct sysmaps {
 };
 static struct sysmaps sysmaps_pcpu[MAXCPU];
 pt_entry_t *CMAP3;
-static pd_entry_t *KPTD;
+static pd_entry_t *KPTD;	//wyc: ==0xBFF0_4648. kernel PTD in kernel pte
 caddr_t ptvmmap = 0;
 caddr_t CADDR3;
 struct msgbuf *msgbufp = NULL;
@@ -1462,7 +1462,8 @@ pmap_extract(pmap_t pmap, vm_offset_t va)
 
 	rtval = 0;
 	PMAP_LOCK(pmap);
-	pde = pmap->pm_pdir[va >> PDRSHIFT];
+	//wyc pde = pmap->pm_pdir[va >> PDRSHIFT];
+	pde = *pmap_pde(pmap, va);
 	if (pde != 0) {
 		if ((pde & PG_PS) != 0)
 			rtval = (pde & PG_PS_FRAME) | (va & PDRMASK);

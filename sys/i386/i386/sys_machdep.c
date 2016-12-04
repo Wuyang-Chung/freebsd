@@ -184,12 +184,16 @@ sysarch(
 
 	switch(uap->op) {
 	case I386_GET_VAL:
-		kargs.cargs.a0 = (unsigned long)PTmap;
-		kargs.cargs.a1 = (unsigned long)PTD;
-		kargs.cargs.a2 = (unsigned long)PTDpde;
-		kargs.cargs.a3 = (unsigned long)0xa3aa;
+	{
+		// definitions of external variables
+
+		kargs.cargs.a0 = (unsigned long)0xa0;	//wyc: 
+		kargs.cargs.a1 = (unsigned long)0xa1;	// substitute 0xa0, 0xa1, 0xa2, 0xa3
+		kargs.cargs.a2 = (unsigned long)0xa2;	// with any kernel variable you want to know
+		kargs.cargs.a3 = (unsigned long)0xa3;	// its value at run time
 		error = copyout(&kargs.cargs, uap->parms, sizeof(kargs.cargs));
 		break;
+	}
 	case I386_SET_VAL:
 		error = EOPNOTSUPP;
 		break;
