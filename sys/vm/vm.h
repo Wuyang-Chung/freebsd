@@ -87,9 +87,9 @@ enum obj_type {
 	OBJT_VNODE,	//wyc: provide the physical memory for caching file data
 	OBJT_DEVICE, 	//wyc: e.g. frame buffer
 	OBJT_PHYS,	//wyc: time-of-day, trampoline code. marked unmanged
-	OBJT_DEAD, 
-	OBJT_SG, 
-	OBJT_MGTDEVICE
+	OBJT_DEAD,	//wyc: after dealloc
+	OBJT_SG,	//wyc: Scatter-Gather
+	OBJT_MGTDEVICE	//wyc: == OBJT_DEVICE with .pgo_init == NULL
 };
 typedef u_char objtype_t;
 

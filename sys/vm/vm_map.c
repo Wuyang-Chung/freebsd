@@ -277,7 +277,8 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
 
-	//wyc: 'pinit' is always NULL
+	//wyc: 'pinit' is always NULL in i386.
+	//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 	if (pinit != NULL)
 		panic("vmspace_alloc: pinit not NULL");	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));

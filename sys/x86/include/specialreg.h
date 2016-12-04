@@ -474,7 +474,7 @@
 #define	MSR_TSC_DEADLINE	0x6e0	/* Writes are not serializing */
 
 /*
- * VMX MSRs
+ * VMX MSRs (wyc: Virtual-Machine eXtensions)
  */
 #define	MSR_VMX_BASIC		0x480
 #define	MSR_VMX_PINBASED_CTLS	0x481
