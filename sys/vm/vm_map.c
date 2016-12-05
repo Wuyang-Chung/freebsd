@@ -3187,7 +3187,8 @@ vm_map_copy_entry(
 				(src_object->type == OBJT_DEFAULT ||
 				 src_object->type == OBJT_SWAP)) {
 				vm_object_collapse(src_object);
-				if ((src_object->flags & (OBJ_NOSPLIT|OBJ_ONEMAPPING)) == OBJ_ONEMAPPING) {
+				if ((src_object->flags & (OBJ_NOSPLIT|OBJ_ONEMAPPING)) 
+				    == OBJ_ONEMAPPING) {
 					vm_object_split(src_entry);
 					src_object = src_entry->object.vm_object;
 				}
@@ -3250,8 +3251,16 @@ vm_map_copy_entry(
 			}
 		}
 
-		pmap_copy(dst_map->pmap, src_map->pmap, dst_entry->start,
-		    dst_entry->end - dst_entry->start, src_entry->start);
+		//wyc: panic if "start" and "end" not equal
+		if (src_entry->start != dst_entry->start )
+			panic("%s: src start != dst start", __func__);
+		if (src_entry->end != dst_entry->end)
+			panic("%s: src end != dst end", __func__);
+		pmap_copy(dst_map->pmap, 
+		    src_map->pmap, 
+		    dst_entry->start,
+		    src_entry->end - src_entry->start,	//wyc: replace dst with src
+		    src_entry->start);
 	} else {
 		/*
 		 * We don't want to make writeable wired pages copy-on-write.
@@ -3279,12 +3288,12 @@ vmspace_map_entry_forked(const struct vmspace *vm1, struct vmspace *vm2,
 	entrysize = entry->end - entry->start;
 	vm2->vm_map.size += entrysize;
 	if (entry->eflags & (MAP_ENTRY_GROWS_DOWN | MAP_ENTRY_GROWS_UP)) {
-		vm2->vm_ssize += btoc(entrysize);
+		vm2->vm_ssize += btoc(entrysize); //wyc: ==howmany(entrysize,PAGE_SIZE)
 	} else if (entry->start >= (vm_offset_t)vm1->vm_daddr &&
 	    entry->start < (vm_offset_t)vm1->vm_daddr + ctob(vm1->vm_dsize)) {
 		newend = MIN(entry->end,
 		    (vm_offset_t)vm1->vm_daddr + ctob(vm1->vm_dsize));
-		vm2->vm_dsize += btoc(newend - entry->start);
+		vm2->vm_dsize += btoc(newend - entry->start); //wyc: ==howmany(,PAGE_SIZE)
 	} else if (entry->start >= (vm_offset_t)vm1->vm_taddr &&
 	    entry->start < (vm_offset_t)vm1->vm_taddr + ctob(vm1->vm_tsize)) {
 		newend = MIN(entry->end,
@@ -3431,7 +3440,8 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			/*
 			 * Update the physical map
 			 */
-			pmap_copy(new_map->pmap, old_map->pmap,
+			pmap_copy(new_map->pmap, 
+			    old_map->pmap,
 			    new_entry->start,
 			    (old_entry->end - old_entry->start),
 			    old_entry->start);
