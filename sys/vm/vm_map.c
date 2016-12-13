@@ -1242,8 +1242,13 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	cred = NULL;
 	if (cow & (MAP_ACC_NO_CHARGE | MAP_NOFAULT))
 		goto charged;
-	if ((cow & MAP_ACC_CHARGED) || ((prot & VM_PROT_WRITE) &&
-	    ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL))) {
+	if (
+	    (cow & MAP_ACC_CHARGED) || 
+	    (
+	      (prot & VM_PROT_WRITE) &&
+	      ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL)
+	    )
+	   ) {
 		if (!(cow & MAP_ACC_CHARGED) && !swap_reserve(end - start))
 			return (KERN_RESOURCE_SHORTAGE);
 		KASSERT(object == NULL || (protoeflags & MAP_ENTRY_NEEDS_COPY) ||
@@ -1274,14 +1279,16 @@ charged:
 		 (cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) == 0 &&
 		 (prev_entry->end == start) &&
 		 (prev_entry->wired_count == 0) &&
-		 (prev_entry->cred == cred ||
-		  (prev_entry->object.vm_object != NULL &&
+		   (prev_entry->cred == cred ||
+		   (prev_entry->object.vm_object != NULL &&
 		   (prev_entry->object.vm_object->cred == cred))) &&
-		   vm_object_coalesce(prev_entry->object.vm_object,
-		       prev_entry->offset,
-		       (vm_size_t)(prev_entry->end - prev_entry->start),
-		       (vm_size_t)(end - prev_entry->end), cred != NULL &&
-		       (protoeflags & MAP_ENTRY_NEEDS_COPY) == 0)) {
+		 vm_object_coalesce(
+		     prev_entry->object.vm_object,
+		     prev_entry->offset,
+		     (vm_size_t)(prev_entry->end - prev_entry->start),
+		     (vm_size_t)(end - prev_entry->end), 
+		     cred != NULL && (protoeflags & MAP_ENTRY_NEEDS_COPY
+		 ) == 0)) {
 		/*
 		 * We were able to extend the object.  Determine if we
 		 * can extend the previous map entry to include the
