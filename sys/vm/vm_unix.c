@@ -71,9 +71,9 @@ struct obreak_args {
  */
 /* ARGSUSED */
 int
-sys_obreak(td, uap)
-	struct thread *td;
-	struct obreak_args *uap;
+sys_obreak(
+	struct thread *td,
+	struct obreak_args *uap)
 {
 	struct vmspace *vm = td->td_proc->p_vmspace;
 	vm_map_t map = &vm->vm_map;

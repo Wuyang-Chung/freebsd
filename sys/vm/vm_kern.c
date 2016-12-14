@@ -513,8 +513,7 @@ kmem_init_zero_region(void)
  *	`start' as allocated, and the range between `start' and `end' as free.
  */
 void
-kmem_init(start, end)
-	vm_offset_t start, end;
+kmem_init(vm_offset_t start, vm_offset_t end)
 {
 	vm_map_t m;
 
