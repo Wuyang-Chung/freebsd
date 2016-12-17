@@ -963,7 +963,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			 */
 			if (phdr[i].p_offset == 0 &&
 			    hdr->e_phoff + hdr->e_phnum * hdr->e_phentsize
-				<= phdr[i].p_filesz)
+			    <= phdr[i].p_filesz)
 				proghdr = phdr[i].p_vaddr + hdr->e_phoff +
 				    et_dyn_addr;
 
@@ -1670,13 +1670,22 @@ static void
 __elfN(puthdr)(struct thread *td, void *hdr, size_t hdrsize, int numsegs,
     size_t notesz)
 {
+#if defined(WYC)
+	Elf32_Ehdr *ehdr;
+	Elf32_Phdr *phdr;
+#else
 	Elf_Ehdr *ehdr;
 	Elf_Phdr *phdr;
+#endif
 	struct phdr_closure phc;
 
+#if defined(WYC)
+	ehdr = (Elf32_Ehdr *)hdr;
+	phdr = (Elf32_Phdr *)((char *)hdr + sizeof(Elf32_Ehdr));
+#else
 	ehdr = (Elf_Ehdr *)hdr;
 	phdr = (Elf_Phdr *)((char *)hdr + sizeof(Elf_Ehdr));
-
+#endif
 	ehdr->e_ident[EI_MAG0] = ELFMAG0;
 	ehdr->e_ident[EI_MAG1] = ELFMAG1;
 	ehdr->e_ident[EI_MAG2] = ELFMAG2;
