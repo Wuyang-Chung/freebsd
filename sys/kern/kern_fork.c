@@ -389,6 +389,9 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	sx_assert(&allproc_lock, SX_XLOCKED);
 
 	p1 = td->td_proc;
+	//wyc: panic if p2 != td2->td_proc
+	if ( p2 != td2->td_proc )
+		panic("%s", __func__);
 
 	trypid = fork_findpid(fr->fr_flags);
 
