@@ -3496,7 +3496,7 @@ vm_map_stack(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 {
 	vm_size_t growsize, init_ssize;
 	rlim_t lmemlim, vmemlim;
-	int rv;
+	int rv;	//wyc: return value
 
 	growsize = sgrowsiz;
 	init_ssize = (max_ssize < growsize) ? max_ssize : growsize;

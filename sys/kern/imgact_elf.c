@@ -116,7 +116,7 @@ SYSCTL_INT(_debug, OID_AUTO, __elfN(legacy_coredump), CTLFLAG_RW,
     &elf_legacy_coredump, 0,
     "include all and only RW pages in core dumps");
 
-int __elfN(nxstack) =
+int __elfN(nxstack) =	//wyc: non-executable stack
 #if defined(__amd64__) || defined(__powerpc64__) /* both 64 and 32 bit */ || \
     (defined(__arm__) && __ARM_ARCH >= 7) || defined(__aarch64__)
 	1;
