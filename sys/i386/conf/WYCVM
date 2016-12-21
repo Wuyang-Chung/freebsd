@@ -83,9 +83,10 @@ options 	RCTL			# Resource limits
 
 # Debugging support.  Always need this:
 options 	KDB			# Enable kernel debugger support.
-#options 	KDB_TRACE		# Print a stack trace for a panic.
-options 	KDB_UNATTENDED		# when panic occurs, reboot instead of enter into debugger
+options 	KDB_TRACE		# Print a stack trace for a panic.
+#options 	KDB_UNATTENDED		# when panic occurs, reboot instead of enter into debugger
 options 	DDB			# console debugger
+options 	GDB			# Enable the remote gdb debugger backend.
 
 # To make an SMP kernel, the next two lines are needed
 options 	SMP			# Symmetric MultiProcessor Kernel
@@ -222,7 +223,7 @@ device		uart			# Generic UART driver
 #device		ppi			# Parallel port interface device
 ##device		vpo			# Requires scbus and da
 
-device		puc			# Multi I/O cards and multi-channel UARTs
+#device		puc			# Multi I/O cards and multi-channel UARTs
 
 # PCI Ethernet NICs.
 #device		bxe			# Broadcom NetXtreme II BCM5771X/BCM578XX 10GbE
