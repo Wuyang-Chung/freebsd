@@ -27,6 +27,13 @@ makeoptions	DEBUG=-g		# Build kernel with gdb(1) debug symbols
 makeoptions	WITH_CTF=1		# Run ctfconvert(1) for DTrace support
 
 #wyc
+# Debugging support.
+options 	GDB			# Enable the remote gdb debugger backend.
+options 	DDB			# console debugger
+options 	KDB			# Enable kernel debugger support.
+options 	KDB_TRACE		# Print a stack trace for a panic.
+#options 	KDB_UNATTENDED		# when panic occurs, reboot instead of enter into debugger
+
 #options 	INVARIANTS		# enable extra sanity checking of internal structures
 
 options 	SCHED_ULE		# ULE scheduler
@@ -80,13 +87,6 @@ options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
 options 	RACCT			# Resource accounting framework
 options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
 options 	RCTL			# Resource limits
-
-# Debugging support.  Always need this:
-options 	KDB			# Enable kernel debugger support.
-options 	KDB_TRACE		# Print a stack trace for a panic.
-#options 	KDB_UNATTENDED		# when panic occurs, reboot instead of enter into debugger
-options 	DDB			# console debugger
-options 	GDB			# Enable the remote gdb debugger backend.
 
 # To make an SMP kernel, the next two lines are needed
 options 	SMP			# Symmetric MultiProcessor Kernel
