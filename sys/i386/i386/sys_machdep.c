@@ -89,22 +89,6 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_def32 = 1;
 	sdp->sd_gran = 1;
 }
-/* wyc begin
-=============
-*/
-#define I386_GET_VAL	20
-#define I386_SET_VAL	21
-
-struct i386_wyc_args {
-	unsigned long	a0;
-	unsigned long	a1;
-	unsigned long	a2;
-	unsigned long	a3;
-};
-
-/* wyc end
-=============
-*/
 
 #if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct sysarch_args {
@@ -124,7 +108,6 @@ sysarch(
 		//struct i386_ldt_args largs;	//wyc
 		struct i386_ioperm_args iargs;
 		struct i386_get_xfpustate xfpu;
-		struct i386_wyc_args cargs;
 	} kargs;
 	uint32_t base;
 	struct segment_descriptor sd, *sdp;
@@ -140,8 +123,6 @@ sysarch(
 	 */
 	if (IN_CAPABILITY_MODE(td)) {
 		switch (uap->op) {
-		case I386_GET_VAL:
-		case I386_SET_VAL:
 		case I386_GET_IOPERM:
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
@@ -168,11 +149,6 @@ sysarch(
 		    sizeof(struct i386_ioperm_args))) != 0)
 			return (error);
 		break;
-	//case I386_GET_VAL:
-	case I386_SET_VAL:
-		if ((error = copyin(uap->parms, &kargs.cargs, sizeof(kargs.cargs))) != 0)
-			return (error);
-		break;
 	case I386_GET_XFPUSTATE:
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
@@ -183,20 +159,6 @@ sysarch(
 	}
 
 	switch(uap->op) {
-	case I386_GET_VAL:
-	{
-		// definitions of external variables
-
-		kargs.cargs.a0 = (unsigned long)0xa0;	//wyc: 
-		kargs.cargs.a1 = (unsigned long)0xa1;	// substitute 0xa0, 0xa1, 0xa2, 0xa3
-		kargs.cargs.a2 = (unsigned long)0xa2;	// with any kernel variable you want to know
-		kargs.cargs.a3 = (unsigned long)0xa3;	// its value at run time
-		error = copyout(&kargs.cargs, uap->parms, sizeof(kargs.cargs));
-		break;
-	}
-	case I386_SET_VAL:
-		error = EOPNOTSUPP;
-		break;
 	case I386_GET_IOPERM:
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
