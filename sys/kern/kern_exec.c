@@ -1089,7 +1089,7 @@ exec_new_vmspace(
 	else
 		sv_minuser = MAX(sv->sv_minuser, PAGE_SIZE);
 	if (vmspace->vm_refcnt == 1 && vm_map_min(map) == sv_minuser &&
-	    vm_map_max(map) == sv->sv_maxuser) {
+	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE
 		shmexit(vmspace);
 		pmap_remove_pages(vmspace_pmap(vmspace));
 		vm_map_remove(map, vm_map_min(map), vm_map_max(map));
@@ -1103,7 +1103,7 @@ exec_new_vmspace(
 
 	/* Map a shared page */
 	obj = sv->sv_shared_page_obj;
-	if (obj != NULL) {
+	if (obj != NULL) {	//wyc: TRUE
 		vm_object_reference(obj);
 		error = vm_map_fixed(map, obj, 0,
 		    sv->sv_shared_page_base, sv->sv_shared_page_len,
@@ -1133,6 +1133,7 @@ exec_new_vmspace(
 	} else {
 		ssiz = maxssiz;
 	}
+	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000 ssiz==400_0000
 	stack_addr = sv->sv_usrstack - ssiz;
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :

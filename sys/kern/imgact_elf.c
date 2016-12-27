@@ -872,7 +872,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			break;
 		case PT_GNU_STACK:
 #if defined(WYC)
-			if (elf32_nxstack)
+			if (elf32_nxstack)	//wyc: ==0 for i386
 				imgp->stack_prot =
 				    elf32_trans_prot(phdr[i].p_flags);
 #else
@@ -886,6 +886,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	}
 
 #if defined(WYC)
+	//wyc: brand_info == freebsd_brand_info
 	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
 #else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
@@ -897,7 +898,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		error = ENOEXEC;
 		goto ret;
 	}
-	if (hdr->e_type == ET_DYN) {
+	if (hdr->e_type == ET_DYN) { //wyc: FALSE
 		if ((brand_info->flags & BI_CAN_EXEC_DYN) == 0) {
 			uprintf("Cannot execute shared object\n");
 			error = ENOEXEC;
@@ -949,7 +950,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
 			error = __elfN(load_section)(imgp, phdr[i].p_offset,
 #endif
-			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr,
+			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc: et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
 			if (error != 0)
@@ -965,7 +966,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			    hdr->e_phoff + hdr->e_phnum * hdr->e_phentsize
 			    <= phdr[i].p_filesz)
 				proghdr = phdr[i].p_vaddr + hdr->e_phoff +
-				    et_dyn_addr;
+				    et_dyn_addr; //wyc: et_dyn_addr==0
 
 			seg_addr = trunc_page(phdr[i].p_vaddr + et_dyn_addr);
 			seg_size = round_page(phdr[i].p_memsz +
@@ -992,7 +993,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			total_size += seg_size;
 			break;
 		case PT_PHDR: 	/* Program header table info */
-			proghdr = phdr[i].p_vaddr + et_dyn_addr;
+			proghdr = phdr[i].p_vaddr + et_dyn_addr; //wyc: et_dny_addr==0
 			break;
 		default:
 			break;
