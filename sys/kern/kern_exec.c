@@ -192,9 +192,9 @@ sysctl_kern_stackprot(SYSCTL_HANDLER_ARGS)
  * Each of the items is a pointer to a `const struct execsw', hence the
  * double pointer here.
  */
-static const struct execsw **execsw;
+static const struct execsw **_execsw;
 
-#ifndef _SYS_SYSPROTO_H_
+#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
 struct execve_args {
 	char    *fname; 
 	char    **argv;
@@ -594,12 +594,12 @@ interpret:
 	 *	An activator returns -1 if there is no match, 0 on success,
 	 *	and an error otherwise.
 	 */
-	for (i = 0; error == -1 && execsw[i]; ++i) {
-		if (execsw[i]->ex_imgact == NULL ||
-		    execsw[i]->ex_imgact == img_first) {
+	for (i = 0; error == -1 && _execsw[i]; ++i) {
+		if (_execsw[i]->ex_imgact == NULL ||
+		    _execsw[i]->ex_imgact == img_first) {
 			continue;
 		}
-		error = (*execsw[i]->ex_imgact)(imgp);
+		error = (*_execsw[i]->ex_imgact)(imgp);
 	}
 
 	if (error) {
@@ -1585,19 +1585,19 @@ exec_register(
 	const struct execsw **es, **xs, **newexecsw;
 	int count = 2;	/* New slot and trailing NULL */
 
-	if (execsw)
-		for (es = execsw; *es; es++)
+	if (_execsw)
+		for (es = _execsw; *es; es++)
 			count++;
 	newexecsw = malloc(count * sizeof(*es), M_TEMP, M_WAITOK);
 	xs = newexecsw;
-	if (execsw)
-		for (es = execsw; *es; es++)
+	if (_execsw)
+		for (es = _execsw; *es; es++)
 			*xs++ = *es;
 	*xs++ = execsw_arg;
 	*xs = NULL;
-	if (execsw)
-		free(execsw, M_TEMP);
-	execsw = newexecsw;
+	if (_execsw)
+		free(_execsw, M_TEMP);
+	_execsw = newexecsw;
 	return (0);
 }
 
@@ -1608,26 +1608,26 @@ exec_unregister(
 	const struct execsw **es, **xs, **newexecsw;
 	int count = 1;
 
-	if (execsw == NULL)
+	if (_execsw == NULL)
 		panic("unregister with no handlers left?\n");
 
-	for (es = execsw; *es; es++) {
+	for (es = _execsw; *es; es++) {
 		if (*es == execsw_arg)
 			break;
 	}
 	if (*es == NULL)
 		return (ENOENT);
-	for (es = execsw; *es; es++)
+	for (es = _execsw; *es; es++)
 		if (*es != execsw_arg)
 			count++;
 	newexecsw = malloc(count * sizeof(*es), M_TEMP, M_WAITOK);
 	xs = newexecsw;
-	for (es = execsw; *es; es++)
+	for (es = _execsw; *es; es++)
 		if (*es != execsw_arg)
 			*xs++ = *es;
 	*xs = NULL;
-	if (execsw)
-		free(execsw, M_TEMP);
-	execsw = newexecsw;
+	if (_execsw)
+		free(_execsw, M_TEMP);
+	_execsw = newexecsw;
 	return (0);
 }
