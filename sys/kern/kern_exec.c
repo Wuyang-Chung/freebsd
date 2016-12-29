@@ -352,7 +352,7 @@ static int
 do_execve(
 	struct thread *td,
 	struct image_args *args,
-	struct mac *mac_p)
+	struct mac *mac_p) __attribute__((optnone)) //wyc
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -599,7 +599,11 @@ interpret:
 		    _execsw[i]->ex_imgact == img_first) {
 			continue;
 		}
+#if defined(WYC)
+		error = exec_elf32_imgact(imgp); //wyc: the function actually called
+#else
 		error = (*_execsw[i]->ex_imgact)(imgp);
+#endif
 	}
 
 	if (error) {

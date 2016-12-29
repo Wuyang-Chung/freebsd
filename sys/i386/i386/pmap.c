@@ -4477,7 +4477,7 @@ pmap_page_is_mapped(vm_page_t m)
  * is special cased for current process only, but
  * can have the more generic (and slightly slower)
  * mode enabled.  This is much faster than pmap_remove
- *     void pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
+ *     wyc: void pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
  * in the case of running down an entire address space.
  */
 void

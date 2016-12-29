@@ -749,7 +749,7 @@ static int
 #if defined(WYC)
 exec_elf32_imgact(struct image_params *imgp)
 #else
-__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
+__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnone)) //wyc
 #endif
 {
 	struct thread *td;
@@ -886,8 +886,8 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	}
 
 #if defined(WYC)
-	//wyc: brand_info == freebsd_brand_info
 	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
+	brand_info = &freebsd_brand_info; //wyc: brand_info == freebsd_brand_info
 #else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
 #endif
@@ -914,7 +914,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			et_dyn_addr = 0;
 	} else
 		et_dyn_addr = 0;
+#if defined(WYC)
+	sv = &elf32_freebsd_sysvec; //wyc: brand_info->sysvec == &elf32_freebsd_sysvec
+#else
 	sv = brand_info->sysvec;
+#endif
 	if (interp != NULL && brand_info->interp_newpath != NULL)
 		newinterp = brand_info->interp_newpath;
 
