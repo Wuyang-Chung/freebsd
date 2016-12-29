@@ -13,7 +13,6 @@
 #
 # files to ignore
 #
-/kernel.debug
 /0_wyc/kernel.debug
 
 #
