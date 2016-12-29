@@ -1111,9 +1111,9 @@ struct pde_action {
 };
 
 #if !defined(WYC)	// Don't parse it in SI
-// This function will only be called by pmap_update_pde()
-// And that function will only be called if (workaround_erratum383 == 1)
-// workaround_erratum383 is a workaround for AMD CPU
+//wyc This function will only be called by pmap_update_pde()
+//wyc And that function will only be called if (workaround_erratum383 == 1)
+//wyc workaround_erratum383 is a workaround for AMD CPU
 static void
 pmap_update_pde_kernel(void *arg)
 {
@@ -1155,8 +1155,8 @@ pmap_update_pde_teardown(void *arg)
 }
 
 #if !defined(WYC)	// Don't parse it in SI
-// This function will only be called if (workaround_erratum383 == 1)
-// workaround_erratum383 is a workaround for AMD CPU
+//wyc This function will only be called if (workaround_erratum383 == 1)
+//wyc workaround_erratum383 is a workaround for AMD CPU
 /*
  * Change the page size for the specified virtual address in a way that
  * prevents any possibility of the TLB ever having two entries that map the

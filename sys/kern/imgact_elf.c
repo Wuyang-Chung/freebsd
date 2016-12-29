@@ -116,7 +116,7 @@ SYSCTL_INT(_debug, OID_AUTO, __elfN(legacy_coredump), CTLFLAG_RW,
     &elf_legacy_coredump, 0,
     "include all and only RW pages in core dumps");
 
-int __elfN(nxstack) =	//wyc: non-executable stack
+int __elfN(nxstack) =	//wyc: non-executable stack. ==0 for i386
 #if defined(__amd64__) || defined(__powerpc64__) /* both 64 and 32 bit */ || \
     (defined(__arm__) && __ARM_ARCH >= 7) || defined(__aarch64__)
 	1;
@@ -753,23 +753,13 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 #endif
 {
 	struct thread *td;
-#if defined(WYC)
-	const Elf32_Ehdr *hdr;
-	const Elf32_Phdr *phdr;
-	Elf32_Auxargs *elf_auxargs;
-#else
 	const Elf_Ehdr *hdr;
 	const Elf_Phdr *phdr;
 	Elf_Auxargs *elf_auxargs;
-#endif
 	struct vmspace *vmspace;
 	const char *err_str, *newinterp;
 	char *interp, *interp_buf, *path;
-#if defined(WYC)
-	Elf32_Brandinfo *brand_info;
-#else
 	Elf_Brandinfo *brand_info;
-#endif
 	struct sysentvec *sv;
 	vm_prot_t prot;
 	u_long text_size, data_size, total_size, text_addr, data_addr;
@@ -777,11 +767,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	int32_t osrel;
 	int error, i, n, interp_name_len, have_interp;
 
-#if defined(WYC)
-	hdr = (const Elf32_Ehdr *)imgp->image_header;
-#else
 	hdr = (const Elf_Ehdr *)imgp->image_header;
-#endif
 
 	/*
 	 * Do we have a valid ELF header ?
@@ -808,13 +794,8 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 		uprintf("Program headers not in the first page\n");
 		return (ENOEXEC);
 	}
-#if defined(WYC)
-	phdr = (const Elf32_Phdr *)(imgp->image_header + hdr->e_phoff); 
-	if (!aligned(phdr, Elf32_Addr)) {
-#else
 	phdr = (const Elf_Phdr *)(imgp->image_header + hdr->e_phoff); 
 	if (!aligned(phdr, Elf_Addr)) {
-#endif
 		uprintf("Unaligned program headers\n");
 		return (ENOEXEC);
 	}
@@ -1675,22 +1656,12 @@ static void
 __elfN(puthdr)(struct thread *td, void *hdr, size_t hdrsize, int numsegs,
     size_t notesz)
 {
-#if defined(WYC)
-	Elf32_Ehdr *ehdr;
-	Elf32_Phdr *phdr;
-#else
 	Elf_Ehdr *ehdr;
 	Elf_Phdr *phdr;
-#endif
 	struct phdr_closure phc;
 
-#if defined(WYC)
-	ehdr = (Elf32_Ehdr *)hdr;
-	phdr = (Elf32_Phdr *)((char *)hdr + sizeof(Elf32_Ehdr));
-#else
 	ehdr = (Elf_Ehdr *)hdr;
 	phdr = (Elf_Phdr *)((char *)hdr + sizeof(Elf_Ehdr));
-#endif
 	ehdr->e_ident[EI_MAG0] = ELFMAG0;
 	ehdr->e_ident[EI_MAG1] = ELFMAG1;
 	ehdr->e_ident[EI_MAG2] = ELFMAG2;

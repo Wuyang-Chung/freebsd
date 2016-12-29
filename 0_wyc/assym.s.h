@@ -1,4 +1,4 @@
-#if !defined(WYC)	//wyc: SI will not parse the code below
+#if !defined(WYC)	//wyc: don't let SI parse the code below
 #define	BC32SEL	0x68
 #define	BI_ENDCOMMON	0xc
 #define	BI_ESYMTAB	0x44

@@ -352,7 +352,7 @@ static int
 do_execve(
 	struct thread *td,
 	struct image_args *args,
-	struct mac *mac_p) __attribute__((optnone)) //wyc
+	struct mac *mac_p)
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -1065,10 +1065,10 @@ exec_unmap_first_page(
 int
 exec_new_vmspace(
 	struct image_params *imgp,
-	struct sysentvec *sv)
+	struct sysentvec *sv) __attribute__((optnone)) //wyc
 {
 	int error;
-	struct proc *p = imgp->proc;
+	struct proc *p = imgp->proc; //wyc: ==curthread->td_proc
 	struct vmspace *vmspace = p->p_vmspace;
 	vm_object_t obj;
 	struct rlimit rlim_stack;
@@ -1106,7 +1106,11 @@ exec_new_vmspace(
 	}
 
 	/* Map a shared page */
+#if defined(WYC)
+	obj = shared_page_obj; //wyc: sv->sv_shared_page_obj == shared_page_obj
+#else
 	obj = sv->sv_shared_page_obj;
+#endif
 	if (obj != NULL) {	//wyc: TRUE
 		vm_object_reference(obj);
 		error = vm_map_fixed(map, obj, 0,

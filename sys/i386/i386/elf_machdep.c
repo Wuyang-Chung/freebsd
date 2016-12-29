@@ -89,7 +89,7 @@ struct sysentvec elf32_freebsd_sysvec = {
 	.sv_thread_detach = NULL,
 	.sv_trap	= NULL,
 };
-#if defined(WYC) //expand the macro here
+#if defined(WYC) //wyc: macro expansion result
 SYSINIT(elf32_sysvec, SI_SUB_EXEC, SI_ORDER_ANY,
 	(sysinit_cfunc_t)exec_sysvec_init, &elf32_freebsd_sysvec);
 #else
