@@ -315,7 +315,11 @@ typedef struct pmap	*pmap_t;
 
 #ifdef _KERNEL
 extern struct pmap	kernel_pmap_store;
+#if defined(WYC)
+struct pmap	*kernel_pmap = &kernel_pmap_store;
+#else
 #define kernel_pmap	(&kernel_pmap_store)
+#endif
 
 #define	PMAP_LOCK(pmap)		mtx_lock(&(pmap)->pm_mtx)
 #define	PMAP_LOCK_ASSERT(pmap, type) \

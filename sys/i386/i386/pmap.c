@@ -1531,7 +1531,7 @@ retry:
  ***************************************************/
 
 /*
- * Add a wired page to the kva. wyc: but why PG_W is not specified?
+ * Add a wired page to the kva. wyc: why PG_W is not specified???
  * Note: not SMP coherent.
  *
  * This function may be used before pmap_bootstrap() is called.
@@ -5493,7 +5493,7 @@ retry:
 }
 
 void
-pmap_activate(struct thread *td)
+pmap_activate(struct thread *td) __attribute__((optnone)) //wyc
 {
 	pmap_t	pmap, oldpmap;
 	u_int	cpuid;
@@ -5502,6 +5502,8 @@ pmap_activate(struct thread *td)
 	critical_enter();
 	pmap = vmspace_pmap(td->td_proc->p_vmspace);
 	oldpmap = PCPU_GET(curpmap);
+	if (pmap == oldpmap)		//wyc
+		panic("%s", __func__);	//wyc
 	cpuid = PCPU_GET(cpuid);
 #if defined(SMP)
 	CPU_CLR_ATOMIC(cpuid, &oldpmap->pm_active);

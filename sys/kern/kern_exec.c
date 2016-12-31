@@ -352,7 +352,7 @@ static int
 do_execve(
 	struct thread *td,
 	struct image_args *args,
-	struct mac *mac_p)
+	struct mac *mac_p) __attribute__((optnone)) //wyc
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -689,7 +689,11 @@ interpret:
 	 * Else stuff argument count as first item on stack
 	 */
 	if (p->p_sysent->sv_fixup != NULL)
+#if defined(WYC)
+		elf32_freebsd_fixup(&stack_base, imgp);
+#else
 		(*p->p_sysent->sv_fixup)(&stack_base, imgp);
+#endif
 	else
 		suword(--stack_base, imgp->args->argc);
 
@@ -1096,7 +1100,7 @@ exec_new_vmspace(
 	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE
 		shmexit(vmspace);
 		pmap_remove_pages(vmspace_pmap(vmspace));
-		vm_map_remove(map, vm_map_min(map), vm_map_max(map));
+		vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
 	} else {
 		error = vmspace_exec(p, sv_minuser, sv->sv_maxuser);
 		if (error)
@@ -1139,9 +1143,9 @@ exec_new_vmspace(
 	} else if (sv->sv_maxssiz != NULL) {
 		ssiz = *sv->sv_maxssiz;
 	} else {
-		ssiz = maxssiz;
+		ssiz = maxssiz; //wyc: ssiz == maxssiz
 	}
-	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000 ssiz==400_0000
+	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000(SHAREDPAGE) ssiz==400_0000
 	stack_addr = sv->sv_usrstack - ssiz;
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :

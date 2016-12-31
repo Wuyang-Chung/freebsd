@@ -267,7 +267,7 @@ exec_sysvec_init(void *param)
 	    shared_page_fill(*(sv->sv_szsigcode), 16, sv->sv_sigcode);
 	if ((sv->sv_flags & SV_ABI_MASK) != SV_ABI_FREEBSD)
 		return;
-	if ((sv->sv_flags & SV_TIMEKEEP) != 0) {
+	if ((sv->sv_flags & SV_TIMEKEEP) != 0) { //wyc: TRUE
 #ifdef COMPAT_FREEBSD32
 		if ((sv->sv_flags & SV_ILP32) != 0) {
 			KASSERT(compat32_svtk == NULL,

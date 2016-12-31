@@ -123,10 +123,10 @@ struct sysentvec {
 			    syscall_args *);
 	const char	**sv_syscallnames;
 	vm_offset_t	sv_timekeep_base;
-	vm_offset_t	sv_shared_page_base;
-	vm_offset_t	sv_shared_page_len;
+	vm_offset_t	sv_shared_page_base; //wyc: ==SHAREDPAGE for elf32_freebsd_sysvec
+	vm_offset_t	sv_shared_page_len;  //wyc: ==PAGE_SIZE  for elf32_freebsd_sysvec
 	vm_offset_t	sv_sigcode_base;
-	void		*sv_shared_page_obj;
+	void		*sv_shared_page_obj; //wyc: ==shared_page_obj
 	void		(*sv_schedtail)(struct thread *);
 	void		(*sv_thread_detach)(struct thread *);
 	int		(*sv_trap)(struct thread *);
