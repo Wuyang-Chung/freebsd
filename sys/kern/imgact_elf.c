@@ -491,9 +491,19 @@ __elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 }
 
 static int
-__elfN(load_section)(struct image_params *imgp, vm_offset_t offset,
-    caddr_t vmaddr, size_t memsz, size_t filsz, vm_prot_t prot,
-    size_t pagesize)
+#if defined(WYC)
+elf32_load_section(
+#else
+__elfN(load_section)(
+#endif
+    struct image_params *imgp, 
+    vm_offset_t offset,
+    caddr_t vmaddr, 
+    size_t memsz, 
+    size_t filsz, 
+    vm_prot_t prot,
+    size_t pagesize
+    ) __attribute__((optnone)) //wyc
 {
 	struct sf_buf *sf;
 	size_t map_len;

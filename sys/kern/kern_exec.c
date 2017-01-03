@@ -1129,7 +1129,7 @@ exec_new_vmspace(
 	}
 
 	/* Allocate a new stack */
-	if (imgp->stack_sz != 0) {
+	if (imgp->stack_sz != 0) { //wyc: false
 		ssiz = trunc_page(imgp->stack_sz);
 		PROC_LOCK(p);
 		lim_rlimit_proc(p, RLIMIT_STACK, &rlim_stack);
@@ -1140,12 +1140,12 @@ exec_new_vmspace(
 			rlim_stack.rlim_cur = ssiz;
 			kern_setrlimit(curthread, RLIMIT_STACK, &rlim_stack);
 		}
-	} else if (sv->sv_maxssiz != NULL) {
+	} else if (sv->sv_maxssiz != NULL) { //wyc: false
 		ssiz = *sv->sv_maxssiz;
 	} else {
 		ssiz = maxssiz; //wyc: ssiz == maxssiz
 	}
-	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000(SHAREDPAGE) ssiz==400_0000
+	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000(USRSTACK) ssiz==400_0000
 	stack_addr = sv->sv_usrstack - ssiz;
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
