@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 
 	fh = open("/tmp/fifo", O_RDWR);
 	for (i=0; i<10; i++) {
+		printf("%4d: ", i);
 		p = msg;
 		while (*p != 0) {
 			write(fh, p++, 1);
