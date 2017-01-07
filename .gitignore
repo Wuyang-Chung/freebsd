@@ -14,6 +14,7 @@
 # files to ignore
 #
 *.core
+*.out
 /0_wyc/kernel.debug
 
 #
