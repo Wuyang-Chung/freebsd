@@ -5502,10 +5502,11 @@ pmap_activate(struct thread *td) __attribute__((optnone)) //wyc
 	critical_enter();
 	pmap = vmspace_pmap(td->td_proc->p_vmspace);
 	oldpmap = PCPU_GET(curpmap);
-	if (pmap == oldpmap) { //wyc
-		{void kdb_enter(const char *, const char *);kdb_enter("wyc", __func__);}
-		goto exit;
-	}
+	//wyc: Most of the time pmap == oldpmap. But on very few occasion, it is not
+	//if (pmap == oldpmap) {
+	//	{void kdb_enter(const char *, const char *);kdb_enter("wyc", __func__);}
+	//	goto exit;
+	//}
 	cpuid = PCPU_GET(cpuid);
 #if defined(SMP)
 	CPU_CLR_ATOMIC(cpuid, &oldpmap->pm_active);
@@ -5525,7 +5526,7 @@ pmap_activate(struct thread *td) __attribute__((optnone)) //wyc
 	td->td_pcb->pcb_cr3 = cr3;
 	load_cr3(cr3);
 	PCPU_SET(curpmap, pmap);
-exit: //wyc
+//exit: //wyc
 	critical_exit();
 }
 
