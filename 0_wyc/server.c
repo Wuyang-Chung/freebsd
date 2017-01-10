@@ -3,13 +3,15 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+char const * const fifo = "/tmp/fifo";
+
 int main(int argc, char *argv[])
 {
 	int	fh;
 	unsigned char	c;
 
-	mkfifo("/tmp/fifo", 0600);
-	fh = open("/tmp/fifo", O_RDWR);
+	mkfifo(fifo, 0600);
+	fh = open(fifo, O_RDWR);
 	while(1) {
 		read(fh, &c, 1);
 		if (c == 0xAA)
@@ -17,5 +19,6 @@ int main(int argc, char *argv[])
 		write(fh, &c,1);
 	}
 	close(fh);
+	unlink(fifo);
 	return 0;
 }

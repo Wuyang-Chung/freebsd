@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+char const * const fifo = "/tmp/fifo";
+
 int main(int argc, char *argv[])
 {
 	int	fh;
@@ -10,7 +12,7 @@ int main(int argc, char *argv[])
 	char	c = 't';
 	int	i;
 
-	fh = open("/tmp/fifo", O_RDWR);
+	fh = open(fifo, O_RDWR);
 	for (i=0; i<10; i++) {
 		printf("%4d: ", i);
 		p = msg;
