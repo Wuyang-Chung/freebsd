@@ -376,9 +376,10 @@ thread_free(struct thread *td)
 {
 
 	lock_profile_thread_exit(td);
-	if (td->td_cpuset)
+	if (td->td_cpuset) {
 		cpuset_rel(td->td_cpuset);
-	td->td_cpuset = NULL;
+		td->td_cpuset = NULL; //wyc: move this statement within the if statement
+	}
 	cpu_thread_free(td);
 	if (td->td_kstack != 0)
 		vm_thread_dispose(td);
@@ -737,11 +738,11 @@ thread_single(struct proc *p, int mode)
 	PROC_LOCK_ASSERT(p, MA_OWNED);
 
 	if ((p->p_flag & P_HADTHREADS) == 0 && mode != SINGLE_ALLPROC)
-		return (0);
+		return (0); //wyc: success
 
 	/* Is someone already single threading? */
 	if (p->p_singlethread != NULL && p->p_singlethread != td)
-		return (1);
+		return (1); //wyc: fail
 
 	if (mode == SINGLE_EXIT) {
 		p->p_flag |= P_SINGLE_EXIT;

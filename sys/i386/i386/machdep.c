@@ -298,7 +298,7 @@ cpu_startup(dummy)
 	}
 	if (memsize < ptoa((uintmax_t)vm_cnt.v_free_count))
 		memsize = ptoa((uintmax_t)Maxmem);
-	printf("real memory  = %ju (%ju MB)\n", memsize, memsize >> 20);
+	printf("real memory  = %ju (%ju MB)\n", memsize, memsize >> 20); //wyc: should be MiB
 	realmem = atop(memsize);
 
 	/*
@@ -322,9 +322,9 @@ cpu_startup(dummy)
 
 	vm_ksubmap_init(&kmi);
 
-	printf("avail memory = %ju (%ju MB)\n",
+	printf("avail memory = %ju (%ju MB)\n", //wyc: should be MiB
 	    ptoa((uintmax_t)vm_cnt.v_free_count),
-	    ptoa((uintmax_t)vm_cnt.v_free_count) / 1048576);
+	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc: 1048576 == 1<<20
 
 	/*
 	 * Set up buffers, so they can be used to read disk labels.

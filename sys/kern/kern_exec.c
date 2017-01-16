@@ -227,6 +227,7 @@ struct fexecve_args {
 	char	**envv;
 }
 #endif
+//wyc: Executes a program specified by a file handle instead of a file path
 int
 sys_fexecve(struct thread *td, struct fexecve_args *uap)
 {
@@ -373,7 +374,7 @@ do_execve(
 	cap_rights_t rights;
 	int credential_changing;
 	int textset;
-#ifdef MAC
+#ifdef MAC	//wyc: Mandatory Access Control
 	struct label *interpvplabel = NULL;
 	int will_transition;
 #endif
@@ -1118,7 +1119,12 @@ exec_new_vmspace(
 	if (obj != NULL) {	//wyc: TRUE
 		vm_object_reference(obj);
 		error = vm_map_fixed(map, obj, 0,
+#if defined(WYC)
+		    elf32_freebsd_sysvec.sv_shared_page_base, //wyc: ==3G-4M-4K ==0xBFBF_F000
+		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==PAGE_SIZE
+#else
 		    sv->sv_shared_page_base, sv->sv_shared_page_len,
+#endif
 		    VM_PROT_READ | VM_PROT_EXECUTE,
 		    VM_PROT_READ | VM_PROT_EXECUTE,
 		    MAP_INHERIT_SHARE | MAP_ACC_NO_CHARGE);

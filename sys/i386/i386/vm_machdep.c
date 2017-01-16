@@ -187,7 +187,7 @@ cpu_fork(
 	struct mdproc *mdp2;
 
 	p1 = td1->td_proc;
-	if ((flags & RFPROC) == 0) {
+	if ((flags & RFPROC) == 0) { //wyc: FALSE
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;
@@ -212,7 +212,7 @@ cpu_fork(
 
 	/* Ensure that td1's pcb is up to date. */
 	if (td1 == curthread)
-		td1->td_pcb->pcb_gs = rgs();
+		td1->td_pcb->pcb_gs = rgs(); //wyc: gs points to TLS
 #ifdef DEV_NPX
 	critical_enter();
 	if (PCPU_GET(fpcurthread) == td1)
@@ -272,10 +272,10 @@ cpu_fork(
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline() arg */
+	pcb2->pcb_esi = (int)fork_return;	/* function *//* fork_trampoline() arg */
 	pcb2->pcb_ebp = 0;
-	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* fork_trampoline() arg */
-	pcb2->pcb_ebx = (int)td2;		/* fork_trampoline() arg */
+	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* trapframe pointer *//* fork_trampoline() arg */
+	pcb2->pcb_ebx = (int)td2;		/* arg1 *//* fork_trampoline() arg */
 	pcb2->pcb_eip = (int)fork_trampoline;
 	pcb2->pcb_psl = PSL_KERNEL;		/* ints disabled */
 	/*-

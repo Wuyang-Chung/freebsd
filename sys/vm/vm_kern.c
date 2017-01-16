@@ -88,8 +88,8 @@ __FBSDID("$FreeBSD$");
 #include <vm/uma.h>
 
 vm_map_t kernel_map;
-vm_map_t exec_map;
-vm_map_t pipe_map;
+vm_map_t exec_map; //wyc: pageable submap of kernel_map
+vm_map_t pipe_map; //wyc: pageable submap of kernel_map
 
 const void *zero_region;
 CTASSERT((ZERO_REGION_SIZE & PAGE_MASK) == 0);

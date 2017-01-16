@@ -187,6 +187,7 @@ kern_thr_new(struct thread *td, struct thr_param *param)
 int
 thread_create(struct thread *td, struct rtprio *rtp,
     int (*initialize_thread)(struct thread *, void *), void *thunk)
+    __attribute__((optnone)) //wyc
 {
 	struct thread *newtd;
 	struct proc *p;
@@ -237,7 +238,12 @@ thread_create(struct thread *td, struct rtprio *rtp,
 	newtd->td_rb_list = newtd->td_rbp_list = newtd->td_rb_inact = 0;
 	thread_cow_get(newtd, td);
 
+#if defined(WYC)
+	error = thr_new_initthr(newtd, thunk);    //wyc: when called by kern_thr_new
+	error = thr_create_initthr(newtd, thunk); //wyc: when called by sys_thr_create
+#else
 	error = initialize_thread(newtd, thunk);
+#endif
 	if (error != 0) {
 		thread_cow_free(newtd);
 		thread_free(newtd);

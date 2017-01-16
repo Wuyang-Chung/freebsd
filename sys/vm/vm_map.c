@@ -280,7 +280,7 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 	//wyc: 'pinit' is always NULL in i386.
 	//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 	if (pinit != NULL)
-		panic("vmspace_alloc: pinit not NULL");	
+		panic("%s: pinit not NULL", __func__);	
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
 	if (pinit == NULL)
 		pinit = &pmap_pinit;

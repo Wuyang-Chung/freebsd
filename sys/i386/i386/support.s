@@ -496,18 +496,20 @@ fusufault:
 /*
  * Store a 32-bit word, a 16-bit word, or an 8-bit byte to user memory.
  * All these functions are MPSAFE.
+
+wyc: int suword32(volatile void *base, int32_t word);
  */
 
 ALTENTRY(suword32)
 ENTRY(suword)
 	movl	PCPU(CURPCB),%ecx
 	movl	$fusufault,PCB_ONFAULT(%ecx)
-	movl	4(%esp),%edx
+	movl	4(%esp),%edx	/*wyc: base */
 
 	cmpl	$VM_MAXUSER_ADDRESS-4,%edx	/* verify address validity */
 	ja	fusufault
 
-	movl	8(%esp),%eax
+	movl	8(%esp),%eax	/*wyc: word */
 	movl	%eax,(%edx)
 	xorl	%eax,%eax
 	movl	PCPU(CURPCB),%ecx

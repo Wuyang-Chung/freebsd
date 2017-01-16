@@ -801,7 +801,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	flags = fr->fr_flags;
 	pages = fr->fr_pages;
 
-	if ((flags & RFSTOPPED) != 0)
+	if ((flags & RFSTOPPED) != 0) //wyc: FALSE
 		MPASS(fr->fr_procp != NULL && fr->fr_pidp == NULL);
 	else
 		MPASS(fr->fr_procp == NULL);
@@ -822,7 +822,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	if ((flags & RFTSIGZMB) != 0 && (u_int)RFTSIGNUM(flags) > _SIG_MAXSIG)
 		return (EINVAL);
 
-	if ((flags & RFPROCDESC) != 0) {
+	if ((flags & RFPROCDESC) != 0) { //wyc: FALSE
 		/* Can't not create a process yet get a process descriptor. */
 		if ((flags & RFPROC) == 0)
 			return (EINVAL);
@@ -842,7 +842,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * Here we don't create a new process, but we divorce
 	 * certain parts of a process from itself.
 	 */
-	if ((flags & RFPROC) == 0) {
+	if ((flags & RFPROC) == 0) { //wyc: FALSE
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)
@@ -884,7 +884,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * will abandon it if something goes wrong. We don't finit() until
 	 * later.
 	 */
-	if (flags & RFPROCDESC) {
+	if (flags & RFPROCDESC) { //wyc: FALSE
 		error = procdesc_falloc(td, &fp_procdesc, fr->fr_pd_fd,
 		    fr->fr_pd_flags, fr->fr_pd_fcaps);
 		if (error != 0)

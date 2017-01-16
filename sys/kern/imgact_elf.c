@@ -1119,6 +1119,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 
 int
 __elfN(freebsd_fixup)(register_t **stack_base, struct image_params *imgp)
+__attribute__((optnone)) //wyc
 {
 	Elf_Auxargs *args = (Elf_Auxargs *)imgp->auxargs;
 	Elf_Addr *base;
