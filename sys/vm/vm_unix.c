@@ -60,7 +60,7 @@ __FBSDID("$FreeBSD$");
 #include <vm/pmap.h>
 #include <vm/vm_map.h>
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct obreak_args {
 	char *nsize;
 };
@@ -234,7 +234,7 @@ done:
 	return (error);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct ovadvise_args {
 	int anom;
 };

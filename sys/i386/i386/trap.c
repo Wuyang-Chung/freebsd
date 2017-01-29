@@ -785,10 +785,10 @@ out:
 }
 
 static int
-trap_pfault(frame, usermode, eva)
-	struct trapframe *frame;
-	int usermode;
-	vm_offset_t eva;
+trap_pfault(
+	struct trapframe *frame,
+	int usermode,
+	vm_offset_t eva)
 {
 	vm_offset_t va;
 	vm_map_t map;
@@ -919,9 +919,9 @@ nogo:
 }
 
 static void
-trap_fatal(frame, eva)
-	struct trapframe *frame;
-	vm_offset_t eva;
+trap_fatal(
+	struct trapframe *frame,
+	vm_offset_t eva)
 {
 	int code, ss, esp;
 	u_int type;
@@ -1085,7 +1085,7 @@ cpu_fetch_syscall_args(struct thread *td, struct syscall_args *sa)
 
 	if (error == 0) {
 		td->td_retval[0] = 0;
-		td->td_retval[1] = frame->tf_edx;
+		td->td_retval[1] = frame->tf_edx; //wyc: some system calls return 2 values
 	}
 		
 	return (error);

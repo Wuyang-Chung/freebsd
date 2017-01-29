@@ -97,10 +97,10 @@ union vm_map_object {
  *	Also included is control information for virtual copy operations.
  */
 struct vm_map_entry {
-	struct vm_map_entry *prev;	/* previous entry */
-	struct vm_map_entry *next;	/* next entry */
-	struct vm_map_entry *left;	/* left child in binary search tree */
-	struct vm_map_entry *right;	/* right child in binary search tree */
+	struct vm_map_entry *prev;	/* previous entry wyc: circular list */
+	struct vm_map_entry *next;	/* next entry wyc: circular list */
+	struct vm_map_entry *left;	/* left child in binary search tree wyc: splay tree */
+	struct vm_map_entry *right;	/* right child in binary search tree wyc: splay tree */
 	vm_offset_t start;		/* start address */
 	vm_offset_t end;		/* end address */
 	vm_offset_t avail_ssize;	/* amt can grow if this is a stack */

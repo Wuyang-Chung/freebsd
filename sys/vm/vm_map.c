@@ -1402,12 +1402,12 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	if (start < map->min_offset)
 		start = map->min_offset;
 	if (start + length > map->max_offset || start + length < start)
-		return (1);
+		return (1); //wyc: not successful
 
 	/* Empty tree means wide open address space. */
 	if (map->root == NULL) {
 		*addr = start;
-		return (0);
+		return (0); //wyc: successful
 	}
 
 	/*

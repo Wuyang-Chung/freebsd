@@ -917,13 +917,13 @@ struct open_args {
 };
 #endif
 int
-sys_open(td, uap)
-	struct thread *td;
+sys_open(
+	struct thread *td,
 	register struct open_args /* {
 		char *path;
 		int flags;
 		int mode;
-	} */ *uap;
+	} */ *uap)
 {
 
 	return (kern_openat(td, AT_FDCWD, uap->path, UIO_USERSPACE,

@@ -71,7 +71,7 @@ syscall_thread_drain(struct sysent *se)
 		KASSERT((oldcnt & SY_THR_STATIC) == 0,
 		    ("drain on static syscall"));
 		cnt = oldcnt | SY_THR_DRAINING;
-	} while (atomic_cmpset_acq_32(&se->sy_thrcnt, oldcnt, cnt) == 0);
+	} while (atomic_cmpset_acq_32(&se->sy_thrcnt, oldcnt, cnt) == 0); //wyc: 0 == failure
 	while (atomic_cmpset_32(&se->sy_thrcnt, SY_THR_DRAINING,
 	    SY_THR_ABSENT) == 0)
 		pause("scdrn", hz/2);
@@ -89,7 +89,7 @@ syscall_thread_enter(struct thread *td, struct sysent *se)
 		if ((oldcnt & (SY_THR_DRAINING | SY_THR_ABSENT)) != 0)
 			return (ENOSYS);
 		cnt = oldcnt + SY_THR_INCR;
-	} while (atomic_cmpset_acq_32(&se->sy_thrcnt, oldcnt, cnt) == 0);
+	} while (atomic_cmpset_acq_32(&se->sy_thrcnt, oldcnt, cnt) == 0); //wyc: 0 == failure
 	return (0);
 }
 
@@ -103,7 +103,7 @@ syscall_thread_exit(struct thread *td, struct sysent *se)
 		if ((oldcnt & SY_THR_STATIC) != 0)
 			return;
 		cnt = oldcnt - SY_THR_INCR;
-	} while (atomic_cmpset_rel_32(&se->sy_thrcnt, oldcnt, cnt) == 0);
+	} while (atomic_cmpset_rel_32(&se->sy_thrcnt, oldcnt, cnt) == 0); //wyc: 0 == failure
 }
 
 int

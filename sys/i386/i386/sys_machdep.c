@@ -90,7 +90,7 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_gran = 1;
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct sysarch_args {
 	int op;
 	char *parms;

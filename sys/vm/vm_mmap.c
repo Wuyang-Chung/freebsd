@@ -100,7 +100,7 @@ SYSCTL_INT(_vm, OID_AUTO, old_mlock, CTLFLAG_RWTUN, &old_mlock, 0,
 #define	MAP_32BIT_MAX_ADDR	((vm_offset_t)1 << 31)
 #endif
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct sbrk_args {
 	int incr;
 };
@@ -119,7 +119,7 @@ sys_sbrk(
 	return (EOPNOTSUPP);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct sstk_args {
 	int incr;
 };
@@ -170,15 +170,15 @@ ogetpagesize(td, uap)
  * there would be no cache coherency between a descriptor and a VM mapping
  * both to the same character device.
  */
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct mmap_args {
 	void *addr;
-	size_t len;
+	size_t len; //wyc: must be multiple of pages
 	int prot;
 	int flags;
 	int fd;
 	long pad;
-	off_t pos;
+	off_t pos; //wyc: must align on page boundary
 };
 #endif
 
@@ -451,7 +451,7 @@ ommap(td, uap)
 #endif				/* COMPAT_43 */
 
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct msync_args {
 	void *addr;
 	size_t len;
@@ -507,7 +507,7 @@ sys_msync(
 	}
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct munmap_args {
 	void *addr;
 	size_t len;
@@ -582,7 +582,7 @@ sys_munmap(
 	return (0);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct mprotect_args {
 	const void *addr;
 	size_t len;
@@ -624,7 +624,7 @@ sys_mprotect(
 	return (EINVAL);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct minherit_args {
 	void *addr;
 	size_t len;
@@ -664,7 +664,7 @@ sys_minherit(
 	return (EINVAL);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct madvise_args {
 	void *addr;
 	size_t len;
@@ -722,7 +722,7 @@ sys_madvise(
 	return (0);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct mincore_args {
 	const void *addr;
 	size_t len;
@@ -983,7 +983,7 @@ done2:
 	return (error);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct mlock_args {
 	const void *addr;
 	size_t len;
@@ -1055,7 +1055,7 @@ vm_mlock(struct proc *proc, struct ucred *cred, const void *addr0, size_t len)
 	return (error == KERN_SUCCESS ? 0 : ENOMEM);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct mlockall_args {
 	int	how;
 };
@@ -1132,7 +1132,7 @@ sys_mlockall(
 	return (error);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct munlockall_args {
 	register_t dummy;
 };
@@ -1173,7 +1173,7 @@ sys_munlockall(
 	return (error);
 }
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct munlock_args {
 	const void *addr;
 	size_t len;
@@ -1241,12 +1241,12 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 		locktype = LK_EXCLUSIVE;
 	else
 		locktype = LK_SHARED;
-	if ((error = vget(vp, locktype, td)) != 0)
+	if ((error = vget(vp, locktype, td)) != 0) //wyc: get reference on the vnode
 		return (error);
 	foff = *foffp;
 	flags = *flagsp;
 	obj = vp->v_object;
-	if (vp->v_type == VREG) {
+	if (vp->v_type == VREG) { //wyc: it is a regular file
 		/*
 		 * Get the proper underlying object
 		 */
@@ -1296,7 +1296,7 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 	 * Adjust object size to be the size of actual file.
 	 */
 	objsize = round_page(va.va_size);
-	if (va.va_nlink == 0)
+	if (va.va_nlink == 0) //wyc: the file has been unlinked. Don't need long-term persistence
 		flags |= MAP_NOSYNC;
 	if (obj->type == OBJT_VNODE) {
 		obj = vm_pager_allocate(OBJT_VNODE, vp, objsize, prot, foff,
@@ -1325,7 +1325,7 @@ done:
 		*writecounted = FALSE;
 		vnode_pager_update_writecount(obj, objsize, 0);
 	}
-	vput(vp);
+	vput(vp); //wyc: unreference the vnode
 	return (error);
 }
 
@@ -1520,12 +1520,12 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		return (EINVAL);
 
 	if ((flags & MAP_FIXED) == 0) {
-		fitit = TRUE;
+		fitit = TRUE; //wyc: find space for it.
 		*addr = round_page(*addr);
 	} else {
 		if (*addr != trunc_page(*addr))
 			return (EINVAL);
-		fitit = FALSE;
+		fitit = FALSE; //wyc: it has to go in a fixed address
 	}
 
 	if (flags & MAP_ANON) {
@@ -1569,7 +1569,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		    flags & MAP_32BIT ? MAP_32BIT_MAX_ADDR :
 #endif
 		    0, findspace, prot, maxprot, docow);
-	} else {
+	} else { //wyc: put it at this (*addr) location
 		rv = vm_map_fixed(map, object, foff, *addr, size,
 		    prot, maxprot, docow);
 	}

@@ -439,7 +439,7 @@ cpu_set_syscall_retval(struct thread *td, int error)
 	case 0:
 		td->td_frame->tf_eax = td->td_retval[0];
 		td->td_frame->tf_edx = td->td_retval[1];
-		td->td_frame->tf_eflags &= ~PSL_C;
+		td->td_frame->tf_eflags &= ~PSL_C; //wyc: clear the carry bit in the flag
 		break;
 
 	case ERESTART:
@@ -455,7 +455,7 @@ cpu_set_syscall_retval(struct thread *td, int error)
 
 	default:
 		td->td_frame->tf_eax = SV_ABI_ERRNO(td->td_proc, error);
-		td->td_frame->tf_eflags |= PSL_C;
+		td->td_frame->tf_eflags |= PSL_C; //wyc: set the carry bit in the flag
 		break;
 	}
 }

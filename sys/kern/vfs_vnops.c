@@ -220,7 +220,7 @@ restart:
 		bwillwrite();
 		if ((error = namei(ndp)) != 0)
 			return (error);
-		if (ndp->ni_vp == NULL) {
+		if (ndp->ni_vp == NULL) { //wyc: the last name component does not exist
 			VATTR_NULL(vap);
 			vap->va_type = VREG;
 			vap->va_mode = cmode;

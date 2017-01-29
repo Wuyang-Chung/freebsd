@@ -71,7 +71,7 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 			td->td_dbgflags |= TDB_SCE;
 		PROC_UNLOCK(p);
 	}
-	error = (p->p_sysent->sv_fetch_syscall_args)(td, sa);
+	error = (p->p_sysent->sv_fetch_syscall_args)(td, sa); //wyc: called cpu_fetch_syscall_args()
 #ifdef KTRACE
 	if (KTRPOINT(td, KTR_SYSCALL))
 		ktrsyscall(sa->code, sa->narg, sa->args);
@@ -157,7 +157,7 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 		td->td_dbgflags &= ~TDB_SCE;
 		PROC_UNLOCK(p);
 	}
-	(p->p_sysent->sv_set_syscall_retval)(td, error);
+	(p->p_sysent->sv_set_syscall_retval)(td, error); //wyc: cpu_set_syscall_retval
 	return (error);
 }
 

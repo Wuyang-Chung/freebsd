@@ -62,7 +62,7 @@ struct sysent {			/* system call table */
 	u_int32_t sy_entry;	/* DTrace entry ID for systrace. */
 	u_int32_t sy_return;	/* DTrace return ID for systrace. */
 	u_int32_t sy_flags;	/* General flags for system calls. */
-	u_int32_t sy_thrcnt;
+	u_int32_t sy_thrcnt; //wcy: thread flag. see SY_THR_FLAGMASK
 };
 
 /*
@@ -89,7 +89,7 @@ struct vnode;
 
 struct sysentvec {
 	int		sv_size;	/* number of entries */
-	struct sysent	*sv_table;	/* pointer to sysent */
+	struct sysent	*sv_table;	/* pointer to sysent */ //wyc: ==sysent (global variable)
 	u_int		sv_mask;	/* optional mask to index */
 	int		sv_errsize;	/* size of errno translation table */
 	int 		*sv_errtbl;	/* errno translation table */
@@ -112,7 +112,7 @@ struct sysentvec {
 	vm_offset_t	sv_usrstack;	/* USRSTACK */
 	vm_offset_t	sv_psstrings;	/* PS_STRINGS */
 	int		sv_stackprot;	/* vm protection for stack */
-	register_t	*(*sv_copyout_strings)(struct image_params *);
+	register_t	*(*sv_copyout_strings)(struct image_params *); //wyc: ==exec_copyout_strings
 	void		(*sv_setregs)(struct thread *, struct image_params *,
 			    u_long);
 	void		(*sv_fixlimit)(struct rlimit *, int);

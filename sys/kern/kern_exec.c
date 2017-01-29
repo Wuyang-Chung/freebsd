@@ -194,7 +194,7 @@ sysctl_kern_stackprot(SYSCTL_HANDLER_ARGS)
  */
 static const struct execsw **_execsw;
 
-#if 0//ndef _SYS_SYSPROTO_H_	//wyc: already defined in sys/sysproto.h
+#ifndef _SYS_SYSPROTO_H_
 struct execve_args {
 	char    *fname; 
 	char    **argv;
@@ -429,7 +429,7 @@ do_execve(
 
 interpret:
 	if (args->fname != NULL) {
-#ifdef CAPABILITY_MODE
+#ifdef CAPABILITY_MODE //wyc: Capsicum
 		/*
 		 * While capability mode can't reach this point via direct
 		 * path arguments to execve(), we also don't allow
@@ -689,7 +689,7 @@ interpret:
 	 * let it do the stack setup.
 	 * Else stuff argument count as first item on stack
 	 */
-	if (p->p_sysent->sv_fixup != NULL)
+	if (p->p_sysent->sv_fixup != NULL) //wyc: ==elf32_freebsd_fixup()
 #if defined(WYC)
 		elf32_freebsd_fixup(&stack_base, imgp);
 #else

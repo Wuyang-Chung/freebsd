@@ -111,13 +111,13 @@ struct vm_object {
 	vm_memattr_t memattr;		/* default memory attribute for pages */
 	objtype_t type;			/* type of pager */
 	u_short flags;			/* see below */
-	u_short pg_color;		/* (c) color of first page in obj */
+	u_short pg_color;		/* (c) color of first page in obj wyc: superpage */
 	u_int paging_in_progress;	/* Paging (in or out) so don't collapse or destroy */
 	int resident_page_count;	/* number of resident pages */
 	struct vm_object *backing_object; /* object that I'm a shadow of */
 	vm_ooffset_t backing_object_offset;/* Offset in backing object */
 	TAILQ_ENTRY(vm_object) pager_object_list; /* list of all objects of this pager type */
-	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations */
+	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations wyc: superpage */
 	struct vm_radix cache;		/* (o + f) root of the cache page radix trie */
 	void *handle;
 	union {
@@ -173,7 +173,7 @@ struct vm_object {
 		} swp;
 	} un_pager;
 	struct ucred *cred;
-	vm_ooffset_t charge;
+	vm_ooffset_t charge; //wyc: how much vm is charged to this object
 	void *umtx_data;
 };
 
