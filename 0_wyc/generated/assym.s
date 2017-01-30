@@ -1,4 +1,3 @@
-#if !defined(WYC)	//wyc: don't let SI parse the code below
 #define	BC32SEL	0x68
 #define	BI_ENDCOMMON	0xc
 #define	BI_ESYMTAB	0x44
@@ -120,4 +119,3 @@
 #define	V_INTR	0xc
 #define	V_SYSCALL	0x8
 #define	V_TRAP	0x4
-#endif
