@@ -140,7 +140,7 @@ struct vop_vector ffs_fifoops1 = {
 };
 
 /* Global vfs data structures for ufs. */
-struct vop_vector ffs_vnodeops2 = {
+struct vop_vector ffs_vnodeops2 = { //wyc: version 2 of the ffs
 	.vop_default =		&ufs_vnodeops,
 	.vop_fsync =		ffs_fsync,
 	.vop_getpages =		vnode_pager_local_getpages,

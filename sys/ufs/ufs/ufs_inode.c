@@ -65,11 +65,11 @@ __FBSDID("$FreeBSD$");
  * Last reference to an inode.  If necessary, write or delete it.
  */
 int
-ufs_inactive(ap)
+ufs_inactive(
 	struct vop_inactive_args /* {
 		struct vnode *a_vp;
 		struct thread *a_td;
-	} */ *ap;
+	} */ *ap)
 {
 	struct vnode *vp = ap->a_vp;
 	struct inode *ip = VTOI(vp);

@@ -312,13 +312,13 @@ ufs_close(ap)
 }
 
 static int
-ufs_accessx(ap)
+ufs_accessx(
 	struct vop_accessx_args /* {
 		struct vnode *a_vp;
 		accmode_t a_accmode;
 		struct ucred *a_cred;
 		struct thread *a_td;
-	} */ *ap;
+	} */ *ap)
 {
 	struct vnode *vp = ap->a_vp;
 	struct inode *ip = VTOI(vp);
@@ -2581,7 +2581,7 @@ ufs_makeinode(mode, dvp, vpp, cnp)
 		return (error);
 	ip = VTOI(tvp);
 	ip->i_gid = pdir->i_gid;
-	DIP_SET(ip, i_gid, pdir->i_gid);
+	DIP_SET(ip, i_gid, pdir->i_gid); //wyc: DIP==Disk Inode Pointer
 #ifdef SUIDDIR
 	{
 #ifdef QUOTA

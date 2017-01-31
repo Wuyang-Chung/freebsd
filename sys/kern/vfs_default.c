@@ -99,7 +99,7 @@ static int vop_stdgetpages_async(struct vop_getpages_async_args *ap);
 
 struct vop_vector default_vnodeops = {
 	.vop_default =		NULL,
-	.vop_bypass =		VOP_EOPNOTSUPP,
+	.vop_bypass =		VOP_EOPNOTSUPP, //wyc: this field is used by unionfs
 
 	.vop_access =		vop_stdaccess,
 	.vop_accessx =		vop_stdaccessx,

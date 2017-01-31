@@ -1074,14 +1074,14 @@ vfs_cache_lookup(struct vop_lookup_args *ap)
 	    (cnp->cn_nameiop == DELETE || cnp->cn_nameiop == RENAME))
 		return (EROFS);
 
-	error = VOP_ACCESS(dvp, VEXEC, cred, td);
+	error = VOP_ACCESS(dvp, VEXEC, cred, td); //wyc: vop_stdaccess
 	if (error)
 		return (error);
 
 	error = cache_lookup(dvp, vpp, cnp, NULL, NULL);
-	if (error == 0)
-		return (VOP_CACHEDLOOKUP(dvp, vpp, cnp));
-	if (error == -1)
+	if (error == 0) //wyc: cache miss
+		return (VOP_CACHEDLOOKUP(dvp, vpp, cnp)); //wyc: ufs_lookup()
+	if (error == -1) //wyc: cache hit
 		return (0);
 	return (error);
 }

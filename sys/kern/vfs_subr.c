@@ -2520,7 +2520,7 @@ vget(struct vnode *vp, int flags, struct thread *td)
 	if ((flags & LK_VNHELD) == 0)
 		_vhold(vp, (flags & LK_INTERLOCK) != 0);
 
-	if ((error = vn_lock(vp, flags)) != 0) {
+	if ((error = vn_lock(vp, flags)) != 0) { //wyc: vp marked doomed so the lock failed
 		vdrop(vp);
 		CTR2(KTR_VFS, "%s: impossible to lock vnode %p", __func__,
 		    vp);
@@ -2922,7 +2922,7 @@ vinactive(struct vnode *vp, struct thread *td)
 		vm_object_page_clean(obj, 0, 0, OBJPC_NOSYNC);
 		VM_OBJECT_WUNLOCK(obj);
 	}
-	VOP_INACTIVE(vp, td);
+	VOP_INACTIVE(vp, td); //wyc: ufs_inactive()
 	VI_LOCK(vp);
 	VNASSERT(vp->v_iflag & VI_DOINGINACT, vp,
 	    ("vinactive: lost VI_DOINGINACT"));
