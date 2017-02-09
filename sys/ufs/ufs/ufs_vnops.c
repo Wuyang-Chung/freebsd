@@ -2283,11 +2283,11 @@ ufs_readlink(ap)
  * deadlock on memory.  See ufs_bmap() for details.
  */
 static int
-ufs_strategy(ap)
+ufs_strategy(
 	struct vop_strategy_args /* {
 		struct vnode *a_vp;
 		struct buf *a_bp;
-	} */ *ap;
+	} */ *ap)
 {
 	struct buf *bp = ap->a_bp;
 	struct vnode *vp = ap->a_vp;
@@ -2297,7 +2297,7 @@ ufs_strategy(ap)
 	int error;
 
 	ip = VTOI(vp);
-	if (bp->b_blkno == bp->b_lblkno) {
+	if (bp->b_blkno == bp->b_lblkno) { //wyc: ufs_bmaparray has never been done
 		error = ufs_bmaparray(vp, bp->b_lblkno, &blkno, bp, NULL, NULL);
 		bp->b_blkno = blkno;
 		if (error) {
@@ -2306,7 +2306,7 @@ ufs_strategy(ap)
 			bufdone(bp);
 			return (0);
 		}
-		if ((long)bp->b_blkno == -1)
+		if ((long)bp->b_blkno == -1) //wyc: a hole in the file
 			vfs_bio_clrbuf(bp);
 	}
 	if ((long)bp->b_blkno == -1) {
@@ -2315,7 +2315,7 @@ ufs_strategy(ap)
 	}
 	bp->b_iooffset = dbtob(bp->b_blkno);
 	bo = ip->i_umbufobj;
-	BO_STRATEGY(bo, bp);
+	BO_STRATEGY(bo, bp); //wyc: ffs_geom_strategy()
 	return (0);
 }
 

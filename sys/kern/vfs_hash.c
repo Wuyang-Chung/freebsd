@@ -160,7 +160,7 @@ vfs_hash_insert(struct vnode *vp, u_int hash, int flags, struct thread *td,
 				continue;
 			if (fn != NULL && fn(vp2, arg))
 				continue;
-			vhold(vp2);
+			vhold(vp2); //wyc: vnode already in the hash queue
 			rw_wunlock(&vfs_hash_lock);
 			error = vget(vp2, flags | LK_VNHELD, td);
 			if (error == ENOENT && (flags & LK_NOWAIT) == 0)
@@ -168,9 +168,9 @@ vfs_hash_insert(struct vnode *vp, u_int hash, int flags, struct thread *td,
 			rw_wlock(&vfs_hash_lock);
 			LIST_INSERT_HEAD(&vfs_hash_side, vp, v_hashlist);
 			rw_wunlock(&vfs_hash_lock);
-			vput(vp);
+			vput(vp); //wyc: free the one passed to this function
 			if (!error)
-				*vpp = vp2;
+				*vpp = vp2; //wyc: return the one already in hash queue
 			return (error);
 		}
 		if (vp2 == NULL)

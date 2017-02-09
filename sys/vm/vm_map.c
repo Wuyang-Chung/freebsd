@@ -3038,7 +3038,7 @@ vm_map_delete(vm_map_t map, vm_offset_t start, vm_offset_t end)
 			last_timestamp = map->timestamp;
 			(void) vm_map_unlock_and_wait(map, 0);
 			vm_map_lock(map);
-			if (last_timestamp + 1 != map->timestamp) {
+			if (last_timestamp + 1 != map->timestamp) { //wyc: i.e. generation
 				/*
 				 * Look again for the entry because the map was
 				 * modified while it was unlocked.
@@ -3348,7 +3348,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	//old_entry = old_map->header.next;	//wyc: change while to for loop
 
 	for (old_entry = old_map->header.next;
-	     old_entry != &old_map->header;
+	     old_entry != &old_map->header; //wyc: it's a circular list
 	     old_entry = old_entry->next) {
 		if (old_entry->eflags & MAP_ENTRY_IS_SUB_MAP)
 			panic("vm_map_fork: encountered a submap");
@@ -3443,7 +3443,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			 */
 			vm_map_entry_link(new_map, new_map->header.prev,
 			    new_entry);
-			vmspace_map_entry_forked(vm1, vm2, new_entry);
+			vmspace_map_entry_forked(vm1, vm2, new_entry); //wyc: for accounting
 
 			/*
 			 * Update the physical map
@@ -3455,7 +3455,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			    old_entry->start);
 			break;
 
-		case VM_INHERIT_COPY:
+		case VM_INHERIT_COPY: //wyc: COW
 			/*
 			 * Clone the entry and link into the map.
 			 */

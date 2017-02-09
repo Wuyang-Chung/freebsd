@@ -89,7 +89,7 @@ __FBSDID("$FreeBSD$");
 #ifdef HWPMC_HOOKS
 #include <sys/pmckern.h>
 #endif
-
+#if !defined(WYC)
 static fo_rdwr_t	vn_read;
 static fo_rdwr_t	vn_write;
 static fo_rdwr_t	vn_io_fault;
@@ -100,7 +100,7 @@ static fo_kqfilter_t	vn_kqfilter;
 static fo_stat_t	vn_statfile;
 static fo_close_t	vn_closefile;
 static fo_mmap_t	vn_mmap;
-
+#endif
 struct 	fileops vnops = {
 	.fo_read = vn_io_fault,
 	.fo_write = vn_io_fault,
@@ -824,12 +824,12 @@ vn_read(fp, uio, active_cred, flags, td)
  * File table vnode write routine.
  */
 static int
-vn_write(fp, uio, active_cred, flags, td)
-	struct file *fp;
-	struct uio *uio;
-	struct ucred *active_cred;
-	int flags;
-	struct thread *td;
+vn_write(
+	struct file *fp,
+	struct uio *uio,
+	struct ucred *active_cred,
+	int flags,
+	struct thread *td)
 {
 	struct vnode *vp;
 	struct mount *mp;
@@ -884,7 +884,7 @@ vn_write(fp, uio, active_cred, flags, td)
 	error = mac_vnode_check_write(active_cred, fp->f_cred, vp);
 	if (error == 0)
 #endif
-		error = VOP_WRITE(vp, uio, ioflag, fp->f_cred);
+		error = VOP_WRITE(vp, uio, ioflag, fp->f_cred); //wyc: ffs_write()
 	fp->f_nextoff = uio->uio_offset;
 	VOP_UNLOCK(vp, 0);
 	if (vp->v_type != VCHR)
@@ -896,7 +896,7 @@ vn_write(fp, uio, active_cred, flags, td)
 		 * for the backing file after a POSIX_FADV_NOREUSE
 		 * write(2).
 		 */
-		error = VOP_ADVISE(vp, orig_offset, uio->uio_offset - 1,
+		error = VOP_ADVISE(vp, orig_offset, uio->uio_offset - 1, //wyc: vop_stdadvise()
 		    POSIX_FADV_DONTNEED);
 unlock:
 	return (error);
@@ -2450,7 +2450,7 @@ vn_mmap(struct file *fp, vm_map_t map, vm_offset_t *addr, vm_size_t size,
 
 	writecounted = FALSE;
 	error = vm_mmap_vnode(td, size, prot, &maxprot, &flags, vp,
-	    &foff, &object, &writecounted);
+	    &foff, &object, &writecounted); //wyc: vp -> object
 	if (error != 0)
 		return (error);
 	error = vm_mmap_object(map, addr, size, prot, maxprot, flags, object,

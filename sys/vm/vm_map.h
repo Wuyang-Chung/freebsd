@@ -182,7 +182,7 @@ struct vm_map {
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
 	vm_size_t size;			/* virtual size */
-	u_int timestamp;		/* Version number */
+	u_int timestamp;		/* Version number. wyc: generation number */
 	u_char needs_wakeup;
 	u_char system_map;		/* (c) Am I a system map? */
 	vm_flags_t flags;		/* flags for this vm_map */

@@ -249,7 +249,7 @@ cpu_fork(
 
 	td2->td_frame->tf_eax = 0;		/* Child returns zero */
 	td2->td_frame->tf_eflags &= ~PSL_C;	/* success */
-	td2->td_frame->tf_edx = 1;
+	td2->td_frame->tf_edx = 1; //wyc: in parent process it is assigned to 0. Why?
 
 	/*
 	 * If the parent process has the trap bit set (i.e. a debugger had
@@ -272,11 +272,11 @@ cpu_fork(
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;	/* function *//* fork_trampoline() arg */
+	pcb2->pcb_esi = (int)fork_return;	/* fork_exit(callout,,)*/
 	pcb2->pcb_ebp = 0;
-	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* trapframe pointer *//* fork_trampoline() arg */
-	pcb2->pcb_ebx = (int)td2;		/* arg1 *//* fork_trampoline() arg */
-	pcb2->pcb_eip = (int)fork_trampoline;
+	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* fork_exit(,,frame)*/
+	pcb2->pcb_ebx = (int)td2;		/* fork_exit(,arg,)*/
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc: the place where the child will start exection
 	pcb2->pcb_psl = PSL_KERNEL;		/* ints disabled */
 	/*-
 	 * pcb2->pcb_dr*:	cloned above.

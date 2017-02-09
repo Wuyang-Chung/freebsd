@@ -1158,7 +1158,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 		mtx_unlock_spin(&dt_lock);
   
 	bzero((char *)regs, sizeof(struct trapframe));
-	regs->tf_eip = imgp->entry_addr;
+	regs->tf_eip = imgp->entry_addr; //wyc: start address
 	regs->tf_esp = stack;
 	regs->tf_eflags = PSL_USER | (regs->tf_eflags & PSL_T);
 	regs->tf_ss = _udatasel;

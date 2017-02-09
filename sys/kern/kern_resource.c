@@ -1367,6 +1367,7 @@ ui_racct_foreach(void (*callback)(struct racct *racct,
 }
 #endif
 
+//wyc: why not just pass uid instead of uip to this function
 static inline int
 chglimit(struct uidinfo *uip, long *limit, int diff, rlim_t max, const char *name)
 {

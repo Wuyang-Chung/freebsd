@@ -213,9 +213,10 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	if (error != 0)
 		return (error);
 	error = exec_copyin_args(&args, uap->fname, UIO_USERSPACE,
-	    uap->argv, uap->envv);
+	    uap->argv, uap->envv); //wyc: the size of args is 1KiB+256KiB
 	if (error == 0)
 		error = kern_execve(td, &args, NULL);
+	//wyc: will not run to here if kern_execve succeeds
 	post_execve(td, error, oldvmspace);
 	return (error);
 }
@@ -602,6 +603,7 @@ interpret:
 		}
 #if defined(WYC)
 		error = exec_elf32_imgact(imgp); //wyc: the function actually called
+		error = exec_shell_imgact(imgp); //wyc: shell script
 #else
 		error = (*_execsw[i]->ex_imgact)(imgp);
 #endif
@@ -985,7 +987,7 @@ exec_map_first_page(
 		exec_unmap_first_page(imgp);
 
 	object = imgp->vp->v_object;
-	if (object == NULL)
+	if (object == NULL) //wyc: a executable file must have an object.
 		return (EACCES);
 	VM_OBJECT_WLOCK(object);
 #if VM_NRESERVLEVEL > 0
@@ -1111,6 +1113,10 @@ exec_new_vmspace(
 	}
 
 	/* Map a shared page */
+	/*wyc:
+	  a page near the top of your address space which is shared between
+	  user process and the kernel. Such as realtime timer.
+	*/
 #if defined(WYC)
 	obj = shared_page_obj; //wyc: sv->sv_shared_page_obj == shared_page_obj
 #else

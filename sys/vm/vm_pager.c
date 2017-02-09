@@ -230,7 +230,7 @@ vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
 
 	ops = pagertab[type];
 	if (ops)
-		ret = (*ops->pgo_alloc) (handle, size, prot, off, cred);
+		ret = (*ops->pgo_alloc) (handle, size, prot, off, cred); //wyc: vnode_pager_alloc()
 	else
 		ret = NULL;
 	return (ret);
@@ -289,7 +289,7 @@ vm_pager_get_pages(vm_object_t object, vm_page_t *m, int count, int *rbehind,
 	vm_pager_assert_in(object, m, count);
 
 	r = (*pagertab[object->type]->pgo_getpages)(object, m, count, rbehind,
-	    rahead);
+	    rahead); //wyc: vn_pager_getpages()
 	if (r != VM_PAGER_OK)
 		return (r);
 

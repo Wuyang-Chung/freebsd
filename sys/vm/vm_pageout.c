@@ -1601,7 +1601,7 @@ vm_pageout_worker(void *arg)
 			 */
 			if (mtx_sleep(&vm_pageout_wanted,
 			    &vm_page_queue_free_mtx, PDROP | PVM, "psleep",
-			    hz) == 0) {
+			    hz) == 0) { //wyc: hz==1 second
 				PCPU_INC(cnt.v_pdwakeups);
 				domain->vmd_pass = 1;
 			} else

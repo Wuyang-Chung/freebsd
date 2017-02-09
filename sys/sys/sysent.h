@@ -99,8 +99,8 @@ struct sysentvec {
 					/* stack fixup function */
 	void		(*sv_sendsig)(void (*)(int), struct ksiginfo *, struct __sigset *);
 			    		/* send signal */
-	char 		*sv_sigcode;	/* start of sigtramp code */
-	int 		*sv_szsigcode;	/* size of sigtramp code */
+	char 		*sv_sigcode;	/* start of sigtramp code */ //wyc: ==sigcode
+	int 		*sv_szsigcode;	/* size of sigtramp code */ //wyc: ==&szsigcode
 	char		*sv_name;	/* name of binary type */
 	int		(*sv_coredump)(struct thread *, struct vnode *, off_t, int);
 					/* function to dump core, or NULL */
@@ -114,7 +114,7 @@ struct sysentvec {
 	int		sv_stackprot;	/* vm protection for stack */
 	register_t	*(*sv_copyout_strings)(struct image_params *); //wyc: ==exec_copyout_strings
 	void		(*sv_setregs)(struct thread *, struct image_params *,
-			    u_long);
+			    u_long); //wyc: ==exec_setregs
 	void		(*sv_fixlimit)(struct rlimit *, int);
 	u_long		*sv_maxssiz;
 	u_int		sv_flags;

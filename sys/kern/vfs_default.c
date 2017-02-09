@@ -729,14 +729,14 @@ loop2:
 
 /* XXX Needs good comment and more info in the manpage (VOP_GETPAGES(9)). */
 int
-vop_stdgetpages(ap)
+vop_stdgetpages(
 	struct vop_getpages_args /* {
 		struct vnode *a_vp;
 		vm_page_t *a_m;
 		int a_count;
 		int *a_rbehind;
 		int *a_rahead;
-	} */ *ap;
+	} */ *ap)
 {
 
 	return vnode_pager_generic_getpages(ap->a_vp, ap->a_m,

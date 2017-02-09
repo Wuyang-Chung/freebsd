@@ -61,7 +61,7 @@
  * executed, and before any successive bios can be executed.
  */
 #define BIO_ORDERED	0x08
-#define	BIO_UNMAPPED	0x10
+#define	BIO_UNMAPPED	0x10 //wyc: Not mapped in kernel virtual address
 #define	BIO_TRANSIENT_MAPPING	0x20
 #define	BIO_VLIST	0x40
 

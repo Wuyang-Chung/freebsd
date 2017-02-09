@@ -572,10 +572,10 @@ readrest:
 		if (fs.object->type != OBJT_DEFAULT && nera == -1 &&
 		    !P_KILLED(curproc)) {
 			KASSERT(fs.lookup_still_valid, ("map unlocked"));
-			era = fs.entry->read_ahead;
+			era = fs.entry->read_ahead; //wyc: expected read ahead
 			behavior = vm_map_entry_behavior(fs.entry);
 			if (behavior == MAP_ENTRY_BEHAV_RANDOM) {
-				nera = 0;
+				nera = 0; //wyc: new expected read ahead
 			} else if (behavior == MAP_ENTRY_BEHAV_SEQUENTIAL) {
 				nera = VM_FAULT_READ_AHEAD_MAX;
 				if (vaddr == fs.entry->next_read)
@@ -637,6 +637,11 @@ readrest:
 			unlock_map(&fs);
 
 			if (fs.object->type == OBJT_VNODE) {
+				/*wyc:
+				    It is possible to have multiple vnode object
+				    along the road. For example if a regular file
+				    is used as a swap space.
+				*/
 				vp = fs.object->handle;
 				if (vp == fs.vp)
 					goto vnode_locked;
@@ -800,7 +805,7 @@ vnode_locked:
 			fs.object = next_object;
 		}
 	}
-
+	//wyc: page has been found
 	vm_page_assert_xbusied(fs.m);
 
 	/*

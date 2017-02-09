@@ -310,7 +310,7 @@ ast(struct trapframe *framep)
 		PROC_LOCK(p);
 		mtx_lock(&p->p_sigacts->ps_mtx);
 		while ((sig = cursig(td)) != 0)
-			postsig(sig);
+			postsig(sig); //wyc
 		mtx_unlock(&p->p_sigacts->ps_mtx);
 		PROC_UNLOCK(p);
 	}

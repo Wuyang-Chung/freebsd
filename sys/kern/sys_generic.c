@@ -400,9 +400,9 @@ struct write_args {
 };
 #endif
 int
-sys_write(td, uap)
-	struct thread *td;
-	struct write_args *uap;
+sys_write(
+	struct thread *td,
+	struct write_args *uap)
 {
 	struct uio auio;
 	struct iovec aiov;
@@ -562,13 +562,13 @@ kern_pwritev(td, fd, auio, offset)
  * a file using the passed in uio, offset, and flags.
  */
 static int
-dofilewrite(td, fd, fp, auio, offset, flags)
-	struct thread *td;
-	int fd;
-	struct file *fp;
-	struct uio *auio;
-	off_t offset;
-	int flags;
+dofilewrite(
+	struct thread *td,
+	int fd,
+	struct file *fp,
+	struct uio *auio,
+	off_t offset,
+	int flags)
 {
 	ssize_t cnt;
 	int error;

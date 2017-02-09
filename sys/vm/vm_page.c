@@ -1302,7 +1302,7 @@ vm_page_find_least(vm_object_t object, vm_pindex_t pindex)
 
 	VM_OBJECT_ASSERT_LOCKED(object);
 	if ((m = TAILQ_FIRST(&object->memq)) != NULL && m->pindex < pindex)
-		m = vm_radix_lookup_ge(&object->rtree, pindex);
+		m = vm_radix_lookup_ge(&object->rtree, pindex); //wyc: ge: greater or equal
 	return (m);
 }
 

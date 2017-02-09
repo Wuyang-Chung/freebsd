@@ -700,7 +700,7 @@ vm_reserv_alloc_page(vm_object_t object, vm_pindex_t pindex, vm_page_t mpred)
 	KASSERT(!rv->inpartpopq,
 	    ("vm_reserv_alloc_page: reserv %p's inpartpopq is TRUE", rv));
 	for (i = 0; i < NPOPMAP; i++)
-		KASSERT(rv->popmap[i] == 0,
+		KASSERT(rv->popmap[i] == 0, //wyc: popmap: population map
 		    ("vm_reserv_alloc_page: reserv %p's popmap is corrupted",
 		    rv));
 	index = VM_RESERV_INDEX(object, pindex);

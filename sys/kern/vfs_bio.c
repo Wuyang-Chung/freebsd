@@ -326,7 +326,8 @@ static int bdirtywait;
 #define QUEUE_SENTINEL	1024	/* not an queue index, but mark for sentinel */
 
 /* Maximum number of clean buffer queues. */
-#define	CLEAN_QUEUES	16
+#define	CLEAN_QUEUES	16	//wyc: a lot more traffic are on the clean list 
+				//  so the kernel creates multiple clean lists
 
 /* Configured number of clean queues. */
 static int clean_queues;
@@ -1831,7 +1832,7 @@ breadn_flags(struct vnode *vp, daddr_t blkno, int size, daddr_t *rablkno,
 	/*
 	 * Can only return NULL if GB_LOCK_NOWAIT flag is specified.
 	 */
-	*bpp = bp = getblk(vp, blkno, size, 0, 0, flags);
+	*bpp = bp = getblk(vp, blkno, size, 0, 0, flags); //wyc: the returned buffer is locked
 	if (bp == NULL)
 		return (EBUSY);
 
@@ -1852,13 +1853,13 @@ breadn_flags(struct vnode *vp, daddr_t blkno, int size, daddr_t *rablkno,
 		bp->b_ioflags &= ~BIO_ERROR;
 		if (bp->b_rcred == NOCRED && cred != NOCRED)
 			bp->b_rcred = crhold(cred);
-		vfs_busy_pages(bp, 0);
+		vfs_busy_pages(bp, 0); //wyc: call back into the vm system and set the page busy
 		bp->b_iooffset = dbtob(bp->b_blkno);
-		bstrategy(bp);
+		bstrategy(bp); //wyc: initiate the IO. The IO will be sorted.
 		++readwait;
 	}
 
-	breada(vp, rablkno, rabsize, cnt, cred);
+	breada(vp, rablkno, rabsize, cnt, cred); //wyc: do read ahead
 
 	if (readwait) {
 		rv = bufwait(bp);
@@ -3521,7 +3522,7 @@ loop:
 		else if (error)
 			return (NULL);
 		/* If recursed, assume caller knows the rules. */
-		else if (BUF_LOCKRECURSED(bp))
+		else if (BUF_LOCKRECURSED(bp)) //wyc: recursive
 			goto end;
 
 		/*
@@ -3703,7 +3704,8 @@ loop:
 		 * Insert the buffer into the hash, so that it can
 		 * be found by incore.
 		 */
-		bp->b_blkno = bp->b_lblkno = blkno;
+		//wyc: set b_blkno to b_lblkno to indicate that a logical to physical mapping is needed
+		bp->b_blkno = bp->b_lblkno = blkno; //wyc: blkno here is actually logical block no
 		bp->b_offset = offset;
 		bgetvp(vp, bp);
 		BO_UNLOCK(bo);
@@ -4577,7 +4579,7 @@ bufstrategy(struct bufobj *bo, struct buf *bp)
 	KASSERT(vp == bo->bo_private, ("Inconsistent vnode bufstrategy"));
 	KASSERT(vp->v_type != VCHR && vp->v_type != VBLK,
 	    ("Wrong vnode in bufstrategy(bp=%p, vp=%p)", bp, vp));
-	i = VOP_STRATEGY(vp, bp);
+	i = VOP_STRATEGY(vp, bp); //wyc: ufs_strategy()
 	KASSERT(i == 0, ("VOP_STRATEGY failed bp=%p vp=%p", bp, bp->b_vp));
 }
 

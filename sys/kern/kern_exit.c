@@ -221,7 +221,7 @@ exit1(struct thread *td, int rval, int signo)
 	 * P_WEXIT.
 	 */
 	thread_suspend_check(0);
-	while (p->p_flag & P_HADTHREADS) {
+	while (p->p_flag & P_HADTHREADS) { //wyc: there are multiple threads in the process
 		/*
 		 * Kill off the other threads. This requires
 		 * some co-operation from other parts of the kernel
@@ -329,7 +329,7 @@ exit1(struct thread *td, int rval, int signo)
 	 * Event handler could change exit status.
 	 * XXX what if one of these generates an error?
 	 */
-	EVENTHANDLER_INVOKE(process_exit, p);
+	EVENTHANDLER_INVOKE(process_exit, p); //wyc: notify an event to interested kernel module
 
 	/*
 	 * If parent is waiting for us to exit or exec,
@@ -453,7 +453,7 @@ exit1(struct thread *td, int rval, int signo)
 		q->p_sigparent = SIGCHLD;
 
 		if (!(q->p_flag & P_TRACED)) {
-			proc_reparent(q, q->p_reaper);
+			proc_reparent(q, q->p_reaper); //wyc: in most cases it is init process
 		} else {
 			/*
 			 * Traced processes are killed since their existence
@@ -589,7 +589,7 @@ exit1(struct thread *td, int rval, int signo)
 	 * proc lock.
 	 */
 	wakeup(p->p_pptr);
-	cv_broadcast(&p->p_pwait);
+	cv_broadcast(&p->p_pwait); //wyc: wake up the parent who did a vfork
 	sched_exit(p->p_pptr, td);
 	PROC_SLOCK(p);
 	p->p_state = PRS_ZOMBIE;

@@ -622,9 +622,9 @@ pgdelete(pgrp)
 }
 
 static void
-pgadjustjobc(pgrp, entering)
-	struct pgrp *pgrp;
-	int entering;
+pgadjustjobc(
+	struct pgrp *pgrp,
+	int entering)
 {
 
 	PGRP_LOCK(pgrp);

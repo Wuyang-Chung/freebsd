@@ -109,8 +109,8 @@ sys_fork(struct thread *td, struct fork_args *uap)
 	fr.fr_pidp = &pid;
 	error = fork1(td, &fr);
 	if (error == 0) {
-		td->td_retval[0] = pid;
-		td->td_retval[1] = 0;
+		td->td_retval[0] = pid; //wyc: return value to the parent
+		td->td_retval[1] = 0; //wyc: in child process it is assigned to 1. Why?
 	}
 	return (error);
 }
@@ -249,7 +249,7 @@ fork_findpid(int flags)
 		if (trypid < 10)
 			trypid = 10;
 	} else {
-		if (randompid)
+		if (randompid) //wyc: by default ==0. Random will cause a lot of overhead
 			trypid += arc4random() % randompid;
 	}
 retry:
@@ -401,7 +401,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	p2->p_pid = trypid;
 	AUDIT_ARG_PID(p2->p_pid);
 	LIST_INSERT_HEAD(&allproc, p2, p_list);
-	allproc_gen++;
+	allproc_gen++; //wyc: allproc changed
 	LIST_INSERT_HEAD(PIDHASH(p2->p_pid), p2, p_hash);
 	tidhash_add(td2);
 	PROC_LOCK(p2);
@@ -478,7 +478,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	bcopy(&td->td_startcopy, &td2->td_startcopy,
 	    __rangeof(struct thread, td_startcopy, td_endcopy));
 
-	bcopy(&p2->p_comm, &td2->td_name, sizeof(td2->td_name));
+	bcopy(&p2->p_comm, &td2->td_name, sizeof(td2->td_name)); //wyc: comm means command
 	td2->td_sigstk = td->td_sigstk;
 	td2->td_flags = TDF_INMEM;
 	td2->td_lend_user_pri = PRI_MAX;
@@ -492,7 +492,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * Allow the scheduler to initialize the child.
 	 */
 	thread_lock(td);
-	sched_fork(td, td2);
+	sched_fork(td, td2); //wyc: Scheduler: pass parents' behavior to child.
 	thread_unlock(td);
 
 	/*
@@ -532,7 +532,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	p2->p_fdtol = fdtol;
 
 	if (p1->p_flag2 & P2_INHERIT_PROTECTED) {
-		p2->p_flag |= P_PROTECTED;
+		p2->p_flag |= P_PROTECTED; //wyc: don't kill this process when there is no memory to service page fault
 		p2->p_flag2 |= P2_INHERIT_PROTECTED;
 	}
 
@@ -637,7 +637,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * parent.
 	 */
 	if ((fr->fr_flags & RFNOWAIT) != 0) {
-		pptr = p1->p_reaper;
+		pptr = p1->p_reaper; //wyc: normall reaper is init process.
 		p2->p_reaper = pptr;
 	} else {
 		p2->p_reaper = (p1->p_treeflag & P_TREE_REAPER) != 0 ?
@@ -653,7 +653,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	sx_xunlock(&proctree_lock);
 
 	/* Inform accounting that we have forked. */
-	p2->p_acflag = AFORK;
+	p2->p_acflag = AFORK; //wyc: forked but not exec'ed
 	PROC_UNLOCK(p2);
 
 #ifdef KTRACE
@@ -766,7 +766,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 		 */
 		thread_lock(td2);
 		TD_SET_CAN_RUN(td2);
-		sched_add(td2, SRQ_BORING);
+		sched_add(td2, SRQ_BORING); //wyc: add child to the run queue
 		thread_unlock(td2);
 		if (fr->fr_pidp != NULL)
 			*fr->fr_pidp = p2->p_pid;
@@ -897,7 +897,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	/* Allocate new proc. */
 	newproc = uma_zalloc(proc_zone, M_WAITOK);
 	td2 = FIRST_THREAD_IN_PROC(newproc);
-	if (td2 == NULL) {
+	if (__predict_false(td2 == NULL)) { //wyc
 		td2 = thread_alloc(pages);
 		if (td2 == NULL) {
 			error = ENOMEM;
@@ -905,7 +905,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 		proc_linkup(newproc, td2);
 	} else {
-		if (td2->td_kstack == 0 || td2->td_kstack_pages != pages) {
+		if (__predict_false(td2->td_kstack == 0 || td2->td_kstack_pages != pages)) { //wyc
 			if (td2->td_kstack != 0)
 				vm_thread_dispose(td2);
 			if (!thread_alloc_stack(td2, pages)) {
@@ -968,7 +968,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 */
 	error = priv_check_cred(td->td_ucred, PRIV_PROC_LIMIT, 0);
 	if (error == 0)
-		ok = chgproccnt(td->td_ucred->cr_ruidinfo, 1, 0);
+		ok = chgproccnt(td->td_ucred->cr_ruidinfo, 1, 0); //wyc: 0 means no limit
 	else {
 		ok = chgproccnt(td->td_ucred->cr_ruidinfo, 1,
 		    lim_cur(td, RLIMIT_NPROC));
@@ -997,7 +997,7 @@ fail2:
 		fdrop(fp_procdesc, td);
 	}
 	atomic_add_int(&nprocs, -1);
-	pause("fork", hz / 2);
+	pause("fork", hz / 2); //wyc: to slow down fork attack
 	return (error);
 }
 
@@ -1007,9 +1007,9 @@ fail2:
  */
 void
 fork_exit(
-    void (*callout)(void *, struct trapframe *),//wyc: esi.
-    void *arg,					//wyc: ebx.
-    struct trapframe *frame)			//wyc: esp. See fork_trampline()
+    void (*callout)(void *, struct trapframe *),//wyc: fork_return()
+    void *arg,			//wyc: struct thread *td
+    struct trapframe *frame)	//wyc: (int)td->td_frame - sizeof(void *)
 {
 	struct proc *p;
 	struct thread *td;
@@ -1040,7 +1040,7 @@ fork_exit(
 	 * initproc has its own fork handler, but it does return.
 	 */
 	KASSERT(callout != NULL, ("NULL callout in fork_exit"));
-	callout(arg, frame);
+	callout(arg, frame); //wyc: fork_return(arg, frame)
 
 	/*
 	 * Check if a kernel thread misbehaved and returned from its main
@@ -1114,7 +1114,7 @@ fork_return(struct thread *td, struct trapframe *frame)
 		PROC_UNLOCK(p);
 	}
 
-	userret(td, frame);
+	userret(td, frame); //wyc: This will be called before returning to user mode
 
 #ifdef KTRACE
 	if (KTRPOINT(td, KTR_SYSRET))

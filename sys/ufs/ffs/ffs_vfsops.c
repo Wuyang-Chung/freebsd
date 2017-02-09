@@ -1632,12 +1632,12 @@ ffs_vget(mp, ino, flags, vpp)
 }
 
 int
-ffs_vgetf(mp, ino, flags, vpp, ffs_flags)
-	struct mount *mp;
-	ino_t ino;
-	int flags;
-	struct vnode **vpp;
-	int ffs_flags;
+ffs_vgetf(
+	struct mount *mp,
+	ino_t ino,
+	int flags,
+	struct vnode **vpp,
+	int ffs_flags)
 {
 	struct fs *fs;
 	struct inode *ip;

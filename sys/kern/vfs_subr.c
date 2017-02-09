@@ -1062,7 +1062,7 @@ vnlru_proc(void)
 
 	force = 0;
 	for (;;) {
-		kproc_suspend_check(vnlruproc);
+		kproc_suspend_check(vnlruproc); //wyc: check for stop signal
 		mtx_lock(&vnode_free_list_mtx);
 		/*
 		 * If numvnodes is too large (due to desiredvnodes being
@@ -1118,7 +1118,7 @@ vnlru_proc(void)
 		trigger = vm_cnt.v_page_count * 2 / usevnodes;
 		if (force < 2)
 			trigger = vsmalltrigger;
-		reclaim_nc_src = force >= 3;
+		reclaim_nc_src = force >= 3; //wyc: also reclaim directory
 		mtx_lock(&mountlist_mtx);
 		for (mp = TAILQ_FIRST(&mountlist); mp != NULL; mp = nmp) {
 			if (vfs_busy(mp, MBF_NOWAIT | MBF_MNTLSTLOCK)) {
@@ -1927,7 +1927,7 @@ gbincore(struct bufobj *bo, daddr_t lblkno)
 	struct buf *bp;
 
 	ASSERT_BO_LOCKED(bo);
-	bp = BUF_PCTRIE_LOOKUP(&bo->bo_clean.bv_root, lblkno);
+	bp = BUF_PCTRIE_LOOKUP(&bo->bo_clean.bv_root, lblkno); //wyc: PCTRIE_DEFINE
 	if (bp != NULL)
 		return (bp);
 	return BUF_PCTRIE_LOOKUP(&bo->bo_dirty.bv_root, lblkno);

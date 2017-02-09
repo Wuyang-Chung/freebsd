@@ -351,7 +351,7 @@ sys_mmap(
 		}
 		if (prot & PROT_EXEC)
 			cap_rights_set(&rights, CAP_MMAP_X);
-		error = fget_mmap(td, uap->fd, &rights, &cap_maxprot, &fp);
+		error = fget_mmap(td, uap->fd, &rights, &cap_maxprot, &fp); //wyc: fd -> fp
 		if (error != 0)
 			goto done;
 		if ((flags & (MAP_SHARED | MAP_PRIVATE)) == 0 &&
@@ -362,7 +362,7 @@ sys_mmap(
 
 		/* This relies on VM_PROT_* matching PROT_*. */
 		error = fo_mmap(fp, &vms->vm_map, &addr, size, prot,
-		    cap_maxprot, flags, pos, td);
+		    cap_maxprot, flags, pos, td); //wyc: in: fp, in/out:addr
 	}
 
 	if (error == 0)
@@ -1224,6 +1224,7 @@ sys_munlock(
  * Helper function for vm_mmap.  Perform sanity check specific for mmap
  * operations on vnodes.
  */
+//wyc: vp -> *objp
 int
 vm_mmap_vnode(struct thread *td, vm_size_t objsize,
     vm_prot_t prot, vm_prot_t *maxprotp, int *flagsp,
@@ -1250,11 +1251,11 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 		/*
 		 * Get the proper underlying object
 		 */
-		if (obj == NULL) {
+		if (obj == NULL) { //wyc: sanity check. vnode must have a object
 			error = EINVAL;
 			goto done;
 		}
-		if (obj->type == OBJT_VNODE && obj->handle != vp) {
+		if (obj->type == OBJT_VNODE && obj->handle != vp) { //wyc: something related with bypass???
 			vput(vp);
 			vp = (struct vnode *)obj->handle;
 			/*

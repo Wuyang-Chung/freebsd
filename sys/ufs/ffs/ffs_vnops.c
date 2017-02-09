@@ -102,10 +102,12 @@ __FBSDID("$FreeBSD$");
 #ifdef DIRECTIO
 extern int	ffs_rawread(struct vnode *vp, struct uio *uio, int *workdone);
 #endif
+#if !defined(WYC)
 static vop_fsync_t	ffs_fsync;
 static vop_lock1_t	ffs_lock;
 static vop_read_t	ffs_read;
 static vop_write_t	ffs_write;
+#endif
 static int	ffs_extread(struct vnode *vp, struct uio *uio, int ioflag);
 static int	ffs_extwrite(struct vnode *vp, struct uio *uio, int ioflag,
 		    struct ucred *cred);
@@ -642,13 +644,13 @@ ffs_read(ap)
  * Vnode op for writing.
  */
 static int
-ffs_write(ap)
+ffs_write(
 	struct vop_write_args /* {
 		struct vnode *a_vp;
 		struct uio *a_uio;
 		int a_ioflag;
 		struct ucred *a_cred;
-	} */ *ap;
+	} */ *ap)
 {
 	struct vnode *vp;
 	struct uio *uio;
@@ -718,7 +720,7 @@ ffs_write(ap)
 		flags = seqcount << BA_SEQSHIFT;
 	if ((ioflag & IO_SYNC) && !DOINGASYNC(vp))
 		flags |= IO_SYNC;
-	flags |= BA_UNMAPPED;
+	flags |= BA_UNMAPPED; //wyc: don't need to map it into the kernel
 
 	for (error = 0; uio->uio_resid > 0;) {
 		lbn = lblkno(fs, uio->uio_offset);
@@ -726,8 +728,8 @@ ffs_write(ap)
 		xfersize = fs->fs_bsize - blkoffset;
 		if (uio->uio_resid < xfersize)
 			xfersize = uio->uio_resid;
-		if (uio->uio_offset + xfersize > ip->i_size)
-			vnode_pager_setsize(vp, uio->uio_offset + xfersize);
+		if (uio->uio_offset + xfersize > ip->i_size) //wyc: larger than the file size
+			vnode_pager_setsize(vp, uio->uio_offset + xfersize); //wyc: notify vm the file size changed
 
 		/*
 		 * We must perform a read-before-write if the transfer size
@@ -738,10 +740,10 @@ ffs_write(ap)
 		else
 			flags &= ~BA_CLRBUF;
 /* XXX is uio->uio_offset the right thing here? */
-		error = UFS_BALLOC(vp, uio->uio_offset, xfersize,
+		error = UFS_BALLOC(vp, uio->uio_offset, xfersize, //wyc: ffs_balloc_ufs2()
 		    ap->a_cred, flags, &bp);
 		if (error != 0) {
-			vnode_pager_setsize(vp, ip->i_size);
+			vnode_pager_setsize(vp, ip->i_size); //wyc: notify vm that it will not expand the file
 			break;
 		}
 		if (ioflag & IO_DIRECT)

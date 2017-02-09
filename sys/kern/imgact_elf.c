@@ -549,7 +549,11 @@ __elfN(load_section)(
 		cow = MAP_COPY_ON_WRITE | MAP_PREFAULT |
 		    (prot & VM_PROT_WRITE ? 0 : MAP_DISABLE_COREDUMP);
 
+#if defined(WYC)
+		rv = elf32_map_insert(map,
+#else
 		rv = __elfN(map_insert)(map,
+#endif
 				      object,
 				      file_addr,	/* file offset */
 				      map_addr,		/* virtual start */
@@ -927,7 +931,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	 */
 	VOP_UNLOCK(imgp->vp, 0);
 
-	error = exec_new_vmspace(imgp, sv);
+	error = exec_new_vmspace(imgp, sv); //wyc: destroy old address and allocate a new stack
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
@@ -1094,6 +1098,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	/*
 	 * Construct auxargs table (used by the fixup routine)
 	 */
+	//wyc: for dynamic loader
 	elf_auxargs = malloc(sizeof(Elf_Auxargs), M_TEMP, M_WAITOK);
 	elf_auxargs->execfd = -1;
 	elf_auxargs->phdr = proghdr;

@@ -242,7 +242,7 @@ retry:
 
 		object->handle = handle;
 		VI_LOCK(vp);
-		if (vp->v_object != NULL) {
+		if (vp->v_object != NULL) { //wyc: someone allocate an object before us
 			/*
 			 * Object has been created while we were sleeping
 			 */
@@ -691,7 +691,7 @@ vnode_pager_getpages(vm_object_t object, vm_page_t *m, int count, int *rbehind,
 
 	vp = object->handle;
 	VM_OBJECT_WUNLOCK(object);
-	rtval = VOP_GETPAGES(vp, m, count, rbehind, rahead);
+	rtval = VOP_GETPAGES(vp, m, count, rbehind, rahead); //wyc: vop_stdgetpages()
 	KASSERT(rtval != EOPNOTSUPP,
 	    ("vnode_pager: FS getpages not implemented\n"));
 	VM_OBJECT_WLOCK(object);

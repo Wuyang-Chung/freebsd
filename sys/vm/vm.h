@@ -83,7 +83,7 @@ typedef u_char vm_prot_t;	/* protection codes */
 #define	VM_PROT_DEFAULT		VM_PROT_ALL
 
 enum obj_type { 
-	OBJT_DEFAULT,
+	OBJT_DEFAULT,	//wyc: not having an object yet
 	OBJT_SWAP,
 	OBJT_VNODE,	//wyc: provide the physical memory for caching file data
 	OBJT_DEVICE, 	//wyc: e.g. frame buffer

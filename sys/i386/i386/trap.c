@@ -307,7 +307,7 @@ trap(struct trapframe *frame)
 			enable_intr();
 	}
 
-        if ((ISPL(frame->tf_cs) == SEL_UPL) ||
+        if ((ISPL(frame->tf_cs) == SEL_UPL) || //wyc: user trap
 	    ((frame->tf_eflags & PSL_VM) && 
 		!(curpcb->pcb_flags & PCB_VM86CALL))) {
 		/* user trap */

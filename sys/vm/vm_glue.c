@@ -646,7 +646,7 @@ vm_forkproc(
 		atomic_add_int(&p1->p_vmspace->vm_refcnt, 1);
 	}
 
-	while (vm_page_count_severe()) {
+	while (vm_page_count_severe()) { //wyc: check for severe page shortage
 		VM_WAIT;
 	}
 
@@ -670,8 +670,8 @@ vm_forkproc(
  * the process was still executing.
  */
 void
-vm_waitproc(p)
-	struct proc *p;
+vm_waitproc(
+	struct proc *p)
 {
 
 	vmspace_exitfree(p);		/* and clean-out the vmspace */

@@ -351,7 +351,7 @@ thread_alloc(int pages)
 		uma_zfree(thread_zone, td);
 		return (NULL);
 	}
-	cpu_thread_alloc(td);
+	cpu_thread_alloc(td); //wyc: function that starts with "cpu_" is a machine dependent function
 	vm_domain_policy_init(&td->td_vm_dom_policy);
 	return (td);
 }

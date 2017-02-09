@@ -1595,8 +1595,8 @@ sched_interact_update(struct thread *td)
 		ts->ts_slptime /= 2;
 		return;
 	}
-	ts->ts_runtime = (ts->ts_runtime / 5) * 4;
-	ts->ts_slptime = (ts->ts_slptime / 5) * 4;
+	ts->ts_runtime = (ts->ts_runtime / 5) * 4; //wyc: decay function. Throw away
+	ts->ts_slptime = (ts->ts_slptime / 5) * 4; //wyc: 20% of run time and sleep time
 }
 
 /*
@@ -1964,7 +1964,8 @@ sched_switch(struct thread *td, struct thread *newtd, int flags)
 			(*dtrace_vtime_switch_func)(newtd);
 #endif
 
-		cpu_switch(td, newtd, mtx);
+		cpu_switch(td, newtd, mtx); //wyc: assembly
+		//wyc: run in new thread
 		/*
 		 * We may return from cpu_switch on a different cpu.  However,
 		 * we always return with td_lock pointing to the current cpu's
@@ -2052,8 +2053,8 @@ sched_wakeup(struct thread *td)
 	td->td_slptick = 0;
 	if (slptick && slptick != ticks) {
 		ts->ts_slptime += (ticks - slptick) << SCHED_TICK_SHIFT;
-		sched_interact_update(td);
-		sched_pctcpu_update(ts, 0);
+		sched_interact_update(td); //wyc: collecting statistics
+		sched_pctcpu_update(ts, 0); //wyc: update the percentage of cpu time
 	}
 	/*
 	 * Reset the slice value since we slept and advanced the round-robin.
