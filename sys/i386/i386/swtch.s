@@ -134,7 +134,7 @@ ENTRY(cpu_switch)
 	pushfl					/* PSL */
 	popl	PCB_PSL(%edx)
 	/* Test if debug registers should be saved. */
-	testl	$PCB_DBREGS,PCB_FLAGS(%edx)
+	testl	$PCB_DBREGS,PCB_FLAGS(%edx)	/* wyc: bitwise AND, set EFLAGS */
 	jz      1f                              /* no, skip over */
 	movl    %dr7,%eax                       /* yes, do the save */
 	movl    %eax,PCB_DR7(%edx)
@@ -167,7 +167,7 @@ ENTRY(cpu_switch)
 	movl	8(%esp),%ecx			/* New thread */
 	movl	12(%esp),%esi			/* New lock */
 #ifdef INVARIANTS
-	testl	%ecx,%ecx			/* no thread? */
+	testl	%ecx,%ecx			/* no thread? wyc: bitwise AND, set EFLAGS */
 	jz	badsw3				/* no, panic */
 #endif
 	movl	TD_PCB(%ecx),%edx
@@ -187,7 +187,7 @@ ENTRY(cpu_switch)
 #ifdef SMP
 	lock
 #endif
-	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old */
+	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old wyc: bit test and reset */
 
 	/* Set bit in new pmap->pm_active */
 	movl	TD_PROC(%ecx),%eax		/* newproc */
@@ -197,7 +197,7 @@ ENTRY(cpu_switch)
 #ifdef SMP
 	lock
 #endif
-	btsl	%esi, PM_ACTIVE(%ebx)		/* set new */
+	btsl	%esi, PM_ACTIVE(%ebx)		/* set new wyc: bit test and set */
 	jmp	sw1
 
 sw0:

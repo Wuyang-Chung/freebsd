@@ -195,7 +195,7 @@ cpu_fork(
 
 			mtx_lock_spin(&dt_lock);
 			if ((pldt1 = mdp1->md_ldt) != NULL) {
-			    panic("%s 1: md_ldt != NULL", __func__); //wyc
+			    panic("%s %d: md_ldt != NULL", __func__, __LINE__); //wyc
 			    if (pldt1->ldt_refcnt > 1) {
 				pldt = user_ldt_alloc(mdp1, pldt1->ldt_len);
 				if (pldt == NULL)
@@ -234,7 +234,7 @@ cpu_fork(
 
 	/* Point mdproc and then copy over td1's contents */
 	if (p1->p_md.md_ldt != NULL)
-		panic("%s", __func__); //wyc
+		panic("%s %d: md_ldt != NULL", __func__, __LINE__); //wyc
 	mdp2 = &p2->p_md;
 	bcopy(&p1->p_md, mdp2, sizeof(*mdp2));
 
