@@ -1152,7 +1152,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
 		//wyc: panic if md_ldt != NULL
-		panic("exec_setregs: md_ldt != NULL");
+		panic("%s: md_ldt != NULL", __func__);
 		user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
@@ -2715,7 +2715,7 @@ init386(
 	/* make a call gate to reenter kernel with */
 	gdp = &ldt[LSYS5CALLS_SEL].gd;
 
-	x = (int) &IDTVEC(lcall_syscall);
+	x = (int) &IDTVEC(rsvd); //wyc: replace lcall_syscall with rsvd
 	gdp->gd_looffset = x;
 	gdp->gd_selector = GSEL(GCODE_SEL,SEL_KPL);
 	gdp->gd_stkcpy = 1;
