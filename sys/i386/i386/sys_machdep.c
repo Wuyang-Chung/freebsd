@@ -110,7 +110,8 @@ sysarch(
 		struct i386_get_xfpustate xfpu;
 	} kargs;
 	uint32_t base;
-	struct segment_descriptor sd, *sdp;
+	struct segment_descriptor sd;
+	//struct segment_descriptor *sdp;
 
 	//return EOPNOTSUPP;	//wyc: Will fail to boot if disable sysarch entirely
 	AUDIT_ARG_CMD(uap->op);
@@ -160,23 +161,31 @@ sysarch(
 
 	switch(uap->op) {
 	case I386_GET_IOPERM:
+		panic("I386_GET_IOPERM"); //wyc
+#if 0
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
 			error = copyout(&kargs.iargs, uap->parms,
 			    sizeof(struct i386_ioperm_args));
+#endif
 		break;
 	case I386_SET_IOPERM:
-		error = i386_set_ioperm(td, &kargs.iargs);
+		panic("I386_SET_IOPERM"); //wyc
+		//error = i386_set_ioperm(td, &kargs.iargs);
 		break;
 	case I386_VM86:
-		error = vm86_sysarch(td, uap->parms);
+		panic("I386_VM86"); //wyc
+		//error = vm86_sysarch(td, uap->parms);
 		break;
 	case I386_GET_FSBASE:
-		sdp = &td->td_pcb->pcb_fsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
-		error = copyout(&base, uap->parms, sizeof(base));
+		panic("I386_GET_FSBASE"); //wyc
+		//sdp = &td->td_pcb->pcb_fsd;
+		//base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		//error = copyout(&base, uap->parms, sizeof(base));
 		break;
 	case I386_SET_FSBASE:
+		panic("I386_SET_FSBASE"); //wyc
+#if 0
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
 			/*
@@ -192,13 +201,16 @@ sysarch(
 			critical_exit();
 			td->td_frame->tf_fs = GSEL(GUFS_SEL, SEL_UPL);
 		}
+#endif
 		break;
 	case I386_GET_GSBASE:
-		sdp = &td->td_pcb->pcb_gsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
-		error = copyout(&base, uap->parms, sizeof(base));
+		panic("I386_GET_GSBASE"); //wyc
+		//sdp = &td->td_pcb->pcb_gsd;
+		//base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		//error = copyout(&base, uap->parms, sizeof(base));
 		break;
-	case I386_SET_GSBASE:
+	case I386_SET_GSBASE: //wyc: called by pid 1 tid 100002
+		//panic("I386_SET_GSBASE");
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
 			/*
@@ -214,7 +226,8 @@ sysarch(
 			load_gs(GSEL(GUGS_SEL, SEL_UPL));
 		}
 		break;
-	case I386_GET_XFPUSTATE:
+	case I386_GET_XFPUSTATE: //wyc: called by pid 660 tid 100065. pid 635 tid 100064
+		//panic("I386_GET_XFPUSTATE");
 		if (kargs.xfpu.len > cpu_max_ext_state_size -
 		    sizeof(union savefpu))
 			return (EINVAL);
