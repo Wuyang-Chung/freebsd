@@ -1369,7 +1369,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_limit = sizeof(ldt)-1,
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_UPL,
-	.ssd_p = 1,
+	.ssd_p = 1, //wyc: can not set to 0
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},

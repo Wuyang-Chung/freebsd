@@ -113,7 +113,6 @@ sysarch(
 	struct segment_descriptor sd;
 	//struct segment_descriptor *sdp;
 
-	//return EOPNOTSUPP;	//wyc: Will fail to boot if disable sysarch entirely
 	AUDIT_ARG_CMD(uap->op);
 
 #ifdef CAPABILITY_MODE
