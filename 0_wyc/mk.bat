@@ -1,12 +1,14 @@
 #!/bin/csh
-cd /nfs/vm.FreeBSD
-make kernel KERNCONF=WYCVM
-if ($? == 0) then
-	cp /usr/obj/nfs/vm.FreeBSD/sys/WYCVM/kernel.debug 0_wyc
-	if ($? == 0) then
-		echo "*** kernel copied"
-	endif
-	echo "*** rebooting the machine ...."
-	reboot
-endif
+
+sntp -S tw.pool.ntp.org; if ($? != 0) goto error
+
+cd /nfs/vm.FreeBSD; if ($? != 0) goto error
+make kernel KERNCONF=WYCVM; if ($? != 0) goto error
+cp /usr/obj/nfs/vm.FreeBSD/sys/WYCVM/kernel.debug 0_wyc
+if ($? == 0) echo "*** kernel copied"
+echo "*** rebooting the machine ...."
+reboot
+
+error:
+echo "*** error"
 
