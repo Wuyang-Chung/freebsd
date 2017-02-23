@@ -222,7 +222,7 @@ vm_object_zinit(void *mem, int size, int flags)
 }
 
 static void
-_vm_object_allocate(objtype_t type, vm_pindex_t size, vm_object_t object)
+_vm_object_init(vm_object_t object, objtype_t type, vm_pindex_t size)
 {
 
 	TAILQ_INIT(&object->memq);
@@ -231,7 +231,7 @@ _vm_object_allocate(objtype_t type, vm_pindex_t size, vm_object_t object)
 	object->type = type;
 	switch (type) {
 	case OBJT_DEAD:
-		panic("_vm_object_allocate: can't create OBJT_DEAD");
+		panic("%s: can't create OBJT_DEAD", __func__);
 	case OBJT_DEFAULT:
 	case OBJT_SWAP:
 		object->flags = OBJ_ONEMAPPING;
@@ -250,7 +250,7 @@ _vm_object_allocate(objtype_t type, vm_pindex_t size, vm_object_t object)
 		object->flags = 0;
 		break;
 	default:
-		panic("_vm_object_allocate: type %d is undefined", type);
+		panic("%s: type %d is undefined", __func__, type);
 	}
 	object->size = size;
 	object->generation = 1;
@@ -268,27 +268,27 @@ _vm_object_allocate(objtype_t type, vm_pindex_t size, vm_object_t object)
 }
 
 /*
- *	vm_object_init:
+ *	vm_object_mod_init:
  *
  *	Initialize the VM objects module.
  */
 void
-vm_object_init(void)
+vm_object_mod_init(void)
 {
 	TAILQ_INIT(&vm_object_list);
 	mtx_init(&vm_object_list_mtx, "vm object_list", NULL, MTX_DEF);
 	
 	rw_init(&kernel_object->lock, "kernel vm object");
-	_vm_object_allocate(OBJT_PHYS, OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS),
-	    kernel_object);
+	_vm_object_init(kernel_object, OBJT_PHYS, 
+		OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS));
 #if VM_NRESERVLEVEL > 0
 	kernel_object->flags |= OBJ_COLORED;
 	kernel_object->pg_color = (u_short)atop(VM_MIN_KERNEL_ADDRESS);
 #endif
 
 	rw_init(&kmem_object->lock, "kmem vm object");
-	_vm_object_allocate(OBJT_PHYS, OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS),
-	    kmem_object);
+	_vm_object_init(kmem_object, OBJT_PHYS, 
+		OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS));
 #if VM_NRESERVLEVEL > 0
 	kmem_object->flags |= OBJ_COLORED;
 	kmem_object->pg_color = (u_short)atop(VM_MIN_KERNEL_ADDRESS);
@@ -416,7 +416,7 @@ vm_object_allocate(objtype_t type, vm_pindex_t size)
 	vm_object_t object;
 
 	object = (vm_object_t)uma_zalloc(obj_zone, M_WAITOK);
-	_vm_object_allocate(type, size, object);
+	_vm_object_init(object, type, size);
 	return (object);
 }
 

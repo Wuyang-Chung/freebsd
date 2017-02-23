@@ -143,7 +143,7 @@ vm_mem_init(void *dummy)
 	 * Initialize other VM packages
 	 */
 	vmem_startup();
-	vm_object_init();
+	vm_object_mod_init();
 	vm_map_startup();
 	kmem_init(virtual_avail, virtual_end);
 
