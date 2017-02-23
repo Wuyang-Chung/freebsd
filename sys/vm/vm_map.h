@@ -177,7 +177,14 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  *	(c)	const until freed
  */
 struct vm_map {
-	struct vm_map_entry header;	/* List of entries */
+/*
+ *  offset_of(vm_map.header.prev) must be equal to offset_of(vm_map_entry.prev)
+ *  offset_of(vm_map.header.next) must be equal to offset_of(vm_map_entry.next)
+*/
+	struct {
+		struct vm_map_entry *prev;
+		struct vm_map_entry *next;
+	} header;			/* Sentinel head of circular link list */
 	struct sx lock;			/* Lock for map data */
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
@@ -188,12 +195,17 @@ struct vm_map {
 	vm_flags_t flags;		/* flags for this vm_map */
 	vm_map_entry_t root;		/* Root of a binary search tree */
 	pmap_t pmap;			/* (c) Physical map */
-//#define	min_offset	header.start	/* (c) */
-//#define	max_offset	header.end	/* (c) */
-	vm_offset_t min_offset;	//wyc
-	vm_offset_t max_offset;	//wyc
+	vm_offset_t min_offset;		/* (c) */ //wyc
+	vm_offset_t max_offset;		/* (c) */ //wyc
 	int busy;
 };
+
+#define MAP_ENTRY_SENTINEL(map) ((vm_map_entry_t)&(map)->header)
+
+#define MAP_ENTRY_FOREACH(entry, map)			\
+	for ((entry) = (map)->header.next;		\
+	    (entry) != MAP_ENTRY_SENTINEL(map);	\
+	    (entry) = (entry)->next) /* wyc */
 
 /*
  * vm_flags_t values

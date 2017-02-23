@@ -703,7 +703,7 @@ vm_pageout_map_deactivate_pages(map, desired)
 	 * that.
 	 */
 	tmpe = map->header.next;
-	while (tmpe != &map->header) {
+	while (tmpe != MAP_ENTRY_SENTINEL(map)) {
 		if ((tmpe->eflags & MAP_ENTRY_IS_SUB_MAP) == 0) {
 			obj = tmpe->object.vm_object;
 			if (obj != NULL && VM_OBJECT_TRYRLOCK(obj)) {
@@ -731,7 +731,7 @@ vm_pageout_map_deactivate_pages(map, desired)
 	 * do this search sort of wrong -- .text first is not the best idea.
 	 */
 	tmpe = map->header.next;
-	while (tmpe != &map->header) {
+	while (tmpe != MAP_ENTRY_SENTINEL(map)) {
 		if (pmap_resident_count(vm_map_pmap(map)) <= desired)
 			break;
 		if ((tmpe->eflags & MAP_ENTRY_IS_SUB_MAP) == 0) {
@@ -1395,8 +1395,7 @@ vm_pageout_oom_pagecount(struct vmspace *vmspace)
 	KASSERT(!map->system_map, ("system map"));
 	sx_assert(&map->lock, SA_LOCKED);
 	res = 0;
-	for (entry = map->header.next; entry != &map->header;
-	    entry = entry->next) {
+	MAP_ENTRY_FOREACH(entry, map) {
 		if ((entry->eflags & MAP_ENTRY_IS_SUB_MAP) != 0)
 			continue;
 		obj = entry->object.vm_object;

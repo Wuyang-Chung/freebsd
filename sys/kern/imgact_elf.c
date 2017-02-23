@@ -583,7 +583,11 @@ __elfN(load_section)(
 
 	/* This had damn well better be true! */
 	if (map_len != 0) {
+#if defined(WYC)
+		rv = elf32_map_insert(map, NULL, 0, map_addr, map_addr +
+#else
 		rv = __elfN(map_insert)(map, NULL, 0, map_addr, map_addr +
+#endif
 		    map_len, VM_PROT_ALL, 0);
 		if (rv != KERN_SUCCESS) {
 			return (EINVAL);
@@ -882,8 +886,8 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	}
 
 #if defined(WYC)
-	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
 	brand_info = &freebsd_brand_info; //wyc: brand_info == freebsd_brand_info
+	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
 #else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
 #endif
@@ -1532,8 +1536,7 @@ each_writable_segment(
 	boolean_t ignore_entry;
 
 	vm_map_lock_read(map);
-	for (entry = map->header.next; entry != &map->header;
-	    entry = entry->next) {
+	MAP_ENTRY_FOREACH (entry, map) {
 		/*
 		 * Don't dump inaccessible mappings, deal with legacy
 		 * coredump mode.

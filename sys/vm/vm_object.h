@@ -116,6 +116,7 @@ struct vm_object {
 	int resident_page_count;	/* number of resident pages */
 	struct vm_object *backing_object; /* object that I'm a shadow of */
 	vm_ooffset_t backing_object_offset;/* Offset in backing object */
+	vm_offset_t backing_object_len; //wyc todo
 	TAILQ_ENTRY(vm_object) pager_object_list; /* list of all objects of this pager type */
 	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations wyc: superpage */
 	struct vm_radix cache;		/* (o + f) root of the cache page radix trie */

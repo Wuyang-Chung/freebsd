@@ -2425,7 +2425,7 @@ _vm_object_in_map(vm_map_t map, vm_object_t object, vm_map_entry_t entry)
 	if (entry == 0) {
 		tmpe = map->header.next;
 		entcount = map->nentries;
-		while (entcount-- && (tmpe != &map->header)) {
+		while (entcount-- && (tmpe != MAP_ENTRY_SENTINEL(map))) {
 			if (_vm_object_in_map(map, object, tmpe)) {
 				return 1;
 			}
@@ -2435,7 +2435,7 @@ _vm_object_in_map(vm_map_t map, vm_object_t object, vm_map_entry_t entry)
 		tmpm = entry->object.sub_map;
 		tmpe = tmpm->header.next;
 		entcount = tmpm->nentries;
-		while (entcount-- && tmpe != &tmpm->header) {
+		while (entcount-- && tmpe != MAP_ENTRY_SENTINEL(tmpm)) {
 			if (_vm_object_in_map(tmpm, object, tmpe)) {
 				return 1;
 			}

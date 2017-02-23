@@ -2088,8 +2088,7 @@ sysctl_kern_proc_ovmmap(SYSCTL_HANDLER_ARGS)
 
 	map = &vm->vm_map;
 	vm_map_lock_read(map);
-	for (entry = map->header.next; entry != &map->header;
-	    entry = entry->next) {
+	MAP_ENTRY_FOREACH(entry, map ) {
 		vm_object_t obj, tobj, lobj;
 		vm_offset_t addr;
 
@@ -2327,8 +2326,7 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 	error = 0;
 	map = &vm->vm_map;
 	vm_map_lock_read(map);
-	for (entry = map->header.next; entry != &map->header;
-	    entry = entry->next) {
+	MAP_ENTRY_FOREACH(entry, map) {
 		if (entry->eflags & MAP_ENTRY_IS_SUB_MAP)
 			continue;
 
