@@ -3726,7 +3726,7 @@ Retry:
 	}
 
 	is_procstack = (addr >= (vm_offset_t)vm->vm_maxsaddr &&
-	    addr < (vm_offset_t)p->p_sysent->sv_usrstack) ? 1 : 0;
+	    addr < (vm_offset_t)p->p_sysent->sv_usrstack) ? 1 : 0; //wyc: compile-time error at p_sysent if moved to vm_fault.c
 
 	/*
 	 * If this is the main process stack, see if we're over the stack
@@ -3875,7 +3875,7 @@ Retry:
 			/* Update the current entry. */
 			stack_entry->end = addr;
 			stack_entry->avail_ssize -= grow_amount;
-			vm_map_entry_resize_free(map, stack_entry);
+			vm_map_entry_resize_free(map, stack_entry); //wyc: compile-time error at vm_map_entry_resize_free() if moved to vm_fault.c
 			rv = KERN_SUCCESS;
 		} else
 			rv = KERN_FAILURE;
@@ -4157,89 +4157,6 @@ RetryLookup:;
 		}
 		vm_map_lock_downgrade(map);
 	}
-
-	/*
-	 * Return the object/offset from this entry.  If the entry was
-	 * copy-on-write or empty, it has been fixed up.
-	 */
-	*pindex = OFF_TO_IDX((vaddr - entry->start) + entry->offset);
-	*object = entry->object.vm_object;
-
-	*out_prot = prot;
-	return (KERN_SUCCESS);
-}
-
-/*
- *	vm_map_lookup_locked:
- *
- *	Lookup the faulting address.  A version of vm_map_lookup that returns 
- *      KERN_FAILURE instead of blocking on map lock or memory allocation.
- *
- *	wyc: this function is only referenced by functions in vm_fault.c
- */
-int
-vm_map_lookup_locked(vm_map_t *var_map,		/* IN/OUT */
-		     vm_offset_t vaddr,
-		     vm_prot_t fault_typea,
-		     vm_map_entry_t *out_entry,	/* OUT */
-		     vm_object_t *object,	/* OUT */
-		     vm_pindex_t *pindex,	/* OUT */
-		     vm_prot_t *out_prot,	/* OUT */
-		     boolean_t *wired)		/* OUT */
-{
-	vm_map_entry_t entry;
-	vm_map_t map = *var_map;
-	vm_prot_t prot;
-	vm_prot_t fault_type = fault_typea;
-
-	/*
-	 * Lookup the faulting address.
-	 */
-	if (!vm_map_lookup_entry(map, vaddr, out_entry))
-		return (KERN_INVALID_ADDRESS);
-
-	entry = *out_entry;
-
-	/*
-	 * Fail if the entry refers to a submap.
-	 */
-	if (entry->eflags & MAP_ENTRY_IS_SUB_MAP)
-		return (KERN_FAILURE);
-
-	/*
-	 * Check whether this task is allowed to have this page.
-	 */
-	prot = entry->protection;
-	fault_type &= VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
-	if ((fault_type & prot) != fault_type)
-		return (KERN_PROTECTION_FAILURE);
-
-	/*
-	 * If this page is not pageable, we have to get it for all possible
-	 * accesses.
-	 */
-	*wired = (entry->wired_count != 0);
-	if (*wired)
-		fault_type = entry->protection;
-
-	if (entry->eflags & MAP_ENTRY_NEEDS_COPY) {
-		/*
-		 * Fail if the entry was copy-on-write for a write fault.
-		 */
-		if (fault_type & VM_PROT_WRITE)
-			return (KERN_FAILURE);
-		/*
-		 * We're attempting to read a copy-on-write page --
-		 * don't allow writes.
-		 */
-		prot &= ~VM_PROT_WRITE;
-	}
-
-	/*
-	 * Fail if an object should be created.
-	 */
-	if (entry->object.vm_object == NULL && !map->system_map)
-		return (KERN_FAILURE);
 
 	/*
 	 * Return the object/offset from this entry.  If the entry was
