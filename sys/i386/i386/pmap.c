@@ -1531,7 +1531,7 @@ retry:
  ***************************************************/
 
 /*
- * Add a wired page to the kva. wyc: why PG_W is not specified???
+ * Add a wired page to the kva. wyc???: why PG_W is not specified?
  * Note: not SMP coherent.
  *
  * This function may be used before pmap_bootstrap() is called.

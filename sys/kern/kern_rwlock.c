@@ -1044,7 +1044,7 @@ __rw_try_upgrade(volatile uintptr_t *c, const char *file, int line)
 	int success;
 
 	if (SCHEDULER_STOPPED())
-		return (1);
+		return (TRUE);
 
 	rw = rwlock2rw(c);
 
@@ -1060,7 +1060,7 @@ __rw_try_upgrade(volatile uintptr_t *c, const char *file, int line)
 	 * turnstile.  So, do the simple case of no waiters first.
 	 */
 	tid = (uintptr_t)curthread;
-	success = 0;
+	success = FALSE;
 	for (;;) {
 		v = rw->rw_lock;
 		if (RW_READERS(v) > 1)

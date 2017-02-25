@@ -158,7 +158,7 @@
 #define	SHAREDPAGE		(VM_MAXUSER_ADDRESS - PAGE_SIZE) //wyc: 3G-4M-4K
 #define	USRSTACK		SHAREDPAGE		//wyc: 3G-4M-4
 
-//wyc: should VM_MAX_ADDRESS be VM_MAXUSER_ADDRESS -1 ???
+//wyc???: should VM_MAX_ADDRESS be VM_MAXUSER_ADDRESS -1
 #define VM_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)
 #define VM_MIN_ADDRESS		((vm_offset_t)0)
 

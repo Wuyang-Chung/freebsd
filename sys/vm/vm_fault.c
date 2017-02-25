@@ -116,9 +116,9 @@ __FBSDID("$FreeBSD$");
 struct faultstate {
 	vm_page_t m;
 	vm_object_t object;
-	vm_pindex_t pindex;
+	vm_pindex_t pindex;	//wyc: offset within object
 	vm_page_t first_m;
-	vm_object_t	first_object;
+	vm_object_t first_object;
 	vm_pindex_t first_pindex;
 	vm_map_t map;
 	vm_map_entry_t entry;
@@ -303,10 +303,10 @@ vm_fault_hold(vm_map_t map, vm_offset_t vaddr, vm_prot_t fault_type,
 	faultcount = 0;
 	nera = -1;
 
-RetryFault:;
+RetryFault://; wyc??? why there is a ';' at the end of the label
 
 	/*
-	 * Find the backing store object and offset into it to begin the
+	 * Find the backing store object and offset (fs.first_pindex) into it to begin the
 	 * search.
 	 */
 	fs.map = map;
@@ -363,6 +363,7 @@ RetryFault:;
 	 * object suffices, allowing multiple page faults of a similar type to
 	 * run in parallel on the same top-level object.
 	 */
+	//wyc: fast fault code
 	if (fs.vp == NULL /* avoid locked vnode leak */ &&
 	    (fault_flags & (VM_FAULT_WIRE | VM_FAULT_DIRTY)) == 0 &&
 	    /* avoid calling vm_object_set_writeable_dirty() */
@@ -401,7 +402,7 @@ RetryFault:;
 		curthread->td_ru.ru_minflt++;
 		return (KERN_SUCCESS);
 fast_failed:
-		if (!VM_OBJECT_TRYUPGRADE(fs.first_object)) {
+		if (VM_OBJECT_TRYUPGRADE(fs.first_object)==FALSE) {
 			VM_OBJECT_RUNLOCK(fs.first_object);
 			VM_OBJECT_WLOCK(fs.first_object);
 		}
@@ -430,7 +431,7 @@ fast_failed:
 	 * Search for the page at object/offset.
 	 */
 	fs.object = fs.first_object;
-	fs.pindex = fs.first_pindex;
+	fs.pindex = fs.first_pindex; //wyc: page index within object
 	while (TRUE) {
 		/*
 		 * If the object is marked for imminent termination,
@@ -439,7 +440,7 @@ fast_failed:
 		 * object, return fail.
 		 */
 		if ((fs.object->flags & OBJ_DEAD) != 0) {
-			dead = fs.object->type == OBJT_DEAD;
+			dead = (fs.object->type == OBJT_DEAD);
 			unlock_and_deallocate(&fs);
 			if (dead)
 				return (KERN_PROTECTION_FAILURE);
@@ -711,7 +712,7 @@ vnode_locked:
 			    &behind, &ahead);
 			if (rv == VM_PAGER_OK) {
 				faultcount = behind + 1 + ahead;
-				hardfault++;
+				hardfault++; //wyc: we actuall did IO
 				break; /* break to PAGE HAS BEEN FOUND */
 			}
 			if (rv == VM_PAGER_ERROR)
@@ -796,7 +797,7 @@ vnode_locked:
 			KASSERT(fs.object != next_object,
 			    ("object loop %p", next_object));
 			VM_OBJECT_WLOCK(next_object);
-			vm_object_pip_add(next_object, 1);
+			vm_object_pip_add(next_object, 1); //wyc: pip: paging in progress
 			if (fs.object != fs.first_object)
 				vm_object_pip_wakeup(fs.object);
 			fs.pindex +=

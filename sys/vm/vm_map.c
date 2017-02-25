@@ -3614,6 +3614,8 @@ SYSCTL_INT(_security_bsd, OID_AUTO, stack_guard_page, CTLFLAG_RWTUN,
  * the stack.  Also returns KERN_SUCCESS if addr is outside the
  * stack range (this is strange, but preserves compatibility with
  * the grow function in vm_machdep.c).
+ *
+ * wyc: this function is only referenced by functions in vm_fault.c
  */
 int
 vm_map_growstack(struct proc *p, vm_offset_t addr)
@@ -4172,6 +4174,8 @@ RetryLookup:;
  *
  *	Lookup the faulting address.  A version of vm_map_lookup that returns 
  *      KERN_FAILURE instead of blocking on map lock or memory allocation.
+ *
+ *	wyc: this function is only referenced by functions in vm_fault.c
  */
 int
 vm_map_lookup_locked(vm_map_t *var_map,		/* IN/OUT */

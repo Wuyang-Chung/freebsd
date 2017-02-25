@@ -1280,7 +1280,7 @@ vm_page_remove(vm_page_t m)
  *	The object must be locked.
  */
 vm_page_t
-vm_page_lookup(vm_object_t object, vm_pindex_t pindex)
+vm_page_lookup(vm_object_t object, vm_pindex_t pindex) //wyc: pindex: offset within object
 {
 
 	VM_OBJECT_ASSERT_LOCKED(object);

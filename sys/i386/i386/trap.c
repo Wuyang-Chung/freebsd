@@ -797,7 +797,7 @@ trap_pfault(
 	struct thread *td = curthread;
 	struct proc *p = td->td_proc;
 
-	if (__predict_false((td->td_pflags & TDP_NOFAULTING) != 0)) {
+	if (__predict_false((td->td_pflags & TDP_NOFAULTING) != 0)) { //wyc: TLB
 		/*
 		 * Due to both processor errata and lazy TLB invalidation when
 		 * access restrictions are removed from virtual pages, memory
