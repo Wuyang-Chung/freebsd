@@ -97,6 +97,7 @@ union vm_map_object {
  *	Also included is control information for virtual copy operations.
  */
 struct vm_map_entry {
+	/* prev and next must be the first and second field respectively */
 	struct vm_map_entry *prev;	/* previous entry wyc: circular list */
 	struct vm_map_entry *next;	/* next entry wyc: circular list */
 	struct vm_map_entry *left;	/* left child in binary search tree wyc: splay tree */
@@ -178,10 +179,10 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  */
 struct vm_map {
 /*
- *  offset_of(vm_map.header.prev) must be equal to offset_of(vm_map_entry.prev)
- *  offset_of(vm_map.header.next) must be equal to offset_of(vm_map_entry.next)
+ *  offset_of(_entry_head, prev) must be equal to offset_of(vm_map_entry, prev)
+ *  offset_of(_entry_head, next) must be equal to offset_of(vm_map_entry, next)
 */
-	struct {
+	struct _entry_head {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
 	} header;			/* Sentinel head of circular link list */

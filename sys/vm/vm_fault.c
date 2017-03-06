@@ -131,8 +131,8 @@ static void vm_fault_dontneed(const struct faultstate *fs, vm_offset_t vaddr,
 static void vm_fault_prefault(const struct faultstate *fs, vm_offset_t addra,
 	    int backward, int forward);
 
-static int vm_map_lookup_locked(vm_map_t *, vm_offset_t, vm_prot_t, vm_map_entry_t *, vm_object_t *,
-    vm_pindex_t *, vm_prot_t *, boolean_t *);
+static int vm_map_lookup_locked(vm_map_t, vm_offset_t, vm_prot_t,
+	vm_map_entry_t *, vm_object_t *, vm_pindex_t *, vm_prot_t *, boolean_t *);
 
 static inline void
 release_page(struct faultstate *fs)
@@ -309,7 +309,7 @@ vm_fault_hold(vm_map_t map, vm_offset_t vaddr, vm_prot_t fault_type,
 RetryFault://; wyc??? why there is a ';' at the end of the label
 
 	/*
-	 * Find the backing store object and offset (fs.first_pindex) into it to begin the
+	 * Find the backing store object and offset into it to begin the
 	 * search.
 	 */
 	fs.map = map;
@@ -944,7 +944,7 @@ vnode_locked:
 		}
 		fs.lookup_still_valid = TRUE;
 		if (fs.map->timestamp != map_generation) {
-			result = vm_map_lookup_locked(&fs.map, vaddr, fault_type,
+			result = vm_map_lookup_locked(fs.map, vaddr, fault_type,
 			    &fs.entry, &retry_object, &retry_pindex, &retry_prot, &wired);
 
 			/*
@@ -1323,13 +1323,13 @@ vm_fault_copy_entry(vm_map_t dst_map, vm_map_t src_map,
 	src_map++;
 #endif	/* lint */
 
-	upgrade = src_entry == dst_entry;
+	upgrade = (src_entry == dst_entry);
 	access = prot = dst_entry->protection;
 
 	src_object = src_entry->object.vm_object;
 	src_pindex = OFF_TO_IDX(src_entry->offset);
 
-	if (upgrade && (dst_entry->eflags & MAP_ENTRY_NEEDS_COPY) == 0) {
+	if (upgrade && !(dst_entry->eflags & MAP_ENTRY_NEEDS_COPY)) {
 		dst_object = src_object;
 		vm_object_reference(dst_object);
 	} else {
@@ -1520,9 +1520,9 @@ vm_fault_enable_pagefaults(int save)
  *	wyc: this function is only referenced by functions in vm_fault.c
  */
 static int
-vm_map_lookup_locked(vm_map_t *var_map,		/* IN/OUT */
+vm_map_lookup_locked(vm_map_t map,		/* IN */
 		     vm_offset_t vaddr,
-		     vm_prot_t fault_typea,
+		     vm_prot_t fault_type,
 		     vm_map_entry_t *out_entry,	/* OUT */
 		     vm_object_t *object,	/* OUT */
 		     vm_pindex_t *pindex,	/* OUT */
@@ -1530,14 +1530,14 @@ vm_map_lookup_locked(vm_map_t *var_map,		/* IN/OUT */
 		     boolean_t *wired)		/* OUT */
 {
 	vm_map_entry_t entry;
-	vm_map_t map = *var_map;
+	//vm_map_t map = *var_map;
 	vm_prot_t prot;
-	vm_prot_t fault_type = fault_typea;
+	//vm_prot_t fault_type = fault_typea;
 
 	/*
 	 * Lookup the faulting address.
 	 */
-	if (!vm_map_lookup_entry(map, vaddr, out_entry))
+	if (vm_map_lookup_entry(map, vaddr, out_entry)==FALSE)
 		return (KERN_INVALID_ADDRESS);
 
 	entry = *out_entry;

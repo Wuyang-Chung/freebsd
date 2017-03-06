@@ -1243,11 +1243,9 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	cred = NULL;
 	if (cow & (MAP_ACC_NO_CHARGE | MAP_NOFAULT))
 		goto charged;
-	if (
-	    (cow & MAP_ACC_CHARGED) || 
-	    (
-	      (prot & VM_PROT_WRITE) &&
-	      ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL)
+	if ((cow & MAP_ACC_CHARGED) || 
+	    ((prot & VM_PROT_WRITE) &&
+	     ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL)
 	    )
 	   ) {
 		if (!(cow & MAP_ACC_CHARGED) && !swap_reserve(end - start))
@@ -1280,16 +1278,18 @@ charged:
 		 (cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) == 0 &&
 		 (prev_entry->end == start) &&
 		 (prev_entry->wired_count == 0) &&
-		   (prev_entry->cred == cred ||
-		   (prev_entry->object.vm_object != NULL &&
-		   (prev_entry->object.vm_object->cred == cred))) &&
+		 (prev_entry->cred == cred ||
+		  (prev_entry->object.vm_object != NULL &&
+		   (prev_entry->object.vm_object->cred == cred)
+		  )
+		 ) &&
 		 vm_object_coalesce(
 		     prev_entry->object.vm_object,
 		     prev_entry->offset,
 		     (vm_size_t)(prev_entry->end - prev_entry->start),
 		     (vm_size_t)(end - prev_entry->end), 
-		     cred != NULL && (protoeflags & MAP_ENTRY_NEEDS_COPY
-		 ) == 0)) {
+		     cred != NULL && !(protoeflags & MAP_ENTRY_NEEDS_COPY))
+		) {
 		/*
 		 * We were able to extend the object.  Determine if we
 		 * can extend the previous map entry to include the
@@ -1700,8 +1700,8 @@ _vm_map_clip_start(vm_map_t map, vm_map_entry_t entry, vm_offset_t start)
 			entry->cred = NULL;
 		}
 	} else if (entry->object.vm_object != NULL &&
-		   ((entry->eflags & MAP_ENTRY_NEEDS_COPY) == 0) &&
-		   entry->cred != NULL) {
+	    !(entry->eflags & MAP_ENTRY_NEEDS_COPY) &&
+	     entry->cred != NULL) {
 		VM_OBJECT_WLOCK(entry->object.vm_object);
 		KASSERT(entry->object.vm_object->cred == NULL,
 		    ("OVERCOMMIT: vm_entry_clip_start: both cred e %p", entry));
@@ -1777,8 +1777,8 @@ _vm_map_clip_end(vm_map_t map, vm_map_entry_t entry, vm_offset_t end)
 			entry->cred = NULL;
 		}
 	} else if (entry->object.vm_object != NULL &&
-		   ((entry->eflags & MAP_ENTRY_NEEDS_COPY) == 0) &&
-		   entry->cred != NULL) {
+	    !(entry->eflags & MAP_ENTRY_NEEDS_COPY) &&
+	    entry->cred != NULL) {
 		VM_OBJECT_WLOCK(entry->object.vm_object);
 		KASSERT(entry->object.vm_object->cred == NULL,
 		    ("OVERCOMMIT: vm_entry_clip_end: both cred e %p", entry));
@@ -3181,7 +3181,7 @@ vm_map_copy_entry(
 		 * If the source entry is marked needs_copy, it is already
 		 * write-protected.
 		 */
-		if ((src_entry->eflags & MAP_ENTRY_NEEDS_COPY) == 0 &&
+		if (!(src_entry->eflags & MAP_ENTRY_NEEDS_COPY) &&
 		    (src_entry->protection & VM_PROT_WRITE) != 0) {
 			pmap_protect(src_map->pmap,
 			    src_entry->start,
@@ -3197,8 +3197,8 @@ vm_map_copy_entry(
 			VM_OBJECT_WLOCK(src_object);
 			charged = ENTRY_CHARGED(src_entry);
 			if ((src_object->handle == NULL) &&
-				(src_object->type == OBJT_DEFAULT ||
-				 src_object->type == OBJT_SWAP)) {
+			    (src_object->type == OBJT_DEFAULT ||
+			     src_object->type == OBJT_SWAP)) {
 				vm_object_collapse(src_object);
 				if ((src_object->flags & (OBJ_NOSPLIT|OBJ_ONEMAPPING)) 
 				    == OBJ_ONEMAPPING) {
@@ -4001,6 +4001,8 @@ vmspace_unshare(struct proc *p)
  *	specified, the map may be changed to perform virtual
  *	copying operations, although the data referenced will
  *	remain the same.
+ *
+ *	wyc: referenced by both vm_fault.c and kern_umtx.c
  */
 int
 vm_map_lookup(vm_map_t *var_map,		/* IN/OUT */
@@ -4020,7 +4022,7 @@ vm_map_lookup(vm_map_t *var_map,		/* IN/OUT */
 	vm_size_t size;
 	struct ucred *cred;
 
-RetryLookup:;
+RetryLookup://; wyc
 
 	vm_map_lock_read(map);
 
@@ -4054,9 +4056,9 @@ RetryLookup:;
 		vm_map_unlock_read(map);
 		return (KERN_PROTECTION_FAILURE);
 	}
-	KASSERT((prot & VM_PROT_WRITE) == 0 || (entry->eflags &
-	    (MAP_ENTRY_USER_WIRED | MAP_ENTRY_NEEDS_COPY)) !=
-	    (MAP_ENTRY_USER_WIRED | MAP_ENTRY_NEEDS_COPY),
+	KASSERT((prot & VM_PROT_WRITE) == 0 ||
+	    (entry->eflags & (MAP_ENTRY_USER_WIRED|MAP_ENTRY_NEEDS_COPY)) !=
+	    (MAP_ENTRY_USER_WIRED|MAP_ENTRY_NEEDS_COPY),
 	    ("entry %p flags %x", entry, entry->eflags));
 	if ((fault_typea & VM_PROT_COPY) != 0 &&
 	    (entry->max_protection & VM_PROT_WRITE) == 0 &&

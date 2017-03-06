@@ -1401,7 +1401,7 @@ vm_pageout_oom_pagecount(struct vmspace *vmspace)
 		obj = entry->object.vm_object;
 		if (obj == NULL)
 			continue;
-		if ((entry->eflags & MAP_ENTRY_NEEDS_COPY) != 0 &&
+		if ((entry->eflags & MAP_ENTRY_NEEDS_COPY) &&
 		    obj->ref_count != 1)
 			continue;
 		switch (obj->type) {
