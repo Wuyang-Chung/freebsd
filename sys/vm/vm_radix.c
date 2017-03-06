@@ -350,7 +350,7 @@ restart:
 	rnode = vm_radix_getroot(rtree);
 	if (rnode == NULL) {
 		rtree->rt_root = (uintptr_t)page | VM_RADIX_ISLEAF;
-		return (0);
+		return (ESUCCESS);
 	}
 	parentp = (void **)&rtree->rt_root;
 	for (;;) {
@@ -389,14 +389,14 @@ restart:
 			*parentp = tmp;
 			vm_radix_addpage(tmp, index, clev, page);
 			vm_radix_addpage(tmp, m->pindex, clev, m);
-			return (0);
+			return (ESUCCESS);
 		} else if (vm_radix_keybarr(rnode, index))
 			break;
 		slot = vm_radix_slot(index, rnode->rn_clev);
 		if (rnode->rn_child[slot] == NULL) {
 			rnode->rn_count++;
 			vm_radix_addpage(rnode, index, rnode->rn_clev, page);
-			return (0);
+			return (ESUCCESS);
 		}
 		parentp = &rnode->rn_child[slot];
 		rnode = rnode->rn_child[slot];
@@ -428,7 +428,7 @@ restart:
 	vm_radix_addpage(tmp, index, clev, page);
 	slot = vm_radix_slot(newind, clev);
 	tmp->rn_child[slot] = rnode;
-	return (0);
+	return (ESUCCESS);
 }
 
 /*

@@ -1146,6 +1146,7 @@ vm_page_insert_after(vm_page_t m, vm_object_t object, vm_pindex_t pindex,
     vm_page_t mpred)
 {
 	vm_page_t msucc;
+	int	rv;
 
 	VM_OBJECT_ASSERT_WLOCKED(object);
 	KASSERT(m->object == NULL,
@@ -1171,13 +1172,13 @@ vm_page_insert_after(vm_page_t m, vm_object_t object, vm_pindex_t pindex,
 	/*
 	 * Now link into the object's ordered list of backed pages.
 	 */
-	if (vm_radix_insert(&object->rtree, m)) { //wyc: root of resident page tree
+	if ((rv=vm_radix_insert(&object->rtree, m))!=ESUCCESS) { //wyc: root of resident page tree
 		m->object = NULL;
 		m->pindex = 0;
-		return (1);
+		return (rv);
 	}
 	vm_page_insert_radixdone(m, object, mpred);
-	return (0);
+	return (ESUCCESS);
 }
 
 /*
@@ -1770,7 +1771,7 @@ vm_page_alloc(vm_object_t object, vm_pindex_t pindex, int req)
 	m->act_count = 0;
 
 	if (object != NULL) {
-		if (vm_page_insert_after(m, object, pindex, mpred)) {
+		if (vm_page_insert_after(m, object, pindex, mpred)!=ESUCCESS) {
 			/* See the comment below about hold count. */
 			if (vp != NULL)
 				vdrop(vp);
@@ -1967,7 +1968,7 @@ retry:
 		/* Unmanaged pages don't use "act_count". */
 		m->oflags = VPO_UNMANAGED;
 		if (object != NULL) {
-			if (vm_page_insert(m, object, pindex)) {
+			if (vm_page_insert(m, object, pindex)!=ESUCCESS) {
 				vm_page_alloc_contig_vdrop(
 				    &deferred_vdrop_list);
 				if (vm_paging_needed())
