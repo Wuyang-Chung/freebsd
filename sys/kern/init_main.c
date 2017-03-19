@@ -205,7 +205,6 @@ mi_startup(void)
 {
 
 	register struct sysinit **sipp;		/* system initialization*/
-	register struct sysinit **xipp;		/* interior loop of sort*/
 
 #if defined(VERBOSE_SYSINIT)
 	int last;
@@ -222,10 +221,11 @@ mi_startup(void)
 
 restart:
 	/* wyc: change to selection sort
-	 * Perform a selection sort of the system initialization objects by
+	 * Perform a bubble sort of the system initialization objects by
 	 * their subsystem (primary key) and order (secondary key).
 	 */
 	for (sipp = sysinit; sipp < sysinit_end-1; sipp++) {
+		register struct sysinit **xipp;	/* interior loop of sort*/
 		register struct sysinit **min;	//wyc: change to selection sort
 		register struct sysinit *save;	//wyc: change to selection sort
 

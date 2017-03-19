@@ -3645,7 +3645,7 @@ Retry:
 	vm_map_lock_read(map);
 
 	/* If addr is already in the entry range, no need to grow.*/
-	if (vm_map_lookup_entry(map, addr, &prev_entry)) {
+	if (vm_map_lookup_entry(map, addr, &prev_entry)==TRUE) {
 		vm_map_unlock_read(map);
 		return (KERN_SUCCESS);
 	}
@@ -4022,7 +4022,7 @@ vm_map_lookup(vm_map_t *var_map,		/* IN/OUT */
 	vm_size_t size;
 	struct ucred *cred;
 
-RetryLookup://; wyc
+RetryLookup:;
 
 	vm_map_lock_read(map);
 
@@ -4078,7 +4078,7 @@ RetryLookup://; wyc
 	/*
 	 * If the entry was copy-on-write, we either ...
 	 */
-	if (entry->eflags & MAP_ENTRY_NEEDS_COPY) {
+	if (entry->eflags & MAP_ENTRY_NEEDS_COPY) { //wyc: private mapping
 		/*
 		 * If we want to write the page, we may as well handle that
 		 * now since we've got the map locked.
@@ -4087,7 +4087,7 @@ RetryLookup://; wyc
 		 * permissions allowed.
 		 */
 		if ((fault_type & VM_PROT_WRITE) != 0 ||
-		    (fault_typea & VM_PROT_COPY) != 0) {
+		    (fault_typea & VM_PROT_COPY) != 0) { //wyc: create shadow object
 			/*
 			 * Make a new object, and place it in the object
 			 * chain.  Note that no new references have appeared

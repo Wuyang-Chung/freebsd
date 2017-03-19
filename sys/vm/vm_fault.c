@@ -306,7 +306,7 @@ vm_fault_hold(vm_map_t map, vm_offset_t vaddr, vm_prot_t fault_type,
 	faultcount = 0;
 	nera = -1;
 
-RetryFault://; wyc??? why there is a ';' at the end of the label
+RetryFault:;
 
 	/*
 	 * Find the backing store object and offset into it to begin the
@@ -338,7 +338,7 @@ RetryFault://; wyc??? why there is a ';' at the end of the label
 	    fs.entry->wiring_thread != curthread) {
 		vm_map_unlock_read(fs.map);
 		vm_map_lock(fs.map);
-		if (vm_map_lookup_entry(fs.map, vaddr, &fs.entry) &&
+		if (vm_map_lookup_entry(fs.map, vaddr, &fs.entry)==TRUE &&
 		    (fs.entry->eflags & MAP_ENTRY_IN_TRANSITION)) {
 			if (fs.vp != NULL) {
 				vput(fs.vp);
@@ -371,19 +371,20 @@ RetryFault://; wyc??? why there is a ';' at the end of the label
 	    (fault_flags & (VM_FAULT_WIRE | VM_FAULT_DIRTY)) == 0 &&
 	    /* avoid calling vm_object_set_writeable_dirty() */
 	    ((prot & VM_PROT_WRITE) == 0 ||
-	    (fs.first_object->type != OBJT_VNODE &&
-	    (fs.first_object->flags & OBJ_TMPFS_NODE) == 0) ||
-	    (fs.first_object->flags & OBJ_MIGHTBEDIRTY) != 0)) {
+	     (fs.first_object->type != OBJT_VNODE &&
+	      (fs.first_object->flags & OBJ_TMPFS_NODE) == 0) ||
+	     (fs.first_object->flags & OBJ_MIGHTBEDIRTY) != 0)) {
 		VM_OBJECT_RLOCK(fs.first_object);
 		if ((prot & VM_PROT_WRITE) != 0 &&
 		    (fs.first_object->type == OBJT_VNODE ||
-		    (fs.first_object->flags & OBJ_TMPFS_NODE) != 0) &&
+		     (fs.first_object->flags & OBJ_TMPFS_NODE) != 0) &&
 		    (fs.first_object->flags & OBJ_MIGHTBEDIRTY) == 0)
 			goto fast_failed;
 		m = vm_page_lookup(fs.first_object, fs.first_pindex);
 		/* A busy page can be mapped for read|execute access. */
-		if (m == NULL || ((prot & VM_PROT_WRITE) != 0 &&
-		    vm_page_busied(m)) || m->valid != VM_PAGE_BITS_ALL)
+		if (m == NULL ||
+		    ((prot & VM_PROT_WRITE) && vm_page_busied(m)) ||
+		    m->valid != VM_PAGE_BITS_ALL)
 			goto fast_failed;
 		result = pmap_enter(fs.map->pmap, vaddr, m, prot,
 		   fault_type | PMAP_ENTER_NOSLEEP | (wired ? PMAP_ENTER_WIRED :
@@ -809,7 +810,7 @@ vnode_locked:
 			fs.object = next_object;
 		}
 	}
-	//wyc: page has been found
+//wyc: page has been found
 	vm_page_assert_xbusied(fs.m);
 
 	/*
@@ -989,7 +990,7 @@ vnode_locked:
 	 * map entry.  A read lock on the map suffices to update this address
 	 * safely.
 	 */
-	if (hardfault)
+	if (hardfault) //wyc: actually did IO
 		fs.entry->next_read = vaddr + ptoa(ahead) + PAGE_SIZE;
 
 	vm_fault_dirty(fs.entry, fs.m, prot, fault_type, fault_flags, TRUE);
