@@ -70,7 +70,7 @@
 #include <machine/vmparam.h>
 
 /*
- * CTL_VM identifiers
+ * CTL_VM identifiers wyc: sysctl
  */
 #define	VM_TOTAL		1	/* struct vmtotal */
 #define	VM_METER                VM_TOTAL/* deprecated, use VM_TOTAL */
@@ -99,7 +99,7 @@ struct xswdev {
 };
 
 /*
- *	Return values from the VM routines.
+ *	Return values from the Mach VM routines.
  */
 #define	KERN_SUCCESS		0
 #define	KERN_INVALID_ADDRESS	1

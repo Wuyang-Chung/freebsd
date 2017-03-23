@@ -173,12 +173,11 @@ ogetpagesize(td, uap)
 #ifndef _SYS_SYSPROTO_H_
 struct mmap_args {
 	void *addr;
-	size_t len; //wyc: must be multiple of pages
+	size_t len;
 	int prot;
 	int flags;
 	int fd;
-	long pad;
-	off_t pos; //wyc: must align on page boundary
+	off_t pos;
 };
 #endif
 
@@ -1244,7 +1243,7 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 		locktype = LK_SHARED;
 	if ((error = vget(vp, locktype, td)) != 0) //wyc: get reference on the vnode
 		return (error);
-	foff = *foffp;
+	foff = *foffp; //wyc???: assign int64 to uint32?
 	flags = *flagsp;
 	obj = vp->v_object;
 	if (vp->v_type == VREG) { //wyc: it is a regular file

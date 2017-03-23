@@ -1403,12 +1403,12 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	if (start < map->min_offset)
 		start = map->min_offset;
 	if (start + length > map->max_offset || start + length < start)
-		return (1); //wyc: not successful
+		return (KERN_INVALID_ARGUMENT);
 
 	/* Empty tree means wide open address space. */
 	if (map->root == NULL) {
 		*addr = start;
-		return (0); //wyc: successful
+		return (KERN_SUCCESS);
 	}
 
 	/*
@@ -1418,7 +1418,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	map->root = vm_map_entry_splay(start, map->root);
 	if (start + length <= map->root->start) {
 		*addr = start;
-		return (0);
+		return (KERN_SUCCESS);
 	}
 
 	/*
@@ -1429,13 +1429,13 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	st = (start > map->root->end) ? start : map->root->end;
 	if (length <= map->root->end + map->root->adj_free - st) {
 		*addr = st;
-		return (0);
+		return (KERN_SUCCESS);
 	}
 
 	/* With max_free, can immediately tell if no solution. */
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
-		return (1);
+		return (1); //wyc: not successful
 
 	/*
 	 * Search the right subtree in the order: left subtree, root,
@@ -1447,7 +1447,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 			entry = entry->left;
 		else if (entry->adj_free >= length) {
 			*addr = entry->end;
-			return (0);
+			return (KERN_SUCCESS);
 		} else
 			entry = entry->right;
 	}
@@ -1519,7 +1519,7 @@ again:
 	vm_map_lock(map);
 	do {
 		if (find_space != VMFS_NO_SPACE) {
-			if (vm_map_findspace(map, start, length, addr) ||
+			if (vm_map_findspace(map, start, length, addr)!=KERN_SUCCESS||
 			    (max_addr != 0 && *addr + length > max_addr)) {
 				vm_map_unlock(map);
 				if (find_space == VMFS_OPTIMAL_SPACE) {

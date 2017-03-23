@@ -142,7 +142,7 @@ typedef	__uint32_t	__vm_paddr_t;
 #endif
 typedef	__uint32_t	__vm_size_t;
 #endif
-typedef	__int64_t	__vm_ooffset_t;
+typedef	__int64_t	__vm_ooffset_t;	//wyc???: Why int? Should it be unsigned int?
 typedef	__uint64_t	__vm_pindex_t;
 typedef	int		___wchar_t;
 

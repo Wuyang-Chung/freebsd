@@ -221,6 +221,7 @@ vm_object_zinit(void *mem, int size, int flags)
 	return (0);
 }
 
+//wyc: rename _vm_object_allocate to _vm_object_init
 static void
 _vm_object_init(vm_object_t object, objtype_t type, vm_pindex_t size)
 {
@@ -267,7 +268,7 @@ _vm_object_init(vm_object_t object, objtype_t type, vm_pindex_t size)
 	umtx_shm_object_init(object);
 }
 
-/*
+/* wyc: rename vm_object_init to vm_object_mod_init
  *	vm_object_mod_init:
  *
  *	Initialize the VM objects module.

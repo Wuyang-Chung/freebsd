@@ -442,7 +442,7 @@ kmap_alloc_wait(map, size)
 		 * to lock out sleepers/wakers.
 		 */
 		vm_map_lock(map);
-		if (vm_map_findspace(map, vm_map_min(map), size, &addr) == 0)
+		if (vm_map_findspace(map, vm_map_min(map), size, &addr) == KERN_SUCCESS)
 			break;
 		/* no space now; see if we can ever get space */
 		if (vm_map_max(map) - vm_map_min(map) < size) {

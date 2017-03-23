@@ -34,6 +34,7 @@ struct thread;
 #define	PADR_(t)	0
 #endif
 
+#if !defined(WYC)
 struct nosys_args {
 	register_t dummy;
 };
@@ -1788,6 +1789,7 @@ struct numa_setaffinity_args {
 	char id_l_[PADL_(id_t)]; id_t id; char id_r_[PADR_(id_t)];
 	char policy_l_[PADL_(const struct vm_domain_policy_entry *)]; const struct vm_domain_policy_entry * policy; char policy_r_[PADR_(const struct vm_domain_policy_entry *)];
 };
+#endif // !defined(WYC)
 int	nosys(struct thread *, struct nosys_args *);
 void	sys_sys_exit(struct thread *, struct sys_exit_args *);
 int	sys_fork(struct thread *, struct fork_args *);
