@@ -684,9 +684,9 @@ unlock_return:
  * that is really hard to do.
  */
 static void
-vm_pageout_map_deactivate_pages(map, desired)
-	vm_map_t map;
-	long desired;
+vm_pageout_map_deactivate_pages(
+	vm_map_t map,
+	long desired)
 {
 	vm_map_entry_t tmpe;
 	vm_object_t obj, bigobj;

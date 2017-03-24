@@ -1115,9 +1115,9 @@ vm_map_lookup_entry(
 	 * "address" is the map's header.
 	 */
 	cur = map->root;
-	if (cur == NULL)
+	if (cur == NULL) {
 		*entry = MAP_ENTRY_SENTINEL(map);
-	else if (address >= cur->start && cur->end > address) {
+	} else if (address >= cur->start && cur->end > address) {
 		*entry = cur;
 		return (TRUE);
 	} else if ((locked = vm_map_locked(map)) ||
@@ -1245,9 +1245,7 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		goto charged;
 	if ((cow & MAP_ACC_CHARGED) || 
 	    ((prot & VM_PROT_WRITE) &&
-	     ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL)
-	    )
-	   ) {
+	     ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL))) {
 		if (!(cow & MAP_ACC_CHARGED) && !swap_reserve(end - start))
 			return (KERN_RESOURCE_SHORTAGE);
 		KASSERT(object == NULL || (protoeflags & MAP_ENTRY_NEEDS_COPY) ||
@@ -1280,9 +1278,7 @@ charged:
 		 (prev_entry->wired_count == 0) &&
 		 (prev_entry->cred == cred ||
 		  (prev_entry->object.vm_object != NULL &&
-		   (prev_entry->object.vm_object->cred == cred)
-		  )
-		 ) &&
+		   prev_entry->object.vm_object->cred == cred)) &&
 		 vm_object_coalesce(
 		     prev_entry->object.vm_object,
 		     prev_entry->offset,
@@ -1435,7 +1431,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	/* With max_free, can immediately tell if no solution. */
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
-		return (1); //wyc: not successful
+		return (KERN_NO_SPACE); //wyc: KERN_NO_SPACE???
 
 	/*
 	 * Search the right subtree in the order: left subtree, root,

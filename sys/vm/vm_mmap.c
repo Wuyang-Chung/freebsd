@@ -359,9 +359,13 @@ sys_mmap(
 			goto done;
 		}
 
+#if defined(WYC)
+		vn_mmap();
+#else
 		/* This relies on VM_PROT_* matching PROT_*. */
 		error = fo_mmap(fp, &vms->vm_map, &addr, size, prot,
 		    cap_maxprot, flags, pos, td); //wyc: in: fp, in/out:addr
+#endif
 	}
 
 	if (error == 0)

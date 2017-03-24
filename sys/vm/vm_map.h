@@ -202,11 +202,17 @@ struct vm_map {
 };
 
 #define MAP_ENTRY_SENTINEL(map) ((vm_map_entry_t)&(map)->header)
+#define MAP_ENTRY_FIRST(map) ((map)->header.next)
 
 #define MAP_ENTRY_FOREACH(entry, map)			\
-	for ((entry) = (map)->header.next;		\
-	    (entry) != MAP_ENTRY_SENTINEL(map);	\
-	    (entry) = (entry)->next) /* wyc */
+	for ((entry) = MAP_ENTRY_FIRST(map);		\
+	    (entry) != MAP_ENTRY_SENTINEL(map);		\
+	    (entry) = (entry)->next)
+
+#define MAP_ENTRY_FOREACH_SINCE(entry, map, since)	\
+	for ((entry) = (since);				\
+	    (entry) != MAP_ENTRY_SENTINEL(map);		\
+	    (entry) = (entry)->next)
 
 /*
  * vm_flags_t values

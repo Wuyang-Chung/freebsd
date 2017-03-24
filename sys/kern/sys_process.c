@@ -392,7 +392,7 @@ ptrace_vm_entry(struct thread *td, struct proc *p, struct ptrace_vm_entry *pve)
 	vm_map_lock_read(map);
 
 	do {
-		entry = map->header.next;
+		entry = MAP_ENTRY_FIRST(map);
 		index = 0;
 		while (index < pve->pve_entry && entry != MAP_ENTRY_SENTINEL(map)) {
 			entry = entry->next;
