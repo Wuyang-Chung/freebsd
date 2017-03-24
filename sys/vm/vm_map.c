@@ -3440,7 +3440,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			 * Insert the entry into the new map -- we know we're
 			 * inserting at the end of the new map.
 			 */
-			vm_map_entry_link(new_map, new_map->header.prev,
+			vm_map_entry_link(new_map, MAP_ENTRY_LAST(new_map),
 			    new_entry);
 			vmspace_map_entry_forked(vm1, vm2, new_entry); //wyc: for accounting
 
@@ -3469,7 +3469,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			new_entry->wired_count = 0;
 			new_entry->object.vm_object = NULL;
 			new_entry->cred = NULL;
-			vm_map_entry_link(new_map, new_map->header.prev,
+			vm_map_entry_link(new_map, MAN_ENTRY_LAST(new_map),
 			    new_entry); //wyc: insert to the end of the list
 			vmspace_map_entry_forked(vm1, vm2, new_entry); //wyc: update vm2's statistics
 			vm_map_copy_entry(old_map, new_map, old_entry,

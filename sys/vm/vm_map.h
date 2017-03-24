@@ -201,8 +201,9 @@ struct vm_map {
 	int busy;
 };
 
-#define MAP_ENTRY_SENTINEL(map) ((vm_map_entry_t)&(map)->header)
-#define MAP_ENTRY_FIRST(map) ((map)->header.next)
+#define MAP_ENTRY_SENTINEL(map)	((vm_map_entry_t)&(map)->header)
+#define MAP_ENTRY_FIRST(map)	((map)->header.next)
+#define MAP_ENTRY_LAST(map)	((map)->header.prev)
 
 #define MAP_ENTRY_FOREACH_SINCE(entry, map, since)	\
 	for ((entry) = (since);				\
