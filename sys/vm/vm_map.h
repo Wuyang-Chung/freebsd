@@ -97,7 +97,7 @@ union vm_map_object {
  *	Also included is control information for virtual copy operations.
  */
 struct vm_map_entry {
-	/* prev and next must be the first and second field respectively */
+	/* wyc prev and next must be the first and second field respectively */
 	struct vm_map_entry *prev;	/* previous entry wyc: circular list */
 	struct vm_map_entry *next;	/* next entry wyc: circular list */
 	struct vm_map_entry *left;	/* left child in binary search tree wyc: splay tree */
@@ -178,14 +178,14 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  *	(c)	const until freed
  */
 struct vm_map {
-/*
+/* wyc
  *  offset_of(_entry_head, prev) must be equal to offset_of(vm_map_entry, prev)
  *  offset_of(_entry_head, next) must be equal to offset_of(vm_map_entry, next)
-*/
+ */
 	struct _entry_head {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
-	} header;			/* Sentinel head of circular link list */
+	} header;			/* Sentinel node of the circular link list */
 	struct sx lock;			/* Lock for map data */
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
@@ -204,16 +204,14 @@ struct vm_map {
 #define MAP_ENTRY_SENTINEL(map) ((vm_map_entry_t)&(map)->header)
 #define MAP_ENTRY_FIRST(map) ((map)->header.next)
 
-#define MAP_ENTRY_FOREACH(entry, map)			\
-	for ((entry) = MAP_ENTRY_FIRST(map);		\
-	    (entry) != MAP_ENTRY_SENTINEL(map);		\
-	    (entry) = (entry)->next)
-
 #define MAP_ENTRY_FOREACH_SINCE(entry, map, since)	\
 	for ((entry) = (since);				\
 	    (entry) != MAP_ENTRY_SENTINEL(map);		\
 	    (entry) = (entry)->next)
 
+#define MAP_ENTRY_FOREACH(entry, map)	\
+	MAP_ENTRY_FOREACH_SINCE(entry, map, MAP_ENTRY_FIRST(map))
+	
 /*
  * vm_flags_t values
  */

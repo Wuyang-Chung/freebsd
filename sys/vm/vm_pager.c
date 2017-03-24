@@ -111,12 +111,12 @@ dead_pager_alloc(void *handle, vm_ooffset_t size, vm_prot_t prot,
 }
 
 static void
-dead_pager_putpages(object, m, count, flags, rtvals)
-	vm_object_t object;
-	vm_page_t *m;
-	int count;
-	int flags;
-	int *rtvals;
+dead_pager_putpages(
+	vm_object_t object,
+	vm_page_t *m,
+	int count,
+	int flags,
+	int *rtvals)
 {
 	int i;
 
@@ -126,11 +126,11 @@ dead_pager_putpages(object, m, count, flags, rtvals)
 }
 
 static int
-dead_pager_haspage(object, pindex, prev, next)
-	vm_object_t object;
-	vm_pindex_t pindex;
-	int *prev;
-	int *next;
+dead_pager_haspage(
+	vm_object_t object,
+	vm_pindex_t pindex,
+	int *prev,
+	int *next)
 {
 	if (prev)
 		*prev = 0;
@@ -140,8 +140,8 @@ dead_pager_haspage(object, pindex, prev, next)
 }
 
 static void
-dead_pager_dealloc(object)
-	vm_object_t object;
+dead_pager_dealloc(
+	vm_object_t object)
 {
 	return;
 }
@@ -154,15 +154,15 @@ static struct pagerops deadpagerops = {
 	.pgo_haspage =	dead_pager_haspage,
 };
 
-struct pagerops *pagertab[] = {
-	&defaultpagerops,	/* OBJT_DEFAULT */
-	&swappagerops,		/* OBJT_SWAP */
-	&vnodepagerops,		/* OBJT_VNODE */
-	&devicepagerops,	/* OBJT_DEVICE */
-	&physpagerops,		/* OBJT_PHYS */
-	&deadpagerops,		/* OBJT_DEAD */
-	&sgpagerops,		/* OBJT_SG */
-	&mgtdevicepagerops,	/* OBJT_MGTDEVICE */
+struct pagerops *pagertab[] = {	//wyc
+	[OBJT_DEFAULT]	= &defaultpagerops,
+	[OBJT_SWAP]	= &swappagerops,
+	[OBJT_VNODE]	= &vnodepagerops,
+	[OBJT_DEVICE]	= &devicepagerops,
+	[OBJT_PHYS]	= &physpagerops,
+	[OBJT_DEAD]	= &deadpagerops,
+	[OBJT_SG]	= &sgpagerops,
+	[OBJT_MGTDEVICE]= &mgtdevicepagerops,
 };
 
 /*
@@ -226,11 +226,13 @@ vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
     vm_prot_t prot, vm_ooffset_t off, struct ucred *cred)
 {
 	vm_object_t ret;
-	struct pagerops *ops;
+	//wyc struct pagerops *ops;
+	pgo_alloc_t	*pgo_alloc;
 
-	ops = pagertab[type];
-	if (ops)
-		ret = (*ops->pgo_alloc) (handle, size, prot, off, cred); //wyc: vnode_pager_alloc()
+	//wyc ops = pagertab[type];
+	pgo_alloc = pagertab[type]->pgo_alloc;
+	if (pgo_alloc)
+		ret = (*pgo_alloc) (handle, size, prot, off, cred); //wyc: vnode_pager_alloc()
 	else
 		ret = NULL;
 	return (ret);
