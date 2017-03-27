@@ -702,8 +702,7 @@ vm_pageout_map_deactivate_pages(
 	 * first, search out the biggest object, and try to free pages from
 	 * that.
 	 */
-	tmpe = MAP_ENTRY_FIRST(map);
-	while (tmpe != MAP_ENTRY_SENTINEL(map)) {
+	MAP_ENTRY_FOREACH(tmpe, map) {
 		if ((tmpe->eflags & MAP_ENTRY_IS_SUB_MAP) == 0) {
 			obj = tmpe->object.vm_object;
 			if (obj != NULL && VM_OBJECT_TRYRLOCK(obj)) {
@@ -719,7 +718,6 @@ vm_pageout_map_deactivate_pages(
 		}
 		if (tmpe->wired_count > 0)
 			nothingwired = FALSE;
-		tmpe = tmpe->next;
 	}
 
 	if (bigobj != NULL) {
@@ -730,8 +728,7 @@ vm_pageout_map_deactivate_pages(
 	 * Next, hunt around for other pages to deactivate.  We actually
 	 * do this search sort of wrong -- .text first is not the best idea.
 	 */
-	tmpe = MAP_ENTRY_FIRST(map);
-	while (tmpe != MAP_ENTRY_SENTINEL(map)) {
+	MAP_ENTRY_FOREACH(tmpe, map) {
 		if (pmap_resident_count(vm_map_pmap(map)) <= desired)
 			break;
 		if ((tmpe->eflags & MAP_ENTRY_IS_SUB_MAP) == 0) {
@@ -742,7 +739,6 @@ vm_pageout_map_deactivate_pages(
 				VM_OBJECT_RUNLOCK(obj);
 			}
 		}
-		tmpe = tmpe->next;
 	}
 
 	/*

@@ -790,10 +790,9 @@ RestartScan:
 	 * up the pages elsewhere.
 	 */
 	lastvecindex = -1;
-	for (current = entry;
-	    (current != MAP_ENTRY_SENTINEL(map)) && (current->start < end);
-	    current = current->next) {
-
+	MAP_ENTRY_FOREACH_SINCE(current, map, entry) {
+		if (current->start >= end)
+			break;
 		/*
 		 * check for contiguity
 		 */

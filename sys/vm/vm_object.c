@@ -2424,23 +2424,23 @@ _vm_object_in_map(vm_map_t map, vm_object_t object, vm_map_entry_t entry)
 		return 0;
 
 	if (entry == 0) {
-		tmpe = MAP_ENTRY_FIRST(map);
 		entcount = map->nentries;
-		while (entcount-- && (tmpe != MAP_ENTRY_SENTINEL(map))) {
+		for (tmpe = MAP_ENTRY_FIRST(map);
+		     entcount-- && tmpe != MAP_ENTRY_SENTINEL(map);
+		     tmpe = tmpe->next) {
 			if (_vm_object_in_map(map, object, tmpe)) {
 				return 1;
 			}
-			tmpe = tmpe->next;
 		}
 	} else if (entry->eflags & MAP_ENTRY_IS_SUB_MAP) {
 		tmpm = entry->object.sub_map;
-		tmpe = MAP_ENTRY_FIRST(tmpm);
 		entcount = tmpm->nentries;
-		while (entcount-- && tmpe != MAP_ENTRY_SENTINEL(tmpm)) {
+		for (tmpe = MAP_ENTRY_FIRST(tmpm);
+		     entcount-- && tmpe != MAP_ENTRY_SENTINEL(tmpm);
+		     tmpe = tmpe->next) {
 			if (_vm_object_in_map(tmpm, object, tmpe)) {
 				return 1;
 			}
-			tmpe = tmpe->next;
 		}
 	} else if ((obj = entry->object.vm_object) != NULL) {
 		for (; obj; obj = obj->backing_object)
