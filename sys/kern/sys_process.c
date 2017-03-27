@@ -393,18 +393,19 @@ ptrace_vm_entry(struct thread *td, struct proc *p, struct ptrace_vm_entry *pve)
 
 	do {
 		index = 0;
-		entry = MAP_ENTRY_FIRST(map);
-		while (index < pve->pve_entry && entry != MAP_ENTRY_SENTINEL(map)) {
-			entry = entry->next;
+		for (entry = MAP_ENTRY_FIRST(map);
+		    index < pve->pve_entry && entry != MAP_ENTRY_SENTINEL(map);
+		    entry = entry->next) {
 			index++;
 		}
 		if (index != pve->pve_entry) {
 			error = EINVAL;
 			break;
 		}
-		while (entry != MAP_ENTRY_SENTINEL(map) &&
-		    (entry->eflags & MAP_ENTRY_IS_SUB_MAP) != 0) {
-			entry = entry->next;
+		for (;
+		     entry != MAP_ENTRY_SENTINEL(map) &&
+		     (entry->eflags & MAP_ENTRY_IS_SUB_MAP) != 0;
+		     entry = entry->next) {
 			index++;
 		}
 		if (entry == MAP_ENTRY_SENTINEL(map)) {

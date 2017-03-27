@@ -2296,7 +2296,7 @@ vm_map_inherit(vm_map_t map, vm_offset_t start, vm_offset_t end,
 	       vm_inherit_t new_inheritance)
 {
 	vm_map_entry_t entry;
-	vm_map_entry_t temp_entry;
+	//vm_map_entry_t temp_entry;
 
 	switch (new_inheritance) {
 	case VM_INHERIT_NONE:
@@ -2310,11 +2310,11 @@ vm_map_inherit(vm_map_t map, vm_offset_t start, vm_offset_t end,
 		return (KERN_SUCCESS);
 	vm_map_lock(map);
 	VM_MAP_RANGE_CHECK(map, start, end);
-	if (vm_map_lookup_entry(map, start, &temp_entry)) {
-		entry = temp_entry;
+	if (vm_map_lookup_entry(map, start, &entry)) {
+		//entry = temp_entry;
 		vm_map_clip_start(map, entry, start);
 	} else
-		entry = temp_entry->next;
+		entry = entry->next;
 	for (;
 	     (entry != MAP_ENTRY_SENTINEL(map)) && (entry->start < end);
 	     entry = entry->next) {
@@ -4212,8 +4212,7 @@ vm_map_print(vm_map_t map)
 			    (void *)entry->object.sub_map,
 			    (uintmax_t)entry->offset);
 			if ((entry->prev == MAP_ENTRY_SENTINEL(map)) ||
-			    (entry->prev->object.sub_map !=
-				entry->object.sub_map)) {
+			    (entry->prev->object.sub_map != entry->object.sub_map)) {
 				db_indent += 2;
 				vm_map_print((vm_map_t)entry->object.sub_map);
 				db_indent -= 2;
@@ -4234,8 +4233,7 @@ vm_map_print(vm_map_t map)
 			db_printf("\n");
 
 			if ((entry->prev == MAP_ENTRY_SENTINEL(map)) ||
-			    (entry->prev->object.vm_object !=
-				entry->object.vm_object)) {
+			    (entry->prev->object.vm_object != entry->object.vm_object)) {
 				db_indent += 2;
 				vm_object_print((db_expr_t)(intptr_t)
 						entry->object.vm_object,
