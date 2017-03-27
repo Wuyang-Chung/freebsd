@@ -8,7 +8,8 @@ cp /usr/obj/nfs/vm.FreeBSD/sys/WYCVM/kernel.debug .
 if ($? == 0) echo "*** kernel copied"
 echo "*** rebooting the machine ...."
 reboot
+exit 0
 
 error:
 echo "*** error"
-
+exit 1
