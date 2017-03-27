@@ -97,6 +97,13 @@ struct fork_args {
 };
 #endif
 
+struct {
+	unsigned fork;
+	unsigned pdfork;
+	unsigned vfork;
+	unsigned rfork;
+} fork_st;
+
 /* ARGSUSED */
 int
 sys_fork(struct thread *td, struct fork_args *uap)
@@ -104,6 +111,7 @@ sys_fork(struct thread *td, struct fork_args *uap)
 	struct fork_req fr;
 	int error, pid;
 
+	++fork_st.fork;
 	bzero(&fr, sizeof(fr));
 	fr.fr_flags = RFFDG | RFPROC;
 	fr.fr_pidp = &pid;
@@ -122,6 +130,7 @@ sys_pdfork(struct thread *td, struct pdfork_args *uap)
 	struct fork_req fr;
 	int error, fd, pid;
 
+	++fork_st.pdfork;
 	bzero(&fr, sizeof(fr));
 	fr.fr_flags = RFFDG | RFPROC | RFPROCDESC;
 	fr.fr_pidp = &pid;
@@ -148,6 +157,7 @@ sys_vfork(struct thread *td, struct vfork_args *uap)
 	struct fork_req fr;
 	int error, pid;
 
+	++fork_st.vfork;
 	bzero(&fr, sizeof(fr));
 	fr.fr_flags = RFFDG | RFPROC | RFPPWAIT | RFMEM;
 	fr.fr_pidp = &pid;
@@ -165,6 +175,7 @@ sys_rfork(struct thread *td, struct rfork_args *uap)
 	struct fork_req fr;
 	int error, pid;
 
+	++fork_st.rfork;
 	/* Don't allow kernel-only flags. */
 	if ((uap->flags & RFKERNELONLY) != 0)
 		return (EINVAL);
@@ -905,7 +916,8 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 		proc_linkup(newproc, td2);
 	} else {
-		if (__predict_false(td2->td_kstack == 0 || td2->td_kstack_pages != pages)) { //wyc
+		if (__predict_false(td2->td_kstack == 0 ||
+				    td2->td_kstack_pages != pages)) { //wyc
 			if (td2->td_kstack != 0)
 				vm_thread_dispose(td2);
 			if (!thread_alloc_stack(td2, pages)) {
