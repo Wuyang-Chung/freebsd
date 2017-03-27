@@ -2218,7 +2218,7 @@ sysctl_kern_proc_ovmmap(SYSCTL_HANDLER_ARGS)
 			break;
 		if (last_timestamp != map->timestamp) {
 			vm_map_lookup_entry(map, addr - 1, &tmp_entry);
-			entry = tmp_entry;
+			entry = tmp_entry; //wyc: note entry changed
 		}
 	}
 	vm_map_unlock_read(map);
@@ -2479,7 +2479,7 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 			break;
 		if (last_timestamp != map->timestamp) {
 			vm_map_lookup_entry(map, addr - 1, &tmp_entry);
-			entry = tmp_entry;
+			entry = tmp_entry; //wyc: note entry changed
 		}
 	}
 	vm_map_unlock_read(map);

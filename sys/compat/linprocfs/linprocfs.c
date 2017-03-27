@@ -1099,7 +1099,7 @@ linprocfs_doprocmaps(PFS_FILL_ARGS)
 			 * the entry may have been clipped, merged, or deleted.
 			 */
 			vm_map_lookup_entry(map, e_end - 1, &tmp_entry);
-			entry = tmp_entry;
+			entry = tmp_entry; //wyc: note entry changed
 		}
 	}
 	vm_map_unlock_read(map);
