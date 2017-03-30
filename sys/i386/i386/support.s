@@ -259,7 +259,7 @@ END(memcpy)
  * Access user memory from inside the kernel. These routines and possibly
  * the math- and DOS emulators should be the only places that do this.
  *
- * We have to access the memory with user's permissions, so use a segment
+ * We have to access the memory with user`s permissions, so use a segment
  * selector with RPL 3. For writes to user space we have to additionally
  * check the PTE for write permission, because the 386 does not check
  * write permissions when we are executing with EPL 0. The 486 does check
@@ -425,6 +425,9 @@ END(casueword)
 /*
  * Fetch (load) a 32-bit word, a 16-bit word, or an 8-bit byte from user
  * memory.
+
+int fueword32(volatile const void *base, int32_t *val);
+int   fueword(volatile const void *base, long *val);
  */
 
 ALTENTRY(fueword32)
@@ -448,7 +451,7 @@ END(fueword)
 /*
  * fuswintr() and suswintr() are specialized variants of fuword16() and
  * suword16(), respectively.  They are called from the profiling code,
- * potentially at interrupt time.  If they fail, that's okay; good things
+ * potentially at interrupt time.  If they fail, that`s okay; good things
  * will happen later.  They always fail for now, until the trap code is
  * able to deal with this.
  */

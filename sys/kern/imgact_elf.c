@@ -383,7 +383,7 @@ __elfN(check_header)(const Elf_Ehdr *hdr)
 	if (i == MAX_BRANDS)
 		return (ENOEXEC);
 
-	return (0);
+	return (ESUCCESS);
 }
 
 static int
@@ -678,7 +678,7 @@ __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 	imgp->execlabel = NULL;
 
 	NDINIT(nd, LOOKUP, LOCKLEAF | FOLLOW, UIO_SYSSPACE, file, curthread);
-	if ((error = namei(nd)) != 0) {
+	if ((error = namei(nd)) != ESUCCESS) {
 		nd->ni_vp = NULL;
 		goto fail;
 	}
@@ -794,7 +794,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	 * if particular brand doesn't support it.
 	 */
 #if defined(WYC)
-	if (elf32_check_header(hdr) != 0 ||
+	if (elf32_check_header(hdr) != ESUCCESS ||
 #else
 	if (__elfN(check_header)(hdr) != 0 ||
 #endif

@@ -602,8 +602,8 @@ interpret:
 			continue;
 		}
 #if defined(WYC)
-		error = exec_elf32_imgact(imgp); //wyc: the function actually called
-		error = exec_shell_imgact(imgp); //wyc: shell script
+		error = exec_elf32_imgact(imgp); //wyc
+		error = exec_shell_imgact(imgp); //wyc
 #else
 		error = (*_execsw[i]->ex_imgact)(imgp);
 #endif
@@ -681,7 +681,7 @@ interpret:
 	/*
 	 * Copy out strings (args and env) and initialize stack base
 	 */
-	if (p->p_sysent->sv_copyout_strings)
+	if (p->p_sysent->sv_copyout_strings) //wyc: sv_copyout_strings == exec_copyout_strings()
 		stack_base = (*p->p_sysent->sv_copyout_strings)(imgp);
 	else
 		stack_base = exec_copyout_strings(imgp);
@@ -1400,9 +1400,9 @@ exec_copyout_strings(
 		execpath_len = 0;
 	p = imgp->proc;
 	szsigcode = 0;
-	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
-	if (p->p_sysent->sv_sigcode_base == 0) {
-		if (p->p_sysent->sv_szsigcode != NULL)
+	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings; //wyc: PS_STRINGS
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: true
+		if (p->p_sysent->sv_szsigcode != NULL) //wyc: true
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;

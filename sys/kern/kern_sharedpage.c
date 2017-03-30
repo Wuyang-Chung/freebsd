@@ -260,12 +260,12 @@ exec_sysvec_init(void *param)
 	struct sysentvec *sv;
 
 	sv = (struct sysentvec *)param;
-	if ((sv->sv_flags & SV_SHP) == 0)
+	if ((sv->sv_flags & SV_SHP) == 0) //wyc: FALSE
 		return;
 	sv->sv_shared_page_obj = shared_page_obj;
 	sv->sv_sigcode_base = sv->sv_shared_page_base +
 	    shared_page_fill(*(sv->sv_szsigcode), 16, sv->sv_sigcode);
-	if ((sv->sv_flags & SV_ABI_MASK) != SV_ABI_FREEBSD)
+	if ((sv->sv_flags & SV_ABI_MASK) != SV_ABI_FREEBSD) //wyc: FALSE
 		return;
 	if ((sv->sv_flags & SV_TIMEKEEP) != 0) { //wyc: TRUE
 #ifdef COMPAT_FREEBSD32

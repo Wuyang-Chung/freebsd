@@ -1185,7 +1185,7 @@ int
 vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot, vm_prot_t max, int cow)
 {
-	vm_map_entry_t new_entry, prev_entry/*wyc, temp_entry*/;
+	vm_map_entry_t new_entry, prev_entry;
 	vm_eflags_t protoeflags;
 	struct ucred *cred;
 	vm_inherit_t inheritance;
@@ -1210,8 +1210,6 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	 */
 	if (vm_map_lookup_entry(map, start, &prev_entry))
 		return (KERN_NO_SPACE);
-
-	//prev_entry = temp_entry;	//wyc
 
 	/*
 	 * Assert that the next entry doesn't overlap the end point.
