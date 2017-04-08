@@ -107,11 +107,11 @@ struct sysentvec {
 	int		(*sv_imgact_try)(struct image_params *);
 	int		sv_minsigstksz;	/* minimum signal stack size */
 	int		sv_pagesize;	/* pagesize */
-	vm_offset_t	sv_minuser;	/* VM_MIN_ADDRESS */
-	vm_offset_t	sv_maxuser;	/* VM_MAXUSER_ADDRESS */
-	vm_offset_t	sv_usrstack;	/* USRSTACK */
+	vm_offset_t	sv_minuser;	/* VM_MIN_ADDRESS */ //wyc: ==0
+	vm_offset_t	sv_maxuser;	/* VM_MAXUSER_ADDRESS */ //wyc: == 3G-4M
+	vm_offset_t	sv_usrstack;	/* USRSTACK */ //wyc: 3G-4M-4K
 	vm_offset_t	sv_psstrings;	/* PS_STRINGS */
-	int		sv_stackprot;	/* vm protection for stack */
+	int		sv_stackprot;	/* vm protection for stack */ //wyc: VM_PROT_ALL
 	register_t	*(*sv_copyout_strings)(struct image_params *); //wyc: ==exec_copyout_strings
 	void		(*sv_setregs)(struct thread *, struct image_params *,
 			    u_long); //wyc: ==exec_setregs

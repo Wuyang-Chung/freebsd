@@ -264,7 +264,7 @@ proc_rwmem(struct proc *p, struct uio *uio)
 	 * copy of each page.  Since these copies will not be writeable by the
 	 * process, we must explicity request that they be dirtied.
 	 */
-	writing = uio->uio_rw == UIO_WRITE;
+	writing = (uio->uio_rw == UIO_WRITE);
 	reqprot = writing ? VM_PROT_COPY | VM_PROT_READ : VM_PROT_READ;
 	fault_flags = writing ? VM_FAULT_DIRTY : VM_FAULT_NORMAL;
 

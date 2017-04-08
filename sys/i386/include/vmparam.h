@@ -159,7 +159,7 @@
 #define	USRSTACK		SHAREDPAGE		//wyc: 3G-4M-4K
 
 //wyc???: should VM_MAX_ADDRESS be VM_MAXUSER_ADDRESS -1
-#define VM_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)
+#define VM_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI) //wyc: (3G-4M)+(3M-4K) == 3G-1M-4K
 #define VM_MIN_ADDRESS		((vm_offset_t)0)
 
 /*

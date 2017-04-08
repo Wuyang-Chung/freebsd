@@ -2088,7 +2088,7 @@ sysctl_kern_proc_ovmmap(SYSCTL_HANDLER_ARGS)
 
 	map = &vm->vm_map;
 	vm_map_lock_read(map);
-	MAP_ENTRY_FOREACH(entry, map ) {
+	MAP_ENTRY_FOREACH(entry, map) {
 		vm_object_t obj, tobj, lobj;
 		vm_offset_t addr;
 

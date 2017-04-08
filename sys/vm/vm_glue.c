@@ -624,7 +624,7 @@ vm_forkproc(
 	struct proc *p1 = td->td_proc;
 	int error;
 
-	if ((flags & RFPROC) == 0) {
+	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
 		/*
 		 * Divorce the memory, if it is shared, essentially
 		 * this changes shared memory amongst threads, into

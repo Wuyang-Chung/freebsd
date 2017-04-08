@@ -187,7 +187,7 @@ cpu_fork(
 	struct mdproc *mdp2;
 
 	p1 = td1->td_proc;
-	if ((flags & RFPROC) == 0) { //wyc: FALSE
+	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;

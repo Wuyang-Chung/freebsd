@@ -1117,10 +1117,13 @@ vm_map_lookup_entry(
 	cur = map->root;
 	if (cur == NULL) {
 		*entry = MAP_ENTRY_SENTINEL(map);
-	} else if (address >= cur->start && cur->end > address) {
+		return FALSE;
+	}
+	if (address >= cur->start && cur->end > address) {
 		*entry = cur;
 		return (TRUE);
-	} else if ((locked = vm_map_locked(map)) ||
+	}
+	if ((locked = vm_map_locked(map)) ||
 	    sx_try_upgrade(&map->lock)) {
 		/*
 		 * Splay requires a write lock on the map.  However, it only
@@ -1143,29 +1146,30 @@ vm_map_lookup_entry(
 				return (TRUE);
 		} else
 			*entry = cur->prev;
-	} else
-		/*
-		 * Since the map is only locked for read access, perform a
-		 * standard binary search tree lookup for "address".
-		 */
-		for (;;) {
-			if (address < cur->start) {
-				if (cur->left == NULL) {
-					*entry = cur->prev;
-					break;
-				}
-				cur = cur->left;
-			} else if (cur->end > address) {
-				*entry = cur;
-				return (TRUE);
-			} else {
-				if (cur->right == NULL) {
-					*entry = cur;
-					break;
-				}
-				cur = cur->right;
+		return FALSE;
+	}
+	/*
+	 * Since the map is only locked for read access, perform a
+	 * standard binary search tree lookup for "address".
+	 */
+	for (;;) {
+		if (address < cur->start) {
+			if (cur->left == NULL) {
+				*entry = cur->prev;
+				break;
 			}
+			cur = cur->left;
+		} else if (cur->end > address) {
+			*entry = cur;
+			return (TRUE);
+		} else {
+			if (cur->right == NULL) {
+				*entry = cur;
+				break;
+			}
+			cur = cur->right;
 		}
+	}
 	return (FALSE);
 }
 
@@ -3638,7 +3642,8 @@ Retry:
 		vm_map_unlock_read(map);
 		return (KERN_SUCCESS);
 	}
-
+	KASSERT(prev_entry != MAP_ENTRY_SENTINEL(map), 
+		("prev_entry should not be sentinel node")); //wyc
 	next_entry = prev_entry->next;
 	if (!(prev_entry->eflags & MAP_ENTRY_GROWS_UP)) {
 		/*

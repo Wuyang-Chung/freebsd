@@ -835,7 +835,7 @@ fork1(struct thread *td, struct fork_req *fr)
 
 	if ((flags & RFPROCDESC) != 0) { //wyc: FALSE
 		/* Can't not create a process yet get a process descriptor. */
-		if ((flags & RFPROC) == 0)
+		if ((flags & RFPROC) == 0) //wyc: FALSE. RFPROC is always specified.
 			return (EINVAL);
 
 		/* Must provide a place to put a procdesc if creating one. */
@@ -853,7 +853,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * Here we don't create a new process, but we divorce
 	 * certain parts of a process from itself.
 	 */
-	if ((flags & RFPROC) == 0) { //wyc: FALSE
+	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)

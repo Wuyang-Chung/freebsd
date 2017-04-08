@@ -796,7 +796,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 #if defined(WYC)
 	if (elf32_check_header(hdr) != ESUCCESS ||
 #else
-	if (__elfN(check_header)(hdr) != 0 ||
+	if (__elfN(check_header)(hdr) != ESUCCESS ||
 #endif
 	    (hdr->e_type != ET_EXEC && hdr->e_type != ET_DYN))
 		return (-1);
@@ -1497,7 +1497,11 @@ cb_put_phdr(
 	phdr->p_paddr = 0;
 	phdr->p_filesz = phdr->p_memsz = entry->end - entry->start;
 	phdr->p_align = PAGE_SIZE;
+#if defined(WYC)
+	phdr->p_flags = elf32_untrans_prot(entry->protection);
+#else
 	phdr->p_flags = __elfN(untrans_prot)(entry->protection);
+#endif
 
 	phc->offset += phdr->p_filesz;
 	phc->phdr++;

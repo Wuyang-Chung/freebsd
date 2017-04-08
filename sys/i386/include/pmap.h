@@ -102,6 +102,7 @@
 #define PGEX_U		0x04	/* access from User mode (UPL) */
 #define PGEX_RSV	0x08	/* reserved PTE field is non-zero */
 #define PGEX_I		0x10	/* during an instruction fetch */
+#define PEGX_PK		0x20	/* protection-key violation */
 
 /*
  * Size of Kernel address space.  This is the number of page table pages

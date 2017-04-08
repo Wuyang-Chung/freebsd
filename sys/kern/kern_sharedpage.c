@@ -71,7 +71,8 @@ shared_page_alloc_locked(int size, int align)
 {
 	int res;
 
-	res = roundup(shared_page_free, align);
+	KASSERT(powerof2(align), ("%s: %d", __func__, align)); //wyc
+	res = roundup2(shared_page_free, align);
 	if (res + size >= IDX_TO_OFF(shared_page_obj->size))
 		res = -1;
 	else
