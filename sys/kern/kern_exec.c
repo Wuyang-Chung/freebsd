@@ -1133,7 +1133,7 @@ exec_new_vmspace(
 #endif
 		    VM_PROT_READ | VM_PROT_EXECUTE,
 		    VM_PROT_READ | VM_PROT_EXECUTE,
-		    MAP_INHERIT_SHARE | MAP_ACC_NO_CHARGE);
+		    COWF_INHERIT_SHARE | COWF_ACC_NO_CHARGE);
 		if (error) {
 			vm_object_deallocate(obj);
 			return (error);
@@ -1162,7 +1162,7 @@ exec_new_vmspace(
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
 		sv->sv_stackprot,
-	    VM_PROT_ALL, MAP_STACK_GROWS_DOWN);
+	    VM_PROT_ALL, COWF_STACK_GROWS_DOWN);
 	if (error)
 		return (error);
 

@@ -284,7 +284,7 @@ exec_aout_imgact(struct image_params *imgp)
 		file_offset,
 		virtual_offset, text_end,
 		VM_PROT_READ | VM_PROT_EXECUTE, VM_PROT_ALL,
-		MAP_COPY_ON_WRITE | MAP_PREFAULT);
+		COWF_COPY_ON_WRITE | COWF_PREFAULT);
 	if (error) {
 		vm_map_unlock(map);
 		vm_object_deallocate(object);
@@ -297,7 +297,7 @@ exec_aout_imgact(struct image_params *imgp)
 			file_offset + a_out->a_text,
 			text_end, data_end,
 			VM_PROT_ALL, VM_PROT_ALL,
-			MAP_COPY_ON_WRITE | MAP_PREFAULT);
+			COWF_COPY_ON_WRITE | COWF_PREFAULT);
 		if (error) {
 			vm_map_unlock(map);
 			vm_object_deallocate(object);

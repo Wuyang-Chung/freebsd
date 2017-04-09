@@ -285,7 +285,7 @@ kmem_suballoc(vm_map_t parent, vm_offset_t *min, vm_offset_t *max,
 	*min = vm_map_min(parent);
 	ret = vm_map_find(parent, NULL, 0, min, size, 0, superpage_align ?
 	    VMFS_SUPER_SPACE : VMFS_ANY_SPACE, VM_PROT_ALL, VM_PROT_ALL,
-	    MAP_ACC_NO_CHARGE);
+	    COWF_ACC_NO_CHARGE);
 	if (ret != KERN_SUCCESS)
 		panic("kmem_suballoc: bad status return of %d", ret);
 	*max = *min + size;
@@ -454,7 +454,7 @@ kmap_alloc_wait(map, size)
 		vm_map_unlock_and_wait(map, 0);
 	}
 	vm_map_insert(map, NULL, 0, addr, addr + size, VM_PROT_ALL,
-	    VM_PROT_ALL, MAP_ACC_CHARGED);
+	    VM_PROT_ALL, COWF_ACC_CHARGED);
 	vm_map_unlock(map);
 	return (addr);
 }
@@ -528,7 +528,7 @@ kmem_init(vm_offset_t start, vm_offset_t end)
 #else		     
 	    VM_MIN_KERNEL_ADDRESS,
 #endif
-	    start, VM_PROT_ALL, VM_PROT_ALL, MAP_NOFAULT);
+	    start, VM_PROT_ALL, VM_PROT_ALL, COWF_NOFAULT);
 	/* ... and ending with the completion of the above `insert' */
 	vm_map_unlock(m);
 }

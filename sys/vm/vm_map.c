@@ -1196,10 +1196,10 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 
 	VM_MAP_ASSERT_LOCKED(map);
 	KASSERT((object != kmem_object && object != kernel_object) ||
-	    (cow & MAP_COPY_ON_WRITE) == 0,
+	    (cow & COWF_COPY_ON_WRITE) == 0,
 	    ("vm_map_insert: kmem or kernel object and COW"));
-	KASSERT(object == NULL || (cow & MAP_NOFAULT) == 0,
-	    ("vm_map_insert: paradoxical MAP_NOFAULT request"));
+	KASSERT(object == NULL || (cow & COWF_NOFAULT) == 0,
+	    ("vm_map_insert: paradoxical COWF_NOFAULT request"));
 
 	/*
 	 * Check that the start and end points are not bogus.
@@ -1223,32 +1223,32 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		return (KERN_NO_SPACE);
 
 	protoeflags = 0;
-	if (cow & MAP_COPY_ON_WRITE)
+	if (cow & COWF_COPY_ON_WRITE)
 		protoeflags |= MAP_ENTRY_COW | MAP_ENTRY_NEEDS_COPY;
-	if (cow & MAP_NOFAULT)
+	if (cow & COWF_NOFAULT)
 		protoeflags |= MAP_ENTRY_NOFAULT;
-	if (cow & MAP_DISABLE_SYNCER)
+	if (cow & COWF_DISABLE_SYNCER)
 		protoeflags |= MAP_ENTRY_NOSYNC;
-	if (cow & MAP_DISABLE_COREDUMP)
+	if (cow & COWF_DISABLE_COREDUMP)
 		protoeflags |= MAP_ENTRY_NOCOREDUMP;
-	if (cow & MAP_STACK_GROWS_DOWN)
+	if (cow & COWF_STACK_GROWS_DOWN)
 		protoeflags |= MAP_ENTRY_GROWS_DOWN;
-	if (cow & MAP_STACK_GROWS_UP)
+	if (cow & COWF_STACK_GROWS_UP)
 		protoeflags |= MAP_ENTRY_GROWS_UP;
-	if (cow & MAP_VN_WRITECOUNT)
+	if (cow & COWF_VN_WRITECOUNT)
 		protoeflags |= MAP_ENTRY_VN_WRITECNT;
-	if (cow & MAP_INHERIT_SHARE)
+	if (cow & COWF_INHERIT_SHARE)
 		inheritance = VM_INHERIT_SHARE;
 	else
 		inheritance = VM_INHERIT_DEFAULT;
 
 	cred = NULL;
-	if (cow & (MAP_ACC_NO_CHARGE | MAP_NOFAULT))
+	if (cow & (COWF_ACC_NO_CHARGE | COWF_NOFAULT))
 		goto charged;
-	if ((cow & MAP_ACC_CHARGED) || 
+	if ((cow & COWF_ACC_CHARGED) || 
 	    ((prot & VM_PROT_WRITE) &&
 	     ((protoeflags & MAP_ENTRY_NEEDS_COPY) || object == NULL))) {
-		if (!(cow & MAP_ACC_CHARGED) && !swap_reserve(end - start))
+		if (!(cow & COWF_ACC_CHARGED) && !swap_reserve(end - start))
 			return (KERN_RESOURCE_SHORTAGE);
 		KASSERT(object == NULL || (protoeflags & MAP_ENTRY_NEEDS_COPY) ||
 		    object->cred == NULL,
@@ -1275,7 +1275,7 @@ charged:
 	}
 	else if ((prev_entry != MAP_ENTRY_SENTINEL(map)) &&
 		 (prev_entry->eflags == protoeflags) &&
-		 (cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) == 0 &&
+		 (cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 &&
 		 (prev_entry->end == start) &&
 		 (prev_entry->wired_count == 0) &&
 		 (prev_entry->cred == cred ||
@@ -1361,10 +1361,10 @@ charged:
 	 */
 	vm_map_simplify_entry(map, new_entry);
 
-	if (cow & (MAP_PREFAULT|MAP_PREFAULT_PARTIAL)) {
+	if (cow & (COWF_PREFAULT|COWF_PREFAULT_PARTIAL)) {
 		vm_map_pmap_enter(map, start, prot,
 				    object, OFF_TO_IDX(offset), end - start,
-				    cow & MAP_PREFAULT_PARTIAL);
+				    cow & COWF_PREFAULT_PARTIAL);
 	}
 
 	return (KERN_SUCCESS);
@@ -1458,20 +1458,20 @@ int
 vm_map_fixed(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_size_t length, vm_prot_t prot,
     vm_prot_t max, int cow) __attribute__((optnone)) //wyc
-// cow == 0x8001(MAP_ACC_NO_CHARGE|MAP_INHERIT_SHARE)
+// cow == 0x8001(COWF_ACC_NO_CHARGE|COWF_INHERIT_SHARE)
 {
 	vm_offset_t end;
 	int result;
 
 	end = start + length;
-	KASSERT((cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) == 0 ||
+	KASSERT((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 ||
 	    object == NULL,
 	    ("vm_map_fixed: non-NULL backing object for stack"));
 	vm_map_lock(map);
 	VM_MAP_RANGE_CHECK(map, start, end);
-	if ((cow & MAP_CHECK_EXCL) == 0) //wyc: TRUE
+	if ((cow & COWF_CHECK_EXCL) == 0) //wyc: TRUE
 		vm_map_delete(map, start, end);
-	if ((cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) != 0) { //wyc: FALSE
+	if ((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) != 0) { //wyc: FALSE
 		result = vm_map_stack_locked(map, start, length, sgrowsiz,
 		    prot, max, cow);
 	} else {
@@ -1500,7 +1500,7 @@ vm_map_find(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	vm_offset_t alignment, initial_addr, start;
 	int result;
 
-	KASSERT((cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) == 0 ||
+	KASSERT((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 ||
 	    object == NULL,
 	    ("vm_map_find: non-NULL backing object for stack"));
 	if (find_space == VMFS_OPTIMAL_SPACE && (object == NULL ||
@@ -1544,7 +1544,7 @@ again:
 
 			start = *addr;
 		}
-		if ((cow & (MAP_STACK_GROWS_DOWN | MAP_STACK_GROWS_UP)) != 0) {
+		if ((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) != 0) {
 			result = vm_map_stack_locked(map, start, length,
 			    sgrowsiz, prot, max, cow);
 		} else {
@@ -1856,7 +1856,7 @@ vm_map_submap(
 }
 
 /*
- * The maximum number of pages to map if MAP_PREFAULT_PARTIAL is specified
+ * The maximum number of pages to map if COWF_PREFAULT_PARTIAL is specified
  */
 #define	MAX_INIT_PT	96
 
@@ -1866,7 +1866,7 @@ vm_map_submap(
  *	Preload the specified map's pmap with mappings to the specified
  *	object's memory-resident pages.  No further physical pages are
  *	allocated, and no further virtual pages are retrieved from secondary
- *	storage.  If the specified flags include MAP_PREFAULT_PARTIAL, then a
+ *	storage.  If the specified flags include COWF_PREFAULT_PARTIAL, then a
  *	limited number of page mappings are created at the low-end of the
  *	specified address range.  (For this purpose, a superpage mapping
  *	counts as one page mapping.)  Otherwise, all resident pages within
@@ -1923,9 +1923,9 @@ vm_map_pmap_enter(vm_map_t map, vm_offset_t addr, vm_prot_t prot,
 		 * don't allow an madvise to blow away our really
 		 * free pages allocating pv entries.
 		 */
-		if (((flags & MAP_PREFAULT_MADVISE) != 0 &&
+		if (((flags & COWF_PREFAULT_MADVISE) != 0 &&
 		    vm_cnt.v_free_count < vm_cnt.v_free_reserved) ||
-		    ((flags & MAP_PREFAULT_PARTIAL) != 0 &&
+		    ((flags & COWF_PREFAULT_PARTIAL) != 0 &&
 		    tmpidx >= threshold)) {
 			psize = tmpidx;
 			break;
@@ -2275,7 +2275,7 @@ vm_map_madvise(
 				    current->object.vm_object,
 				    pstart,
 				    ptoa(pend - pstart),
-				    MAP_PREFAULT_MADVISE
+				    COWF_PREFAULT_MADVISE
 				);
 			}
 		}
@@ -3533,7 +3533,7 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * don't pass it around further.
 	 * NOTE: We explicitly allow bi-directional stacks.
 	 */
-	orient = cow & (MAP_STACK_GROWS_DOWN|MAP_STACK_GROWS_UP);
+	orient = cow & (COWF_STACK_GROWS_DOWN|COWF_STACK_GROWS_UP);
 	KASSERT(orient != 0, ("No stack grow direction"));
 
 	if (addrbos < vm_map_min(map) ||
@@ -3570,9 +3570,9 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * and cow to be 0.  Possibly we should eliminate these as input
 	 * parameters, and just pass these values here in the insert call.
 	 */
-	if (orient == MAP_STACK_GROWS_DOWN)
+	if (orient == COWF_STACK_GROWS_DOWN)
 		bot = addrbos + max_ssize - init_ssize;
-	else if (orient == MAP_STACK_GROWS_UP)
+	else if (orient == COWF_STACK_GROWS_UP)
 		bot = addrbos;
 	else
 		bot = round_page(addrbos + max_ssize/2 - init_ssize/2);
@@ -3586,10 +3586,10 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 			panic("Bad entry start/end for new stack entry");
 
 		new_entry->avail_ssize = max_ssize - init_ssize;
-		KASSERT((orient & MAP_STACK_GROWS_DOWN) == 0 ||
+		KASSERT((orient & COWF_STACK_GROWS_DOWN) == 0 ||
 		    (new_entry->eflags & MAP_ENTRY_GROWS_DOWN) != 0,
 		    ("new entry lacks MAP_ENTRY_GROWS_DOWN"));
-		KASSERT((orient & MAP_STACK_GROWS_UP) == 0 ||
+		KASSERT((orient & COWF_STACK_GROWS_UP) == 0 ||
 		    (new_entry->eflags & MAP_ENTRY_GROWS_UP) != 0,
 		    ("new entry lacks MAP_ENTRY_GROWS_UP"));
 	}
@@ -3821,7 +3821,7 @@ Retry:
 
 		rv = vm_map_insert(map, NULL, 0, addr, stack_entry->start,
 		    next_entry->protection, next_entry->max_protection,
-		    MAP_STACK_GROWS_DOWN);
+		    COWF_STACK_GROWS_DOWN);
 
 		/* Adjust the available stack space by the amount we grew. */
 		if (rv == KERN_SUCCESS) {

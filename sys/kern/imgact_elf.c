@@ -546,8 +546,8 @@ __elfN(load_section)(
 
 	if (map_len != 0) {
 		/* cow flags: don't dump readonly sections in core */
-		cow = MAP_COPY_ON_WRITE | MAP_PREFAULT |
-		    (prot & VM_PROT_WRITE ? 0 : MAP_DISABLE_COREDUMP);
+		cow = COWF_COPY_ON_WRITE | COWF_PREFAULT |
+		    (prot & VM_PROT_WRITE ? 0 : COWF_DISABLE_COREDUMP);
 
 #if defined(WYC)
 		rv = elf32_map_insert(map,

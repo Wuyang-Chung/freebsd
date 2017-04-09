@@ -1405,7 +1405,7 @@ i915_gem_mmap_ioctl(struct drm_device *dev, void *data,
 	vm_object_reference(obj->vm_obj);
 	rv = vm_map_find(map, obj->vm_obj, args->offset, &addr, args->size, 0,
 	    VMFS_OPTIMAL_SPACE, VM_PROT_READ | VM_PROT_WRITE,
-	    VM_PROT_READ | VM_PROT_WRITE, MAP_INHERIT_SHARE);
+	    VM_PROT_READ | VM_PROT_WRITE, COWF_INHERIT_SHARE);
 	if (rv != KERN_SUCCESS) {
 		vm_object_deallocate(obj->vm_obj);
 		error = -vm_mmap_to_errno(rv);

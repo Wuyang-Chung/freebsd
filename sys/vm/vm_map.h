@@ -328,20 +328,20 @@ long vmspace_resident_count(struct vmspace *vmspace);
 /*
  * Copy-on-write flags for vm_map operations
  */
-#define MAP_INHERIT_SHARE	0x0001
-#define MAP_COPY_ON_WRITE	0x0002
-#define MAP_NOFAULT		0x0004
-#define MAP_PREFAULT		0x0008
-#define MAP_PREFAULT_PARTIAL	0x0010
-#define MAP_DISABLE_SYNCER	0x0020
-#define	MAP_CHECK_EXCL		0x0040
-#define MAP_DISABLE_COREDUMP	0x0100
-#define MAP_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
-#define	MAP_VN_WRITECOUNT	0x0400
-#define	MAP_STACK_GROWS_DOWN	0x1000
-#define	MAP_STACK_GROWS_UP	0x2000
-#define	MAP_ACC_CHARGED		0x4000
-#define	MAP_ACC_NO_CHARGE	0x8000
+#define COWF_INHERIT_SHARE	0x0001	/*wyc: ==MAP_SHARED */
+#define COWF_COPY_ON_WRITE	0x0002	/*wyc: ==MAP_ENTRY_COW | MAP_ENTRY_NEEDS_COPY */
+#define COWF_NOFAULT		0x0004	/*wyc: ==MAP_ENTRY_NOFAULT */
+#define COWF_PREFAULT		0x0008	/*wyc: prefault the page mappings into pmap */
+#define COWF_PREFAULT_PARTIAL	0x0010	/*wyc: prefault partial of the page mappings */
+#define COWF_DISABLE_SYNCER	0x0020	/*wyc: ==MAP_NOSYNC == MAP_ENTRY_NOSYNC */
+#define	COWF_CHECK_EXCL		0x0040	/*wyc: check exclusive */
+#define COWF_DISABLE_COREDUMP	0x0100	/*wyc: ==MAP_NOCORE == MAP_ENTRY_NOCOREDUMP */
+#define COWF_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
+#define	COWF_VN_WRITECOUNT	0x0400
+#define	COWF_STACK_GROWS_DOWN	0x1000
+#define	COWF_STACK_GROWS_UP	0x2000
+#define	COWF_ACC_CHARGED	0x4000
+#define	COWF_ACC_NO_CHARGE	0x8000
 
 /*
  * vm_fault option flags

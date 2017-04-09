@@ -1536,28 +1536,28 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 			return (EINVAL);
 		docow = 0;
 	} else if (flags & MAP_PREFAULT_READ)
-		docow = MAP_PREFAULT;
+		docow = COWF_PREFAULT;
 	else
-		docow = MAP_PREFAULT_PARTIAL;
+		docow = COWF_PREFAULT_PARTIAL;
 
 	if ((flags & (MAP_ANON|MAP_SHARED)) == 0)
-		docow |= MAP_COPY_ON_WRITE;
+		docow |= COWF_COPY_ON_WRITE;
 	if (flags & MAP_NOSYNC)
-		docow |= MAP_DISABLE_SYNCER;
+		docow |= COWF_DISABLE_SYNCER;
 	if (flags & MAP_NOCORE)
-		docow |= MAP_DISABLE_COREDUMP;
+		docow |= COWF_DISABLE_COREDUMP;
 	/* Shared memory is also shared with children. */
 	if (flags & MAP_SHARED)
-		docow |= MAP_INHERIT_SHARE;
+		docow |= COWF_INHERIT_SHARE;
 	if (writecounted)
-		docow |= MAP_VN_WRITECOUNT;
+		docow |= COWF_VN_WRITECOUNT;
 	if (flags & MAP_STACK) {
 		if (object != NULL)
 			return (EINVAL);
-		docow |= MAP_STACK_GROWS_DOWN;
+		docow |= COWF_STACK_GROWS_DOWN;
 	}
 	if ((flags & MAP_EXCL) != 0)
-		docow |= MAP_CHECK_EXCL;
+		docow |= COWF_CHECK_EXCL;
 
 	if (fitit) {
 		if ((flags & MAP_ALIGNMENT_MASK) == MAP_ALIGNED_SUPER)
