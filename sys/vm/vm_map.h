@@ -186,6 +186,8 @@ struct vm_map {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
 	} header;			/* Sentinel node of the circular link list */
+	vm_offset_t min_offset;		/* (c) */ //wyc
+	vm_offset_t max_offset;		/* (c) */ //wyc
 	struct sx lock;			/* Lock for map data */
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
@@ -196,8 +198,6 @@ struct vm_map {
 	vm_flags_t flags;		/* flags for this vm_map */
 	vm_map_entry_t root;		/* Root of a binary search tree */
 	pmap_t pmap;			/* (c) Physical map */
-	vm_offset_t min_offset;		/* (c) */ //wyc
-	vm_offset_t max_offset;		/* (c) */ //wyc
 	int busy;
 };
 
@@ -329,7 +329,7 @@ long vmspace_resident_count(struct vmspace *vmspace);
  * Copy-on-write flags for vm_map operations
  */
 #define COWF_INHERIT_SHARE	0x0001	/*wyc: ==MAP_SHARED */
-#define COWF_COPY_ON_WRITE	0x0002	/*wyc: ==MAP_ENTRY_COW | MAP_ENTRY_NEEDS_COPY */
+#define COWF_COPY_ON_WRITE	0x0002	/*wyc: ==MAP_ENTRY_COW|MAP_ENTRY_NEEDS_COPY */
 #define COWF_NOFAULT		0x0004	/*wyc: ==MAP_ENTRY_NOFAULT */
 #define COWF_PREFAULT		0x0008	/*wyc: prefault the page mappings into pmap */
 #define COWF_PREFAULT_PARTIAL	0x0010	/*wyc: prefault partial of the page mappings */
@@ -364,7 +364,7 @@ long vmspace_resident_count(struct vmspace *vmspace);
  * For VMFS_ALIGNED_SPACE, the desired alignment is specified to
  * the macro argument as log base 2 of the desired alignment.
  */
-#define	VMFS_NO_SPACE		0	/* don't find; use the given range */
+#define	VMFS_FIXED		0	/* don't find; use the given range */
 #define	VMFS_ANY_SPACE		1	/* find a range with any alignment */
 #define	VMFS_OPTIMAL_SPACE	2	/* find a range with optimal alignment*/
 #define	VMFS_SUPER_SPACE	3	/* find a superpage-aligned range */

@@ -1516,7 +1516,7 @@ again:
 	start = initial_addr;
 	vm_map_lock(map);
 	do {
-		if (find_space != VMFS_NO_SPACE) {
+		if (find_space != VMFS_FIXED) {
 			if (vm_map_findspace(map, start, length, addr)!=KERN_SUCCESS||
 			    (max_addr != 0 && *addr + length > max_addr)) {
 				vm_map_unlock(map);
@@ -1551,7 +1551,7 @@ again:
 			result = vm_map_insert(map, object, offset, start,
 			    start + length, prot, max, cow);
 		}
-	} while (result == KERN_NO_SPACE && find_space != VMFS_NO_SPACE &&
+	} while (result == KERN_NO_SPACE && find_space != VMFS_FIXED &&
 	    find_space != VMFS_ANY_SPACE);
 	vm_map_unlock(map);
 	return (result);

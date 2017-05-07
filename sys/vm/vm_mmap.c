@@ -172,12 +172,12 @@ ogetpagesize(td, uap)
  */
 #ifndef _SYS_SYSPROTO_H_
 struct mmap_args {
-	void *addr;
+	void *addr;	// a hint for the intended address
 	size_t len;
 	int prot;
-	int flags;
-	int fd;
-	off_t pos;
+	int flags;	// Sharing, mapping type and options
+	int fd;		// file handle
+	off_t pos;	// file offset
 };
 #endif
 
@@ -214,7 +214,7 @@ sys_mmap(
 	/*
 	 * Enforce the constraints.
 	 * Mapping of length 0 is only allowed for old binaries.
-	 * Anonymous mapping shall specify -1 as filedescriptor and
+	 * Anonymous mapping shall specify -1 as file descriptor and
 	 * zero position for new code. Be nice to ancient a.out
 	 * binaries and correct pos for anonymous mapping, since old
 	 * ld.so sometimes issues anonymous map requests with non-zero
@@ -325,7 +325,7 @@ sys_mmap(
 		 * length 0.  For modern binaries, this function
 		 * returns an error earlier.
 		 */
-		error = 0;
+		error = ESUCCESS;
 	} else if (flags & MAP_ANON) {
 		/*
 		 * Mapping blank space is trivial.
@@ -360,7 +360,8 @@ sys_mmap(
 		}
 
 #if defined(WYC)
-		vn_mmap();
+		error = vn_mmap(fp, &vms->vm_map, &addr, size, prot,
+		    cap_maxprot, flags, pos, td); //wyc: in: fp, in/out:addr
 #else
 		/* This relies on VM_PROT_* matching PROT_*. */
 		error = fo_mmap(fp, &vms->vm_map, &addr, size, prot,
@@ -1478,7 +1479,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
     vm_prot_t maxprot, int flags, vm_object_t object, vm_ooffset_t foff,
     boolean_t writecounted, struct thread *td)
 {
-	boolean_t fitit;
+	//boolean_t fitit;
 	int docow, error, findspace, rv;
 
 	if (map == &td->td_proc->p_vmspace->vm_map) {
@@ -1512,7 +1513,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 	}
 
 	/*
-	 * We currently can only deal with page aligned file offsets.
+	 * We currently can only deal with file offset aligned on page boundary
 	 * The mmap() system call already enforces this by subtracting
 	 * the page offset from the file offset, but checking here
 	 * catches errors in device drivers (e.g. d_single_mmap()
@@ -1523,12 +1524,13 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		return (EINVAL);
 
 	if ((flags & MAP_FIXED) == 0) {
-		fitit = TRUE; //wyc: find space for it.
+		//fitit = TRUE; //wyc: find space for it
 		*addr = round_page(*addr);
 	} else {
-		if (*addr != trunc_page(*addr))
+		//if (*addr != trunc_page(*addr))
+		if (*addr & PAGE_MASK)
 			return (EINVAL);
-		fitit = FALSE; //wyc: it has to go in a fixed address
+		//fitit = FALSE; //wyc: it has to go in a fixed address
 	}
 
 	if (flags & MAP_ANON) {
@@ -1559,7 +1561,8 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 	if ((flags & MAP_EXCL) != 0)
 		docow |= COWF_CHECK_EXCL;
 
-	if (fitit) {
+	//if (fitit) {
+	if ((flags & MAP_FIXED) == 0) { //wyc: find space for it.
 		if ((flags & MAP_ALIGNMENT_MASK) == MAP_ALIGNED_SUPER)
 			findspace = VMFS_SUPER_SPACE;
 		else if ((flags & MAP_ALIGNMENT_MASK) != 0)

@@ -141,7 +141,7 @@ int	cpusetobj_strscan(cpuset_t *, const char *);
 void	ddb_display_cpuset(const cpuset_t *);
 #endif
 
-#else
+#else /* _KERNEL */
 __BEGIN_DECLS
 int	cpuset(cpusetid_t *);
 int	cpuset_setid(cpuwhich_t, id_t, cpusetid_t);

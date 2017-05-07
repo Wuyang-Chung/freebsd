@@ -5541,11 +5541,12 @@ pmap_sync_icache(pmap_t pm, vm_offset_t va, vm_size_t sz)
  */
 void
 pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
-    vm_offset_t *addr, vm_size_t size)
+    vm_offset_t *addr, /* IN/OUT */
+    vm_size_t size)
 {
 	vm_offset_t superpage_offset;
 
-	if (size < NBPDR)
+	if (size < NBPDR) //wyc: 4M
 		return;
 	if (object != NULL && (object->flags & OBJ_COLORED) != 0)
 		offset += ptoa(object->pg_color);

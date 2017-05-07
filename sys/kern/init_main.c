@@ -731,7 +731,7 @@ start_init(void *dummy)
 	 */
 	addr = p->p_sysent->sv_usrstack - PAGE_SIZE;
 	if (vm_map_find(&p->p_vmspace->vm_map, NULL, 0, &addr, PAGE_SIZE, 0,
-	    VMFS_NO_SPACE, VM_PROT_ALL, VM_PROT_ALL, 0) != 0)
+	    VMFS_FIXED, VM_PROT_ALL, VM_PROT_ALL, 0) != 0)
 		panic("init: couldn't allocate argument space");
 	p->p_vmspace->vm_maxsaddr = (caddr_t)addr;
 	p->p_vmspace->vm_ssize = 1;
