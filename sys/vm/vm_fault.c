@@ -185,7 +185,7 @@ vm_fault_dirty(vm_map_entry_t entry, vm_page_t m, vm_prot_t prot,
 	boolean_t need_dirty;
 
 	if (((prot & VM_PROT_WRITE) == 0 &&
-	    (fault_flags & VM_FAULT_DIRTY) == 0) ||
+	     (fault_flags & VM_FAULT_DIRTY) == 0) ||
 	    (m->oflags & VPO_UNMANAGED) != 0)
 		return;
 

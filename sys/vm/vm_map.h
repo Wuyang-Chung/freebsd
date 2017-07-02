@@ -364,7 +364,8 @@ long vmspace_resident_count(struct vmspace *vmspace);
  * For VMFS_ALIGNED_SPACE, the desired alignment is specified to
  * the macro argument as log base 2 of the desired alignment.
  */
-#define	VMFS_FIXED		0	/* don't find; use the given range */
+#define	VMFS_NO_SPACE		0	/* don't find; use the given range */
+#define	VMFS_FIXED		VMFS_NO_SPACE //wyc: change VMFS_NO_SPACE to VMFS_FIXED
 #define	VMFS_ANY_SPACE		1	/* find a range with any alignment */
 #define	VMFS_OPTIMAL_SPACE	2	/* find a range with optimal alignment*/
 #define	VMFS_SUPER_SPACE	3	/* find a superpage-aligned range */
