@@ -1159,10 +1159,11 @@ vm_map_lookup_entry(
 				break;
 			}
 			cur = cur->left;
-		} else if (cur->end > address) {
-			*entry = cur;
-			return (TRUE);
 		} else {
+			if (address < cur->end) {
+				*entry = cur;
+				return (TRUE);
+			}
 			if (cur->right == NULL) {
 				*entry = cur;
 				break;
