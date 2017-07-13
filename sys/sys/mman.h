@@ -48,7 +48,7 @@
 /*
  * Protections are chosen from these bits, or-ed together
  */
-#define	PROT_NONE	0x00	/* no permissions */
+#define	PROT_NONE	0x00	/* no permissions wyc: Pages may not be accessed */
 #define	PROT_READ	0x01	/* pages can be read */
 #define	PROT_WRITE	0x02	/* pages can be written */
 #define	PROT_EXEC	0x04	/* pages can be executed */

@@ -3488,6 +3488,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	return (vm2);
 }
 
+/*wyc: addrbos means bottom of stack */
 int
 vm_map_stack(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
     vm_prot_t prot, vm_prot_t max, int cow)
@@ -3519,9 +3520,10 @@ out:
 	return (rv);
 }
 
+/*wyc: addrbos means bottom of stack */
 static int
 vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
-    vm_size_t growsize, vm_prot_t prot, vm_prot_t max, int cow)
+    vm_size_t growsize, vm_prot_t prot, vm_prot_t max_prot, int cow)
 {
 	vm_map_entry_t new_entry, prev_entry;
 	vm_offset_t bot, top;
@@ -3567,7 +3569,7 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * the grow direction) we either map at the top of the range, the
 	 * bottom of the range or in the middle.
 	 *
-	 * Note: we would normally expect prot and max to be VM_PROT_ALL,
+	 * Note: we would normally expect prot and max_prot to be VM_PROT_ALL,
 	 * and cow to be 0.  Possibly we should eliminate these as input
 	 * parameters, and just pass these values here in the insert call.
 	 */
@@ -3578,7 +3580,7 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	else
 		bot = round_page(addrbos + max_ssize/2 - init_ssize/2);
 	top = bot + init_ssize;
-	rv = vm_map_insert(map, NULL, 0, bot, top, prot, max, cow);
+	rv = vm_map_insert(map, NULL, 0, bot, top, prot, max_prot, cow);
 
 	/* Now set the avail_ssize amount. */
 	if (rv == KERN_SUCCESS) {
@@ -3643,8 +3645,7 @@ Retry:
 		vm_map_unlock_read(map);
 		return (KERN_SUCCESS);
 	}
-	KASSERT(prev_entry != MAP_ENTRY_SENTINEL(map), 
-		("prev_entry should not be sentinel node")); //wyc
+
 	next_entry = prev_entry->next;
 	if (!(prev_entry->eflags & MAP_ENTRY_GROWS_UP)) {
 		/*

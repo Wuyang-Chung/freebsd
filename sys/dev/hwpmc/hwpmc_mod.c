@@ -1653,7 +1653,14 @@ pmc_log_process_mappings(struct pmc_owner *po, struct proc *p)
 	vm_map_lock_read(map);
 
 	MAP_ENTRY_FOREACH(entry, map) {
-
+		/* wyc
+		   Since entries are on a circular linked list with a sentinel node
+		   , entry will never be NULL. The following if statement should
+		   never be true.
+		   
+		   In a circular linked list with a sentinel node, sentinel node is
+		   equivalent to NULL.
+		*/
 		if (entry == NULL) {
 			PMCDBG2(LOG,OPS,2, "hwpmc: vm_map entry unexpectedly "
 			    "NULL! pid=%d vm_map=%p\n", p->p_pid, map);

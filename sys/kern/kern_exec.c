@@ -1157,7 +1157,7 @@ exec_new_vmspace(
 	} else {
 		ssiz = maxssiz; //wyc: ssiz == maxssiz
 	}
-	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==0xBFBF_F000(USRSTACK) ssiz==400_0000
+	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
 	stack_addr = sv->sv_usrstack - ssiz;
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :

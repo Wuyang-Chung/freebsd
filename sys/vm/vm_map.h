@@ -120,11 +120,12 @@ struct vm_map_entry {
 	struct thread *wiring_thread;
 };
 
+//wyc: map entry flags
 #define MAP_ENTRY_NOSYNC		0x0001
 #define MAP_ENTRY_IS_SUB_MAP		0x0002
 #define MAP_ENTRY_COW			0x0004
 #define MAP_ENTRY_NEEDS_COPY		0x0008
-#define MAP_ENTRY_NOFAULT		0x0010
+#define MAP_ENTRY_NOFAULT		0x0010	/*wyc: no page fault for this entry */
 #define MAP_ENTRY_USER_WIRED		0x0020
 
 #define MAP_ENTRY_BEHAV_NORMAL		0x0000	/* default behavior */

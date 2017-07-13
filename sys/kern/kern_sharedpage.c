@@ -112,7 +112,7 @@ shared_page_init(void *dummy __unused)
 
 	sx_init(&shared_page_alloc_sx, "shpsx");
 	shared_page_obj = vm_pager_allocate(OBJT_PHYS, 0, PAGE_SIZE,
-	    VM_PROT_DEFAULT, 0, NULL);
+	    VM_PROT_DEFAULT, 0, NULL); //wyc: phys_pager_alloc
 	VM_OBJECT_WLOCK(shared_page_obj);
 	m = vm_page_grab(shared_page_obj, 0, VM_ALLOC_NOBUSY | VM_ALLOC_ZERO);
 	m->valid = VM_PAGE_BITS_ALL;

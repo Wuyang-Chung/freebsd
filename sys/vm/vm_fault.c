@@ -131,7 +131,7 @@ static void vm_fault_dontneed(const struct faultstate *fs, vm_offset_t vaddr,
 static void vm_fault_prefault(const struct faultstate *fs, vm_offset_t addra,
 	    int backward, int forward);
 
-static int vm_map_lookup_locked(vm_map_t, vm_offset_t, vm_prot_t,
+static int vm_map_lookup_locked(vm_map_t *, vm_offset_t, vm_prot_t,
 	vm_map_entry_t *, vm_object_t *, vm_pindex_t *, vm_prot_t *, boolean_t *);
 
 static inline void
@@ -945,7 +945,7 @@ vnode_locked:
 		}
 		fs.lookup_still_valid = TRUE;
 		if (fs.map->timestamp != map_generation) {
-			result = vm_map_lookup_locked(fs.map, vaddr, fault_type,
+			result = vm_map_lookup_locked(&fs.map, vaddr, fault_type,
 			    &fs.entry, &retry_object, &retry_pindex, &retry_prot, &wired);
 
 			/*
@@ -1521,9 +1521,9 @@ vm_fault_enable_pagefaults(int save)
  *	wyc: this function is only referenced by functions in vm_fault.c
  */
 static int
-vm_map_lookup_locked(vm_map_t map,		/* IN */
+vm_map_lookup_locked(vm_map_t *var_map,		/* IN/OUT */
 		     vm_offset_t vaddr,
-		     vm_prot_t fault_type,
+		     vm_prot_t fault_typea,
 		     vm_map_entry_t *out_entry,	/* OUT */
 		     vm_object_t *object,	/* OUT */
 		     vm_pindex_t *pindex,	/* OUT */
@@ -1531,9 +1531,9 @@ vm_map_lookup_locked(vm_map_t map,		/* IN */
 		     boolean_t *wired)		/* OUT */
 {
 	vm_map_entry_t entry;
-	//vm_map_t map = *var_map;
+	vm_map_t map = *var_map;
 	vm_prot_t prot;
-	//vm_prot_t fault_type = fault_typea;
+	vm_prot_t fault_type = fault_typea;
 
 	/*
 	 * Lookup the faulting address.

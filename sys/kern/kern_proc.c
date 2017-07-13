@@ -2479,6 +2479,7 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 			break;
 		if (last_timestamp != map->timestamp) {
 			vm_map_lookup_entry(map, addr - 1, &tmp_entry);
+			//wyc: should check the return value here
 			entry = tmp_entry; //wyc: note entry changed
 		}
 	}
@@ -2490,7 +2491,12 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 }
 
 static int
-sysctl_kern_proc_vmmap(SYSCTL_HANDLER_ARGS)
+sysctl_kern_proc_vmmap(/*SYSCTL_HANDLER_ARGS*/
+	struct sysctl_oid *oidp, 
+	void *arg1, 
+	intmax_t arg2, 
+	struct sysctl_req *req
+)
 {
 	struct proc *p;
 	struct sbuf sb;

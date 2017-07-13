@@ -1528,7 +1528,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		*addr = round_page(*addr);
 	} else {
 		//if (*addr != trunc_page(*addr))
-		if (*addr & PAGE_MASK)
+		if (*addr & PAGE_MASK) //wyc: not page aligned
 			return (EINVAL);
 		//fitit = FALSE; //wyc: it has to go in a fixed address
 	}

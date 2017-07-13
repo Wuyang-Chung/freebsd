@@ -2451,9 +2451,12 @@ do_next:
 }
 #endif /* PC98 */
 
+/*wyc
+    Return:
+	Location of kernel stack for locore */
+*/
 register_t
-init386(
-	int first)
+init386(int first)
 {
 	struct gate_descriptor *gdp;
 	int gsel_tss, metadata_missing, x, pa;

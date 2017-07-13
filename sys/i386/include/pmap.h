@@ -69,7 +69,7 @@
 
 
 /* Our various interpretations of the above */
-#define PG_W		PG_AVAIL1	/* "Wired" pseudoflag */
+#define PG_WIRED	PG_AVAIL1	/* "Wired" pseudoflag */
 #define	PG_MANAGED	PG_AVAIL2
 #if defined(PAE) || defined(PAE_TABLES)
 #define	PG_FRAME	(0x000ffffffffff000ull)
@@ -77,7 +77,7 @@
 #else
 #define	PG_FRAME	(~PAGE_MASK)
 //#define	PG_PS_FRAME	(0xffc00000)
-#define	PG_PS_FRAME	(~PDRMASK)	//wyc: make this definition symmetric to PG_FRAME
+#define	PG_PS_FRAME	(~PDR_MASK)	//wyc: make this definition symmetric to PG_FRAME
 #endif
 #define	PG_PROT		(PG_RW|PG_U)	/* all protection bits . */
 #define PG_N		(PG_NC_PWT|PG_NC_PCD)	/* Non-cacheable */
@@ -90,7 +90,7 @@
  * Promotion to a 2 or 4MB (PDE) page mapping requires that the corresponding
  * 4KB (PTE) page mappings have identical settings for the following fields:
  */
-#define PG_PTE_PROMOTE	(PG_MANAGED | PG_W | PG_G | PG_PTE_PAT | \
+#define PG_PTE_PROMOTE	(PG_MANAGED | PG_WIRED | PG_G | PG_PTE_PAT | \
 	    PG_M | PG_A | PG_NC_PCD | PG_NC_PWT | PG_U | PG_RW | PG_V)
 
 /*
@@ -194,9 +194,9 @@ typedef uint32_t pt_entry_t;
  * Address of current address space page table maps and directories.
  */
 #ifdef _KERNEL
-extern pt_entry_t PTmap[];	//wyc: == 3G-4M      == 0xBFC0_0000
-extern pd_entry_t PTD[];	//wyc: == 3G-1M-4K   == 0xBFEF_F000
-extern pd_entry_t PTDpde[];	//wyc: == 3G-1M-1K-4 == 0xBFEF_FBFC
+extern pt_entry_t PTmap[];	//wyc: == 3G-4M
+extern pd_entry_t PTD[];	//wyc: == 3G-1M-4K
+extern pd_entry_t PTDpde[];	//wyc: == 3G-1M-1K-4
 
 #if defined(PAE) || defined(PAE_TABLES)
 extern pdpt_entry_t *IdlePDPT;

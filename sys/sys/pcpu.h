@@ -63,10 +63,12 @@ __GLOBL(__stop_set_pcpu);
 /*
  * Array of dynamic pcpu base offsets.  Indexed by id.
  */
-extern uintptr_t dpcpu_off[];
+extern uintptr_t dpcpu_off[];	//wyc: base address of dpcpu for each cpu
 
 /*
  * Convenience defines.
+
+ wyc: __start_set_pcup and __stop_set_pcup is defined by DPCPU_DEFINE
  */
 #define	DPCPU_START		((uintptr_t)&__start_set_pcpu)
 #define	DPCPU_STOP		((uintptr_t)&__stop_set_pcpu)

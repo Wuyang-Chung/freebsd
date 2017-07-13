@@ -708,18 +708,18 @@ ENTRY(lgdt)
 	nop
 1:
 	/* reload "stale" selectors */
-	movl	$KDSEL,%eax
+	movl	$KDSEL,%eax	/*wyc: KDSEL==GSEL(GDATA_SEL, SEL_KPL) */
 	movl	%eax,%ds
 	movl	%eax,%es
 	movl	%eax,%gs
 	movl	%eax,%ss
-	movl	$KPSEL,%eax
+	movl	$KPSEL,%eax	/*wyc: KPSEL==GSEL(GPRIV_SEL, SEL_KPL) */
 	movl	%eax,%fs
 
 	/* reload code selector by turning return into intersegmental return */
 	movl	(%esp),%eax
 	pushl	%eax
-	movl	$KCSEL,4(%esp)
+	movl	$KCSEL,4(%esp)	/*wyc: KCSEL==GSEL(GCODE_SEL, SEL_KPL) */
 	MEXITCOUNT
 	lret
 END(lgdt)

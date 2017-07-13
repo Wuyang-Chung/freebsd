@@ -97,12 +97,16 @@
 #else
 #define NPGPTD		1
 #define PDRSHIFT	22		/* LOG2(NBPDR) */
+#define PDR_SHIFT	22	//wyc
 //#define NPGPTD_SHIFT	10	//wyc: not referenced
 #endif
 
-#define NBPTD		(NPGPTD<<PAGE_SHIFT)
-#define NPDEPTD		(NBPTD/(sizeof (pd_entry_t)))
-#define NPDEPG		(PAGE_SIZE/(sizeof (pd_entry_t)))
+#define PDR_SIZE	(1<<PDR_SHIFT)	//wyc
+#define PDR_MASK	(PDR_SIZE-1)	//wyc
+
+#define NBPTD		(NPGPTD<<PAGE_SHIFT)		//wyc: size of PTD table
+#define NPDEPTD		(NBPTD/(sizeof (pd_entry_t)))	//wyc: # of PTDs in PTD table
+#define NPDEPG		(PAGE_SIZE/(sizeof (pd_entry_t))) //wyc: # of PDEs in a page
 #define NBPDR		(1<<PDRSHIFT)	/* bytes/page dir */
 #define PDRMASK		(NBPDR-1)
 
@@ -151,8 +155,8 @@
  */
 #define trunc_page(x)		((x) & ~PAGE_MASK)
 #define round_page(x)		(((x) + PAGE_MASK) & ~PAGE_MASK)
-#define trunc_4mpage(x)		((x) & ~PDRMASK)
-#define round_4mpage(x)		((((x)) + PDRMASK) & ~PDRMASK)
+#define trunc_4mpage(x)		((x) & ~PDR_MASK)
+#define round_4mpage(x)		((((x)) + PDR_MASK) & ~PDR_MASK)
 
 #define atop(x)			((x) >> PAGE_SHIFT)
 #define ptoa(x)			((x) << PAGE_SHIFT)

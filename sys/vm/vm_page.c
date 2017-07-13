@@ -225,7 +225,8 @@ vm_set_page_size(void)
 {
 	if (vm_cnt.v_page_size == 0)
 		vm_cnt.v_page_size = PAGE_SIZE;
-	if (((vm_cnt.v_page_size - 1) & vm_cnt.v_page_size) != 0)
+	//if (((vm_cnt.v_page_size - 1) & vm_cnt.v_page_size) != 0)
+	if (!powerof2(vm_cnt.v_page_size)) //wyc
 		panic("vm_set_page_size: page size not a power of two");
 }
 
