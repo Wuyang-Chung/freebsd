@@ -943,7 +943,7 @@ struct	proc *zpfind(pid_t);		/* Find zombie process by id. */
 struct	fork_req {
 	int		fr_flags;
 	int		fr_pages;	//wyc: page count for kernel stack 
-	int 		*fr_pidp;
+	int 		*fr_pidp;	//wyc: pointer to process ID
 	struct proc 	**fr_procp;
 	int 		*fr_pd_fd;
 	int 		fr_pd_flags;

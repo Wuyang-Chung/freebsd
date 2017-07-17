@@ -180,13 +180,13 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  */
 struct vm_map {
 /* wyc
- *  offset_of(_entry_head, prev) must be equal to offset_of(vm_map_entry, prev)
- *  offset_of(_entry_head, next) must be equal to offset_of(vm_map_entry, next)
+ *  offsetof(sentinel, prev) must be equal to offsetof(vm_map_entry, prev)
+ *  offsetof(sentinel, next) must be equal to offsetof(vm_map_entry, next)
  */
-	struct _entry_head {
+	struct {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
-	} header;			/* Sentinel node of the circular link list */
+	} sentinel;			/* Sentinel node of the circular link list */
 	vm_offset_t min_offset;		/* (c) */ //wyc
 	vm_offset_t max_offset;		/* (c) */ //wyc
 	struct sx lock;			/* Lock for map data */
@@ -202,9 +202,9 @@ struct vm_map {
 	int busy;
 };
 
-#define MAP_ENTRY_SENTINEL(map)	((vm_map_entry_t)&(map)->header)
-#define MAP_ENTRY_FIRST(map)	((map)->header.next)
-#define MAP_ENTRY_LAST(map)	((map)->header.prev)
+#define MAP_ENTRY_SENTINEL(map)	((vm_map_entry_t)&(map)->sentinel)
+#define MAP_ENTRY_FIRST(map)	((map)->sentinel.next)
+#define MAP_ENTRY_LAST(map)	((map)->sentinel.prev)
 
 #define MAP_ENTRY_FOREACH_SINCE(entry, map, since)	\
 	for ((entry) = (since);				\

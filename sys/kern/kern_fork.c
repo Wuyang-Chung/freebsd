@@ -336,6 +336,9 @@ again:
 	return (trypid);
 }
 
+/*wyc
+  This function will not be called because RFPROC is always TRUE
+*/
 static int
 fork_norfproc(struct thread *td, int flags)
 {
@@ -343,7 +346,7 @@ fork_norfproc(struct thread *td, int flags)
 	struct proc *p1;
 
 	KASSERT((flags & RFPROC) == 0,
-	    ("fork_norfproc called with RFPROC set"));
+	    ("%s called with RFPROC set", __func__));
 	p1 = td->td_proc;
 
 	if (((p1->p_flag & (P_HADTHREADS|P_SYSTEM)) == P_HADTHREADS) &&
@@ -853,7 +856,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * Here we don't create a new process, but we divorce
 	 * certain parts of a process from itself.
 	 */
-	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
+	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified except for rfork
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)
@@ -927,6 +930,9 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 	}
 
+	/*wyc
+	  For SASOS RFMEM will always be true
+	*/
 	if ((flags & RFMEM) == 0) {
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
 		if (vm2 == NULL) {

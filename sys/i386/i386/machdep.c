@@ -243,8 +243,7 @@ struct mem_range_softc mem_range_softc;
  };
 
 static void
-cpu_startup(dummy)
-	void *dummy;
+cpu_startup(void *dummy)
 {
 	uintmax_t memsize;
 	char *sysenv;
@@ -2453,7 +2452,7 @@ do_next:
 
 /*wyc
     Return:
-	Location of kernel stack for locore */
+	Location of kernel stack for locore
 */
 register_t
 init386(int first)

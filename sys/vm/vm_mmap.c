@@ -596,6 +596,12 @@ struct mprotect_args {
 /*
  * MPSAFE
  */
+/*wyc
+Quoted from the man pages
+  Not all implementations will guarantee protection on a page	basis;
+  the granularity of	protection changes may be as large as an entire
+  region.
+*/
 int
 sys_mprotect(
 	struct thread *td,

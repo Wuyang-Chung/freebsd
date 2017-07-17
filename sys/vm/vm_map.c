@@ -279,14 +279,12 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
 
-	if (pinit == NULL)
-		pinit = &pmap_pinit;
-	else
+	if (pinit != NULL)
 		//wyc: 'pinit' is always NULL in i386.
 		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 		panic("%s: pinit not NULL", __func__);	
 
-	if (!pinit(vmspace_pmap(vm))) {
+	if (!pmap_pinit(vmspace_pmap(vm))) {
 		uma_zfree(vmspace_zone, vm);
 		return (NULL);
 	}
@@ -794,7 +792,7 @@ static void
 _vm_map_init(vm_map_t map, pmap_t pmap, vm_offset_t min, vm_offset_t max)
 {
 
-	map->header.next = map->header.prev = MAP_ENTRY_SENTINEL(map);
+	map->sentinel.next = map->sentinel.prev = MAP_ENTRY_SENTINEL(map);
 	map->needs_wakeup = FALSE;
 	map->system_map = 0;
 	map->pmap = pmap;
@@ -1402,7 +1400,8 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	if (start < map->min_offset)
 		start = map->min_offset;
 	if (start + length > map->max_offset || start + length < start)
-		return (KERN_INVALID_ARGUMENT);
+		//return (1);
+		return (KERN_NO_SPACE);
 
 	/* Empty tree means wide open address space. */
 	if (map->root == NULL) {
@@ -1434,6 +1433,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	/* With max_free, can immediately tell if no solution. */
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
+		//return (1);
 		return (KERN_NO_SPACE); //wyc: KERN_NO_SPACE???
 
 	/*
