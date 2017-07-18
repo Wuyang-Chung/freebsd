@@ -170,13 +170,11 @@ extern void dblfault_handler(void);
 #define CPU_ENABLE_SSE
 #endif
 
-static void cpu_startup(void *);
 static void fpstate_drop(struct thread *td);
 static void get_fpcontext(struct thread *td, mcontext_t *mcp,
     char *xfpusave, size_t xfpusave_len);
 static int  set_fpcontext(struct thread *td, mcontext_t *mcp,
     char *xfpustate, size_t xfpustate_len);
-SYSINIT(cpu, SI_SUB_CPU, SI_ORDER_FIRST, cpu_startup, NULL);
 
 /* Intel ICH registers */
 #define ICH_PMBASE	0x400
@@ -243,7 +241,7 @@ struct mem_range_softc mem_range_softc;
  };
 
 static void
-cpu_startup(void *dummy)
+cpu_startup(void *dummy __unused)
 {
 	uintmax_t memsize;
 	char *sysenv;
@@ -297,7 +295,7 @@ cpu_startup(void *dummy)
 	}
 	if (memsize < ptoa((uintmax_t)vm_cnt.v_free_count))
 		memsize = ptoa((uintmax_t)Maxmem);
-	printf("real memory  = %ju (%ju MB)\n", memsize, memsize >> 20); //wyc: should be MiB
+	printf("real memory  = %ju (%ju MiB)\n", memsize, memsize >> 20); //wyc: MB -> MiB
 	realmem = atop(memsize);
 
 	/*
@@ -321,9 +319,9 @@ cpu_startup(void *dummy)
 
 	vm_ksubmap_init(&kmi);
 
-	printf("avail memory = %ju (%ju MB)\n", //wyc: should be MiB
+	printf("avail memory = %ju (%ju MiB)\n", //wyc: MB -> MiB
 	    ptoa((uintmax_t)vm_cnt.v_free_count),
-	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc: 1048576 == 1<<20
+	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc: 1048576 == 2^20
 
 	/*
 	 * Set up buffers, so they can be used to read disk labels.
@@ -332,6 +330,7 @@ cpu_startup(void *dummy)
 	vm_pager_bufferinit();
 	cpu_setregs();
 }
+SYSINIT(cpu, SI_SUB_CPU, SI_ORDER_FIRST, cpu_startup, NULL);
 
 /*
  * Send an interrupt to process.

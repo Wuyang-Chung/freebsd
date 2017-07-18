@@ -3217,8 +3217,7 @@ vm_map_copy_entry(
 				crhold(cred);
 				dst_entry->cred = cred;
 				*fork_charge += size;
-				if (!(src_entry->eflags &
-				      MAP_ENTRY_NEEDS_COPY)) {
+				if (!(src_entry->eflags & MAP_ENTRY_NEEDS_COPY)) {
 					crhold(cred);
 					src_entry->cred = cred;
 					*fork_charge += size;

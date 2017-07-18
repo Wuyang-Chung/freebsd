@@ -120,7 +120,7 @@ struct vm_object {
 	TAILQ_ENTRY(vm_object) pager_object_list; /* list of all objects of this pager type */
 	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations wyc: superpage */
 	struct vm_radix cache;		/* (o + f) root of the cache page radix trie */
-	void *handle;
+	void *handle; //wyc: is vnode * for OBJT_VNODE, cdev * for OBJ_DEVICE, ...
 	union {
 		/*
 		 * VNode pager

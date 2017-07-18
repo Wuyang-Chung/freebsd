@@ -86,7 +86,7 @@ __FBSDID("$FreeBSD$");
 
 int cluster_pbuf_freecnt = -1;	/* unlimited to begin with */
 
-struct buf *swbuf;
+struct buf *swbuf;	/* Swap buffer header pool. */
 
 static int dead_pager_getpages(vm_object_t, vm_page_t *, int, int *, int *);
 static vm_object_t dead_pager_alloc(void *, vm_ooffset_t, vm_prot_t,
@@ -187,7 +187,7 @@ vm_pager_init()
 	/*
 	 * Initialize known pagers
 	 */
-	for (pgops = pagertab; pgops < &pagertab[nitems(pagertab)]; pgops++)
+	for (pgops = &pagertab[0]; pgops < &pagertab[nitems(pagertab)]; pgops++)
 		if ((*pgops)->pgo_init != NULL)
 			(*(*pgops)->pgo_init) ();
 }
@@ -242,8 +242,7 @@ vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
  *	The object must be locked.
  */
 void
-vm_pager_deallocate(object)
-	vm_object_t object;
+vm_pager_deallocate(vm_object_t object)
 {
 
 	VM_OBJECT_ASSERT_WLOCKED(object);
