@@ -3323,33 +3323,33 @@ struct vmspace *
 vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 {
 	struct vmspace *vm2;
-	vm_map_t new_map, old_map;
-	vm_map_entry_t new_entry, old_entry;
+	vm_map_t map2, map1;
+	vm_map_entry_t entry2, entry1;
 	vm_object_t object;
 	int locked;
 
-	old_map = &vm1->vm_map;
+	map1 = &vm1->vm_map;
 	/* Copy immutable fields of vm1 to vm2. */
-	vm2 = vmspace_alloc(old_map->min_offset, old_map->max_offset, NULL);
+	vm2 = vmspace_alloc(map1->min_offset, map1->max_offset, NULL);
 	if (vm2 == NULL)
 		return (NULL);
 	vm2->vm_taddr = vm1->vm_taddr;
 	vm2->vm_daddr = vm1->vm_daddr;
 	vm2->vm_maxsaddr = vm1->vm_maxsaddr;
-	vm_map_lock(old_map);
-	if (old_map->busy)
-		vm_map_wait_busy(old_map);
-	new_map = &vm2->vm_map;
-	locked = vm_map_trylock(new_map); /* trylock to silence WITNESS */
+	vm_map_lock(map1);
+	if (map1->busy)
+		vm_map_wait_busy(map1);
+	map2 = &vm2->vm_map;
+	locked = vm_map_trylock(map2); /* trylock to silence WITNESS */
 	KASSERT(locked, ("vmspace_fork: lock failed"));
 
-	//old_entry = old_map->header.next;	//wyc: change while to for loop
+	//entry1 = map1->header.next;	//wyc: change while to for loop
 
-	MAP_ENTRY_FOREACH(old_entry, old_map) {
-		if (old_entry->eflags & MAP_ENTRY_IS_SUB_MAP)
+	MAP_ENTRY_FOREACH(entry1, map1) {
+		if (entry1->eflags & MAP_ENTRY_IS_SUB_MAP)
 			panic("vm_map_fork: encountered a submap");
 
-		switch (old_entry->inheritance) {
+		switch (entry1->inheritance) {
 		case VM_INHERIT_NONE:
 			break;
 
@@ -3357,17 +3357,17 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			/*
 			 * Clone the entry, creating the shared object if necessary.
 			 */
-			object = old_entry->object.vm_object;
+			object = entry1->object.vm_object;
 			if (object == NULL) {
 				object = vm_object_allocate(OBJT_DEFAULT,
-					atop(old_entry->end - old_entry->start));
-				old_entry->object.vm_object = object;
-				old_entry->offset = 0;
-				if (old_entry->cred != NULL) {
-					object->cred = old_entry->cred;
-					object->charge = old_entry->end -
-					    old_entry->start;
-					old_entry->cred = NULL;
+					atop(entry1->end - entry1->start));
+				entry1->object.vm_object = object;
+				entry1->offset = 0;
+				if (entry1->cred != NULL) {
+					object->cred = entry1->cred;
+					object->charge = entry1->end -
+					    entry1->start;
+					entry1->cred = NULL;
 				}
 			}
 
@@ -3376,14 +3376,14 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			 * to insure that a shadow object is created.
 			 */
 			vm_object_reference(object);
-			if (old_entry->eflags & MAP_ENTRY_NEEDS_COPY) {
-				vm_object_shadow(&old_entry->object.vm_object,
-				    &old_entry->offset,
-				    old_entry->end - old_entry->start);
-				old_entry->eflags &= ~MAP_ENTRY_NEEDS_COPY;
+			if (entry1->eflags & MAP_ENTRY_NEEDS_COPY) {
+				vm_object_shadow(&entry1->object.vm_object,
+				    &entry1->offset,
+				    entry1->end - entry1->start);
+				entry1->eflags &= ~MAP_ENTRY_NEEDS_COPY;
 				/* Transfer the second reference too. */
 				vm_object_reference(
-				    old_entry->object.vm_object);
+				    entry1->object.vm_object);
 
 				/*
 				 * As in vm_map_simplify_entry(), the
@@ -3391,15 +3391,15 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 				 * this call to vm_object_deallocate().
 				 */
 				vm_object_deallocate(object);
-				object = old_entry->object.vm_object;
+				object = entry1->object.vm_object;
 			}
 			VM_OBJECT_WLOCK(object);
 			vm_object_clear_flag(object, OBJ_ONEMAPPING);
-			if (old_entry->cred != NULL) {
+			if (entry1->cred != NULL) {
 				KASSERT(object->cred == NULL, ("vmspace_fork both cred"));
-				object->cred = old_entry->cred;
-				object->charge = old_entry->end - old_entry->start;
-				old_entry->cred = NULL;
+				object->cred = entry1->cred;
+				object->charge = entry1->end - entry1->start;
+				entry1->cred = NULL;
 			}
 
 			/*
@@ -3408,7 +3408,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			 * not relock it later for the assertion
 			 * correctness.
 			 */
-			if (old_entry->eflags & MAP_ENTRY_VN_WRITECNT &&
+			if (entry1->eflags & MAP_ENTRY_VN_WRITECNT &&
 			    object->type == OBJT_VNODE) {
 				KASSERT(
 				    ((struct vnode *)object->handle)->v_writecount > 0,
@@ -3422,66 +3422,66 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			/*
 			 * Clone the entry, referencing the shared object.
 			 */
-			new_entry = vm_map_entry_create(new_map);
-			*new_entry = *old_entry;
-			new_entry->eflags &= ~(MAP_ENTRY_USER_WIRED |
+			entry2 = vm_map_entry_create(map2);
+			*entry2 = *entry1;
+			entry2->eflags &= ~(MAP_ENTRY_USER_WIRED |
 			    MAP_ENTRY_IN_TRANSITION);
-			new_entry->wiring_thread = NULL;
-			new_entry->wired_count = 0;
-			if (new_entry->eflags & MAP_ENTRY_VN_WRITECNT) {
+			entry2->wiring_thread = NULL;
+			entry2->wired_count = 0;
+			if (entry2->eflags & MAP_ENTRY_VN_WRITECNT) {
 				vnode_pager_update_writecount(object,
-				    new_entry->start, new_entry->end);
+				    entry2->start, entry2->end);
 			}
 
 			/*
 			 * Insert the entry into the new map -- we know we're
 			 * inserting at the end of the new map.
 			 */
-			vm_map_entry_link(new_map, MAP_ENTRY_LAST(new_map),
-			    new_entry);
-			vmspace_map_entry_forked(vm1, vm2, new_entry); //wyc: for accounting
+			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2),
+			    entry2);
+			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc: for accounting
 
 			/*
 			 * Update the physical map
 			 */
-			pmap_copy(new_map->pmap, 
-			    old_map->pmap,
-			    new_entry->start,
-			    (old_entry->end - old_entry->start),
-			    old_entry->start);
+			pmap_copy(map2->pmap, 
+			    map1->pmap,
+			    entry2->start,
+			    (entry1->end - entry1->start),
+			    entry1->start);
 			break;
 
 		case VM_INHERIT_COPY: //wyc: COW
 			/*
 			 * Clone the entry and link into the map.
 			 */
-			new_entry = vm_map_entry_create(new_map);
-			*new_entry = *old_entry;
+			entry2 = vm_map_entry_create(map2);
+			*entry2 = *entry1;
 			/*
 			 * Copied entry is COW over the old object.
 			 */
-			new_entry->eflags &= ~(MAP_ENTRY_USER_WIRED |
+			entry2->eflags &= ~(MAP_ENTRY_USER_WIRED |
 			    MAP_ENTRY_IN_TRANSITION | MAP_ENTRY_VN_WRITECNT);
-			new_entry->wiring_thread = NULL;
-			new_entry->wired_count = 0;
-			new_entry->object.vm_object = NULL;
-			new_entry->cred = NULL;
-			vm_map_entry_link(new_map, MAP_ENTRY_LAST(new_map),
-			    new_entry); //wyc: insert to the end of the list
-			vmspace_map_entry_forked(vm1, vm2, new_entry); //wyc: update vm2's statistics
-			vm_map_copy_entry(old_map, new_map, old_entry,
-			    new_entry, fork_charge);
+			entry2->wiring_thread = NULL;
+			entry2->wired_count = 0;
+			entry2->object.vm_object = NULL;
+			entry2->cred = NULL;
+			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2),
+			    entry2); //wyc: insert to the end of the list
+			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc: update vm2's statistics
+			vm_map_copy_entry(map1, map2, entry1,
+			    entry2, fork_charge);
 			break;
 		}
-		//old_entry = old_entry->next;	//wyc: change while to for loop
+		//entry1 = entry1->next;	//wyc: change while to for loop
 	}
 	/*
 	 * Use inlined vm_map_unlock() to postpone handling the deferred
-	 * map entries, which cannot be done until both old_map and
-	 * new_map locks are released.
+	 * map entries, which cannot be done until both map1 and
+	 * map2 locks are released.
 	 */
-	sx_xunlock(&old_map->lock);
-	sx_xunlock(&new_map->lock);
+	sx_xunlock(&map1->lock);
+	sx_xunlock(&map2->lock);
 	vm_map_process_deferred();
 
 	return (vm2);
