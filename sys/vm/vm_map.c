@@ -791,8 +791,7 @@ vm_map_create(pmap_t pmap, vm_offset_t min, vm_offset_t max)
 static void
 _vm_map_init(vm_map_t map, pmap_t pmap, vm_offset_t min, vm_offset_t max)
 {
-
-	map->sentinel.next = map->sentinel.prev = MAP_ENTRY_SENTINEL(map);
+	MAP_ENTRY_HEAD_INIT(map);
 	map->needs_wakeup = FALSE;
 	map->system_map = 0;
 	map->pmap = pmap;
@@ -1023,7 +1022,7 @@ vm_map_entry_link(vm_map_t map,
 		after_where->right = NULL;
 		after_where->adj_free = entry->start - after_where->end;
 		vm_map_entry_set_max_free(after_where);
-	} else {
+	} else { //wyc: insert to the head
 		entry->right = map->root;
 		entry->left = NULL;
 	}
@@ -3466,11 +3465,9 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			entry2->wired_count = 0;
 			entry2->object.vm_object = NULL;
 			entry2->cred = NULL;
-			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2),
-			    entry2); //wyc: insert to the end of the list
+			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2), entry2);
 			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc: update vm2's statistics
-			vm_map_copy_entry(map1, map2, entry1,
-			    entry2, fork_charge);
+			vm_map_copy_entry(map1, map2, entry1, entry2, fork_charge);
 			break;
 		}
 		//entry1 = entry1->next;	//wyc: change while to for loop
@@ -3623,7 +3620,8 @@ vm_map_growstack(struct proc *p, vm_offset_t addr)
 	vm_size_t growsize;
 	size_t grow_amount, max_grow;
 	rlim_t lmemlim, stacklim, vmemlim;
-	int is_procstack, rv;
+	int is_procstack; //wyc: is this the main process stack
+	int rv;
 	struct ucred *cred;
 #ifdef notyet
 	uint64_t limit;
@@ -3644,7 +3642,9 @@ Retry:
 		vm_map_unlock_read(map);
 		return (KERN_SUCCESS);
 	}
-
+	/*wyc:
+		what if prev_entry == MAP_ENTRY_SENTINEL(map) ???
+	*/
 	next_entry = prev_entry->next;
 	if (!(prev_entry->eflags & MAP_ENTRY_GROWS_UP)) {
 		/*
@@ -3679,16 +3679,16 @@ Retry:
 	}
 
 	if (stack_entry == next_entry) {
-		KASSERT(stack_entry->eflags & MAP_ENTRY_GROWS_DOWN, ("foo"));
-		KASSERT(addr < stack_entry->start, ("foo"));
+		KASSERT(stack_entry->eflags & MAP_ENTRY_GROWS_DOWN, ("%s", __func__));
+		KASSERT(addr < stack_entry->start, ("%s", __func__));
 		end = (prev_entry != MAP_ENTRY_SENTINEL(map)) ?
 		    prev_entry->end :
 		    stack_entry->start - stack_entry->avail_ssize;
 		grow_amount = roundup(stack_entry->start - addr, PAGE_SIZE);
 		max_grow = stack_entry->start - end;
 	} else {
-		KASSERT(stack_entry->eflags & MAP_ENTRY_GROWS_UP, ("foo"));
-		KASSERT(addr >= stack_entry->end, ("foo"));
+		KASSERT(stack_entry->eflags & MAP_ENTRY_GROWS_UP, ("%s", __func__));
+		KASSERT(addr >= stack_entry->end, ("%s", __func__));
 		end = (next_entry != MAP_ENTRY_SENTINEL(map)) ?
 		    next_entry->start :
 		    stack_entry->end + stack_entry->avail_ssize;
@@ -3827,9 +3827,9 @@ Retry:
 		/* Adjust the available stack space by the amount we grew. */
 		if (rv == KERN_SUCCESS) {
 			new_entry = prev_entry->next;
-			KASSERT(new_entry == stack_entry->prev, ("foo"));
-			KASSERT(new_entry->end == stack_entry->start, ("foo"));
-			KASSERT(new_entry->start == addr, ("foo"));
+			KASSERT(new_entry == stack_entry->prev, ("%s", __func__));
+			KASSERT(new_entry->end == stack_entry->start, ("%s", __func__));
+			KASSERT(new_entry->start == addr, ("%s", __func__));
 			KASSERT((new_entry->eflags & MAP_ENTRY_GROWS_DOWN) !=
 			    0, ("new entry lacks MAP_ENTRY_GROWS_DOWN"));
 			grow_amount = new_entry->end - new_entry->start;

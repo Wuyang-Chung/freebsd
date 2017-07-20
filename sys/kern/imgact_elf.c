@@ -763,10 +763,11 @@ fail:
 	return (error);
 }
 
-static int
 #if defined(WYC)
+static int
 exec_elf32_imgact(struct image_params *imgp)
 #else
+static int
 __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnone)) //wyc
 #endif
 {
