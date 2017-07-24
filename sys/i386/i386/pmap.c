@@ -186,14 +186,14 @@ __FBSDID("$FreeBSD$");
 #define pdir_pde(m, v) (m[(vm_offset_t)(v) >> PDRSHIFT])
 
 #define pmap_pde_v(pte)		((*(int *)pte & PG_V) != 0)
-#define pmap_pte_w(pte)		((*(int *)pte & PG_WIRED) != 0)
-#define pmap_pte_m(pte)		((*(int *)pte & PG_M) != 0)
-#define pmap_pte_u(pte)		((*(int *)pte & PG_A) != 0)
+//#define pmap_pte_w(pte)		((*(int *)pte & PG_WIRED) != 0) //wyc: not referenced
+//#define pmap_pte_m(pte)		((*(int *)pte & PG_M) != 0) //wyc: not referenced
+//#define pmap_pte_u(pte)		((*(int *)pte & PG_A) != 0) //wyc: not referenced
 #define pmap_pte_v(pte)		((*(int *)pte & PG_V) != 0)
 
-#define pmap_pte_set_w(pte, v)	((v) ? atomic_set_int((u_int *)(pte), PG_WIRED) : \
-    atomic_clear_int((u_int *)(pte), PG_WIRED))
-#define pmap_pte_set_prot(pte, v) ((*(int *)pte &= ~PG_PROT), (*(int *)pte |= (v)))
+//#define pmap_pte_set_w(pte, v)	((v) ? atomic_set_int((u_int *)(pte), PG_WIRED) : \
+//    atomic_clear_int((u_int *)(pte), PG_WIRED)) //wyc: not referenced
+//#define pmap_pte_set_prot(pte, v) ((*(int *)pte &= ~PG_PROT), (*(int *)pte |= (v))) //wyc: not referenced
 
 struct pmap kernel_pmap_store;
 LIST_HEAD(pmaplist, pmap);
