@@ -431,15 +431,24 @@ __elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	int error, rv;
 
 	if (start != trunc_page(start)) {
-		rv = __elfN(map_partial)(map, object, offset, start,
-		    round_page(start), prot);
+#if defined(WYC)
+		rv = elf32_map_partial
+#else
+		rv = __elfN(map_partial)
+#endif
+		    (map, object, offset, start, round_page(start), prot);
 		if (rv)
 			return (rv);
 		offset += round_page(start) - start;
 		start = round_page(start);
 	}
 	if (end != round_page(end)) {
-		rv = __elfN(map_partial)(map, object, offset +
+#if defined(WYC)
+		rv = elf32_map_partial
+#else
+		rv = __elfN(map_partial)
+#endif
+		    (map, object, offset +
 		    trunc_page(end) - start, trunc_page(end), end, prot);
 		if (rv)
 			return (rv);
@@ -584,11 +593,11 @@ __elfN(load_section)(
 	/* This had damn well better be true! */
 	if (map_len != 0) {
 #if defined(WYC)
-		rv = elf32_map_insert(map, NULL, 0, map_addr, map_addr +
+		rv = elf32_map_insert
 #else
-		rv = __elfN(map_insert)(map, NULL, 0, map_addr, map_addr +
+		rv = __elfN(map_insert)
 #endif
-		    map_len, VM_PROT_ALL, 0);
+		    (map, NULL, 0, map_addr, map_addr + map_len, VM_PROT_ALL, 0);
 		if (rv != KERN_SUCCESS) {
 			return (EINVAL);
 		}

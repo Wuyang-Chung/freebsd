@@ -194,8 +194,10 @@ struct vm_map {
 	int nentries;			/* Number of entries */
 	vm_size_t size;			/* virtual size */
 	u_int timestamp;		/* Version number. wyc: generation number */
-	u_char needs_wakeup;
-	u_char system_map;		/* (c) Am I a system map? */
+	struct {
+		u_char needs_wakeup:1;
+		u_char system_map:1;	/* (c) Am I a system map? */
+	};
 	vm_flags_t flags;		/* flags for this vm_map */
 	vm_map_entry_t root;		/* Root of a binary search tree */
 	pmap_t pmap;			/* (c) Physical map */

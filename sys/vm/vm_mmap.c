@@ -1610,7 +1610,7 @@ vm_mmap_to_errno(int rv)
 
 	switch (rv) {
 	case KERN_SUCCESS:
-		return (0);
+		return (ESUCCESS);
 	case KERN_INVALID_ADDRESS:
 	case KERN_NO_SPACE:
 		return (ENOMEM);

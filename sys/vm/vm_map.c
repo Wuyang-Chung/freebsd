@@ -340,7 +340,7 @@ vmspace_dofree(struct vmspace *vm)
 	    vm->vm_map.max_offset);
 
 	pmap_release(vmspace_pmap(vm));
-	vm->vm_map.pmap = NULL;
+	vm->vm_map.pmap = NULL; //wyc: When vm is freed, vm_map is also freed. So there is no need to set pmap to NULL
 	uma_zfree(vmspace_zone, vm);
 }
 
@@ -1454,6 +1454,9 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	panic("vm_map_findspace: max_free corrupt");
 }
 
+/*wyc
+  Map the object at the fixed location 'start' with length 'length'
+*/
 int
 vm_map_fixed(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_size_t length, vm_prot_t prot,
