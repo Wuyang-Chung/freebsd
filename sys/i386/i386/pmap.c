@@ -176,14 +176,14 @@ __FBSDID("$FreeBSD$");
 #define PV_STAT(x)	//wyc do { } while (0)
 #endif
 
-#define	pa_index(pa)	((pa) >> PDRSHIFT)
+#define	pa_index(pa)	((pa) >> PDR_SHIFT)
 #define	pa_to_pvh(pa)	(&pv_table[pa_index(pa)])
 
 /*
  * Get PDEs and PTEs for user/kernel address space
  */
-#define	pmap_pde(m, v)	(&((m)->pm_pdir[(vm_offset_t)(v) >> PDRSHIFT]))
-#define pdir_pde(m, v) (m[(vm_offset_t)(v) >> PDRSHIFT])
+#define	pmap_pde(m, v)	(&((m)->pm_pdir[(vm_offset_t)(v) >> PDR_SHIFT]))
+#define pdir_pde(m, v) (m[(vm_offset_t)(v) >> PDR_SHIFT])
 
 #define pmap_pde_v(pte)		((*(int *)pte & PG_V) != 0)
 //#define pmap_pte_w(pte)		((*(int *)pte & PG_WIRED) != 0) //wyc: not referenced
@@ -668,7 +668,7 @@ pmap_set_pg(void)
 		while (va  < endva) {
 			pdir_pde(PTD, va) |= pgeflag;
 			invltlb();	/* Flush non-PG_G entries. */
-			va += NBPDR;
+			va += PDR_SIZE;
 		}
 	} else {
 		va = (vm_offset_t)btext;
@@ -821,7 +821,7 @@ pmap_init(void)
 	else if (pg_ps_enabled) {
 		KASSERT(MAXPAGESIZES > 1 && pagesizes[1] == 0,
 		    ("pmap_init: can't assign to pagesizes[1]"));
-		pagesizes[1] = NBPDR;
+		pagesizes[1] = PDR_SIZE;
 	}
 
 	/*
@@ -829,7 +829,7 @@ pmap_init(void)
 	 * Handle the possibility that "vm_phys_segs[...].end" is zero.
 	 */
 	pv_npg = trunc_4mpage(vm_phys_segs[vm_phys_nsegs - 1].end -
-	    PAGE_SIZE) / NBPDR + 1;
+	    PAGE_SIZE) / PDR_SIZE + 1;
 
 	/*
 	 * Allocate memory for the pv head table for superpages.
@@ -1472,11 +1472,11 @@ pmap_extract(pmap_t pmap, vm_offset_t va)
 
 	rtval = 0;
 	PMAP_LOCK(pmap);
-	//wyc pde = pmap->pm_pdir[va >> PDRSHIFT];
+	//wyc pde = pmap->pm_pdir[va >> PDR_SHIFT];
 	pde = *pmap_pde(pmap, va);
 	if (pde != 0) {
 		if ((pde & PG_PS) != 0)
-			rtval = (pde & PG_PS_FRAME) | (va & PDRMASK);
+			rtval = (pde & PG_PS_FRAME) | (va & PDR_MASK);
 		else {
 			pte = pmap_pte(pmap, va);
 			rtval = (*pte & PG_FRAME) | (va & PAGE_MASK);
@@ -1511,10 +1511,10 @@ retry:
 		if (pde & PG_PS) {
 			if ((pde & PG_RW) || (prot & VM_PROT_WRITE) == 0) {
 				if (vm_page_pa_tryrelock(pmap, (pde &
-				    PG_PS_FRAME) | (va & PDRMASK), &pa))
+				    PG_PS_FRAME) | (va & PDR_MASK), &pa))
 					goto retry;
 				m = PHYS_TO_VM_PAGE((pde & PG_PS_FRAME) |
-				    (va & PDRMASK));
+				    (va & PDR_MASK));
 				vm_page_hold(m);
 			}
 		} else {
@@ -1603,27 +1603,27 @@ pmap_map(vm_offset_t *virt, vm_paddr_t start, vm_paddr_t end, int prot)
 	 * Does the physical address range's size and alignment permit at
 	 * least one superpage mapping to be created?
 	 */ 
-	superpage_offset = start & PDRMASK;
-	if ((end - start) - ((NBPDR - superpage_offset) & PDRMASK) >= NBPDR) {
+	superpage_offset = start & PDR_MASK;
+	if ((end - start) - ((PDR_SIZE - superpage_offset) & PDR_MASK) >= PDR_SIZE) {
 		/*
 		 * Increase the starting virtual address so that its alignment
 		 * does not preclude the use of superpage mappings.
 		 */
-		if ((va & PDRMASK) < superpage_offset)
-			va = (va & ~PDRMASK) + superpage_offset;
-		else if ((va & PDRMASK) > superpage_offset)
-			va = ((va + PDRMASK) & ~PDRMASK) + superpage_offset;
+		if ((va & PDR_MASK) < superpage_offset)
+			va = (va & ~PDR_MASK) + superpage_offset;
+		else if ((va & PDR_MASK) > superpage_offset)
+			va = ((va + PDR_MASK) & ~PDR_MASK) + superpage_offset;
 	}
 	sva = va;
 	while (start < end) {
-		if ((start & PDRMASK) == 0 && end - start >= NBPDR &&
+		if ((start & PDR_MASK) == 0 && end - start >= PDR_SIZE &&
 		    pseflag) {
-			KASSERT((va & PDRMASK) == 0,
+			KASSERT((va & PDR_MASK) == 0,
 			    ("pmap_map: misaligned va %#x", va));
 			newpde = start | PG_PS | pgeflag | PG_RW | PG_V;
 			pmap_kenter_pde(va, newpde);
-			va += NBPDR;
-			start += NBPDR;
+			va += PDR_SIZE;
+			start += PDR_SIZE;
 		} else {
 			pmap_kenter(va, start);
 			va += PAGE_SIZE;
@@ -1742,7 +1742,7 @@ pmap_lookup_pt_page(pmap_t pmap, vm_offset_t va)
 {
 
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
-	return (vm_radix_lookup(&pmap->pm_root, va >> PDRSHIFT));
+	return (vm_radix_lookup(&pmap->pm_root, va >> PDR_SHIFT));
 }
 
 /*
@@ -1982,7 +1982,7 @@ pmap_allocpte(pmap_t pmap, vm_offset_t va, u_int flags)
 	/*
 	 * Calculate pagetable page index
 	 */
-	ptepindex = va >> PDRSHIFT;
+	ptepindex = va >> PDR_SHIFT;
 retry:
 	/*
 	 * Get the page directory entry
@@ -2254,8 +2254,8 @@ pmap_pv_reclaim(pmap_t locked_pmap)
 				if ((tpte & PG_WIRED) != 0)
 					continue;
 				KASSERT(tpte != 0,
-				    ("pmap_pv_reclaim: pmap %p va %x zero pte",
-				    pmap, va));
+				    ("%s: pmap %p va %x zero pte",
+				     __func__, pmap, va));
 				if ((tpte & PG_G) != 0)
 					pmap_invalidate_page(pmap, va);
 				m = PHYS_TO_VM_PAGE(tpte & PG_FRAME);
@@ -2486,7 +2486,7 @@ pmap_pv_demote_pde(pmap_t pmap, vm_offset_t va, vm_paddr_t pa)
 	vm_page_t m;
 
 	rw_assert(&pvh_global_lock, RA_WLOCKED);
-	KASSERT((pa & PDRMASK) == 0,
+	KASSERT((pa & PDR_MASK) == 0,
 	    ("pmap_pv_demote_pde: pa is not 4mpage aligned"));
 
 	/*
@@ -2500,7 +2500,7 @@ pmap_pv_demote_pde(pmap_t pmap, vm_offset_t va, vm_paddr_t pa)
 	m = PHYS_TO_VM_PAGE(pa);
 	TAILQ_INSERT_TAIL(&m->md.pv_list, pv, pv_next);
 	/* Instantiate the remaining NPTEPG - 1 pv entries. */
-	va_last = va + NBPDR - PAGE_SIZE;
+	va_last = va + PDR_SIZE - PAGE_SIZE;
 	do {
 		m++;
 		KASSERT((m->oflags & VPO_UNMANAGED) == 0,
@@ -2519,7 +2519,7 @@ pmap_pv_promote_pde(pmap_t pmap, vm_offset_t va, vm_paddr_t pa)
 	vm_page_t m;
 
 	rw_assert(&pvh_global_lock, RA_WLOCKED);
-	KASSERT((pa & PDRMASK) == 0,
+	KASSERT((pa & PDR_MASK) == 0,
 	    ("pmap_pv_promote_pde: pa is not 4mpage aligned"));
 
 	/*
@@ -2536,7 +2536,7 @@ pmap_pv_promote_pde(pmap_t pmap, vm_offset_t va, vm_paddr_t pa)
 	pvh = pa_to_pvh(pa);
 	TAILQ_INSERT_TAIL(&pvh->pv_list, pv, pv_next);
 	/* Free the remaining NPTEPG - 1 pv entries. */
-	va_last = va + NBPDR - PAGE_SIZE;
+	va_last = va + PDR_SIZE - PAGE_SIZE;
 	do {
 		m++;
 		va += PAGE_SIZE;
@@ -2653,14 +2653,14 @@ pmap_demote_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
 	oldpde = *pde;
 	KASSERT((oldpde & (PG_PS | PG_V)) == (PG_PS | PG_V),
-	    ("pmap_demote_pde: oldpde is missing PG_PS and/or PG_V"));
+	    ("%s: oldpde is missing PG_PS and/or PG_V", __func__));
 	if ((oldpde & PG_A) != 0 && (mpte = pmap_lookup_pt_page(pmap, va)) !=
 	    NULL)
 		pmap_remove_pt_page(pmap, mpte);
 	else {
 		KASSERT((oldpde & PG_WIRED) == 0,
-		    ("pmap_demote_pde: page table page for a wired mapping"
-		    " is missing"));
+		    ("%s: page table page for a wired mapping"
+		    " is missing", __func__));
 
 		/*
 		 * Invalidate the 2- or 4MB page mapping and return
@@ -2668,7 +2668,7 @@ pmap_demote_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 		 * allocation of the new page table page fails.
 		 */
 		if ((oldpde & PG_A) == 0 || (mpte = vm_page_alloc(NULL,
-		    va >> PDRSHIFT, VM_ALLOC_NOOBJ | VM_ALLOC_NORMAL |
+		    va >> PDR_SHIFT, VM_ALLOC_NOOBJ | VM_ALLOC_NORMAL |
 		    VM_ALLOC_WIRED)) == NULL) {
 			SLIST_INIT(&free);
 			pmap_remove_pde(pmap, pde, trunc_4mpage(va), &free);
@@ -2719,9 +2719,9 @@ pmap_demote_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 	}
 	newpde = mptepa | PG_M | PG_A | (oldpde & PG_U) | PG_RW | PG_V;
 	KASSERT((oldpde & PG_A) != 0,
-	    ("pmap_demote_pde: oldpde is missing PG_A"));
+	    ("%s: oldpde is missing PG_A", __func__));
 	KASSERT((oldpde & (PG_M | PG_RW)) != PG_RW,
-	    ("pmap_demote_pde: oldpde is missing PG_M"));
+	    ("%s: oldpde is missing PG_M", __func__));
 	newpte = oldpde & ~PG_PS;
 	if ((newpte & PG_PDE_PAT) != 0)
 		newpte ^= PG_PDE_PAT | PG_PTE_PAT;
@@ -2734,8 +2734,8 @@ pmap_demote_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 		pmap_fill_ptp(firstpte, newpte);
 	}
 	KASSERT((*firstpte & PG_FRAME) == (newpte & PG_FRAME),
-	    ("pmap_demote_pde: firstpte and newpte map different physical"
-	    " addresses"));
+	    ("%s: firstpte and newpte map different physical"
+	    " addresses", __func__));
 
 	/*
 	 * If the mapping has changed attributes, update the page table
@@ -2834,11 +2834,11 @@ pmap_remove_pde(pmap_t pmap, pd_entry_t *pdq, vm_offset_t sva,
 	vm_page_t m, mpte;
 
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
-	KASSERT((sva & PDRMASK) == 0,
+	KASSERT((sva & PDR_MASK) == 0,
 	    ("pmap_remove_pde: sva is not 4mpage aligned"));
 	oldpde = pte_load_clear(pdq);
 	if (oldpde & PG_WIRED)
-		pmap->pm_stats.wired_count -= NBPDR / PAGE_SIZE;
+		pmap->pm_stats.wired_count -= PDR_SIZE / PAGE_SIZE;
 
 	/*
 	 * Machines that don't support invlpg, also don't support
@@ -2846,11 +2846,11 @@ pmap_remove_pde(pmap_t pmap, pd_entry_t *pdq, vm_offset_t sva,
 	 */
 	if (oldpde & PG_G)
 		pmap_invalidate_page(kernel_pmap, sva);
-	pmap->pm_stats.resident_count -= NBPDR / PAGE_SIZE;
+	pmap->pm_stats.resident_count -= PDR_SIZE / PAGE_SIZE;
 	if (oldpde & PG_MANAGED) {
 		pvh = pa_to_pvh(oldpde & PG_PS_FRAME);
 		pmap_pvh_free(pvh, pmap, sva);
-		eva = sva + NBPDR;
+		eva = sva + PDR_SIZE;
 		for (va = sva, m = PHYS_TO_VM_PAGE(oldpde & PG_PS_FRAME);
 		    va < eva; va += PAGE_SIZE, m++) {
 			if ((oldpde & (PG_M | PG_RW)) == (PG_M | PG_RW))
@@ -2964,7 +2964,7 @@ pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
 	 * code.
 	 */
 	if ((sva + PAGE_SIZE == eva) && 
-	    ((pmap->pm_pdir[(sva >> PDRSHIFT)] & PG_PS) == 0)) {
+	    ((pmap->pm_pdir[(sva >> PDR_SHIFT)] & PG_PS) == 0)) {
 		pmap_remove_page(pmap, sva, &free);
 		goto out;
 	}
@@ -2975,13 +2975,13 @@ pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
 		/*
 		 * Calculate index for next page table.
 		 */
-		pdnxt = (sva + NBPDR) & ~PDRMASK;
+		pdnxt = (sva + PDR_SIZE) & ~PDR_MASK;
 		if (pdnxt < sva)
 			pdnxt = eva;
 		if (pmap->pm_stats.resident_count == 0)
 			break;
 
-		pdirindex = sva >> PDRSHIFT;
+		pdirindex = sva >> PDR_SHIFT;
 		ptpaddr = pmap->pm_pdir[pdirindex];
 
 		/*
@@ -2999,7 +2999,7 @@ pmap_remove(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
 			 * Are we removing the entire large page?  If not,
 			 * demote the mapping and fall through.
 			 */
-			if (sva + NBPDR == pdnxt && eva >= pdnxt) {
+			if (sva + PDR_SIZE == pdnxt && eva >= pdnxt) {
 				/*
 				 * The TLB entry for a PG_G mapping is
 				 * invalidated by pmap_remove_pde().
@@ -3134,13 +3134,13 @@ pmap_protect_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t sva, vm_prot_t prot)
 	boolean_t anychanged;
 
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
-	KASSERT((sva & PDRMASK) == 0,
+	KASSERT((sva & PDR_MASK) == 0,
 	    ("pmap_protect_pde: sva is not 4mpage aligned"));
 	anychanged = FALSE;
 retry:
 	oldpde = newpde = *pde;
 	if (oldpde & PG_MANAGED) {
-		eva = sva + NBPDR;
+		eva = sva + PDR_SIZE;
 		for (va = sva, m = PHYS_TO_VM_PAGE(oldpde & PG_PS_FRAME);
 		    va < eva; va += PAGE_SIZE, m++)
 			if ((oldpde & (PG_M | PG_RW)) == (PG_M | PG_RW))
@@ -3205,11 +3205,11 @@ resume:
 		pt_entry_t obits, pbits;
 		u_int pdirindex;
 
-		pdnxt = (sva + NBPDR) & ~PDRMASK;
+		pdnxt = (sva + PDR_SIZE) & ~PDR_MASK;
 		if (pdnxt < sva)
 			pdnxt = eva;
 
-		pdirindex = sva >> PDRSHIFT;
+		pdirindex = sva >> PDR_SHIFT;
 		ptpaddr = pmap->pm_pdir[pdirindex];
 
 		/*
@@ -3227,7 +3227,7 @@ resume:
 			 * Are we protecting the entire large page?  If not,
 			 * demote the mapping and fall through.
 			 */
-			if (sva + NBPDR == pdnxt && eva >= pdnxt) {
+			if (sva + PDR_SIZE == pdnxt && eva >= pdnxt) {
 				/*
 				 * The TLB entry for a PG_G mapping is
 				 * invalidated by pmap_protect_pde().
@@ -3344,7 +3344,7 @@ pmap_promote_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 	firstpte = pmap_pte_quick(pmap, trunc_4mpage(va));
 setpde:
 	newpde = *firstpte;
-	if ((newpde & ((PG_FRAME & PDRMASK) | PG_A | PG_V)) != (PG_A | PG_V)) {
+	if ((newpde & ((PG_FRAME & PDR_MASK) | PG_A | PG_V)) != (PG_A | PG_V)) {
 		pmap_pde_p_failures++;
 		CTR2(KTR_PMAP, "pmap_promote_pde: failure for va %#x"
 		    " in pmap %p", va, pmap);
@@ -3372,7 +3372,7 @@ setpde:
 	 * PTE maps an unexpected 4KB physical page or does not have identical
 	 * characteristics to the first PTE.
 	 */
-	pa = (newpde & (PG_PS_FRAME | PG_A | PG_V)) + NBPDR - PAGE_SIZE;
+	pa = (newpde & (PG_PS_FRAME | PG_A | PG_V)) + PDR_SIZE - PAGE_SIZE;
 	for (pte = firstpte + NPTEPG - 1; pte > firstpte; pte--) {
 setpte:
 		oldpte = *pte;
@@ -3391,8 +3391,8 @@ setpte:
 			    oldpte & ~PG_RW))
 				goto setpte;
 			oldpte &= ~PG_RW;
-			oldpteva = (oldpte & PG_FRAME & PDRMASK) |
-			    (va & ~PDRMASK);
+			oldpteva = (oldpte & PG_FRAME & PDR_MASK) |
+			    (va & ~PDR_MASK);
 			CTR2(KTR_PMAP, "pmap_promote_pde: protect for va %#x"
 			    " in pmap %p", oldpteva, pmap);
 		}
@@ -3414,7 +3414,7 @@ setpte:
 	KASSERT(mpte >= vm_page_array &&
 	    mpte < &vm_page_array[vm_page_array_size],
 	    ("pmap_promote_pde: page table page is out of range"));
-	KASSERT(mpte->pindex == va >> PDRSHIFT,
+	KASSERT(mpte->pindex == va >> PDR_SHIFT,
 	    ("pmap_promote_pde: page table page's pindex is wrong"));
 	if (pmap_insert_pt_page(pmap, mpte)) {
 		pmap_pde_p_failures++;
@@ -3482,10 +3482,10 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 	mpte = NULL;
 	wired = (flags & PMAP_ENTER_WIRED) != 0;
 
-	KASSERT(va <= VM_MAX_KERNEL_ADDRESS, ("pmap_enter: toobig"));
+	KASSERT(va <= VM_MAX_KERNEL_ADDRESS, ("%s: toobig", __func__));
 	//wyc???: should it be (va < 3G-4M)?
 	KASSERT(va < UPT_MIN_ADDRESS || va >= UPT_MAX_ADDRESS,
-	    ("pmap_enter: invalid to pmap_enter page table pages (va: 0x%x)",
+	    ("%s: invalid to pmap_enter page table pages (va: 0x%x), __func__",
 	    va));
 	if ((m->oflags & VPO_UNMANAGED) == 0 && !vm_page_xbusied(m))
 		VM_OBJECT_ASSERT_LOCKED(m->object);
@@ -3512,15 +3512,15 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 
 	pde = pmap_pde(pmap, va);
 	if ((*pde & PG_PS) != 0)
-		panic("pmap_enter: attempted pmap_enter on 4MB page");
+		panic("%s: attempted pmap_enter on 4MB page", __func__);
 	pte = pmap_pte_quick(pmap, va);
 
 	/*
 	 * Page Directory table entry not valid, we need a new PT page
 	 */
 	if (pte == NULL) {
-		panic("pmap_enter: invalid page directory pdir=%#jx, va=%#x",
-			(uintmax_t)pmap->pm_pdir[PTDPTDI], va);
+		panic("%s: invalid page directory pdir=%#jx, va=%#x",
+			__func__, (uintmax_t)pmap->pm_pdir[PTDPTDI], va);
 	}
 
 	pa = VM_PAGE_TO_PHYS(m);
@@ -3572,8 +3572,8 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 		if (mpte != NULL) {
 			mpte->wire_count--;
 			KASSERT(mpte->wire_count > 0,
-			    ("pmap_enter: missing reference to page table page,"
-			     " va: 0x%x", va));
+			    ("%s: missing reference to page table page,"
+			     " va: 0x%x", __func__, va));
 		}
 	} else
 		pmap->pm_stats.resident_count++;
@@ -3583,7 +3583,7 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 	 */
 	if ((m->oflags & VPO_UNMANAGED) == 0) {
 		KASSERT(va < kmi.clean_sva || va >= kmi.clean_eva,
-		    ("pmap_enter: managed mapping within the clean submap"));
+		    ("%s: managed mapping within the clean submap", __func__));
 		if (pv == NULL)
 			pv = get_pv_entry(pmap, FALSE);
 		pv->pv_va = va;
@@ -3716,7 +3716,7 @@ pmap_enter_pde(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot)
 	/*
 	 * Increment counters.
 	 */
-	pmap->pm_stats.resident_count += NBPDR / PAGE_SIZE;
+	pmap->pm_stats.resident_count += PDR_SIZE / PAGE_SIZE;
 
 	/*
 	 * Map the superpage.
@@ -3758,12 +3758,12 @@ pmap_enter_object(pmap_t pmap, vm_offset_t start, vm_offset_t end,
 	PMAP_LOCK(pmap);
 	while (m != NULL && (diff = m->pindex - m_start->pindex) < psize) {
 		va = start + ptoa(diff);
-		if ((va & PDRMASK) == 0 && 	//wyc: aligned on superpage
-		    va + NBPDR <= end &&	//wyc: less than 1 superpage
+		if ((va & PDR_MASK) == 0 && 	//wyc: aligned on superpage
+		    va + PDR_SIZE <= end &&	//wyc: less than 1 superpage
 		    m->psind == 1 && 		//wyc: it is a superpage
 		    pg_ps_enabled &&		//wyc: superpage enabled
 		    pmap_enter_pde(pmap, va, m, prot))
-			m = &m[NBPDR / PAGE_SIZE - 1];	//wyc: == 1023
+			m = &m[PDR_SIZE / PAGE_SIZE - 1];	//wyc: == 1023
 		else
 			mpte = pmap_enter_quick_locked(pmap, va, m, prot,
 			    mpte);
@@ -3803,7 +3803,7 @@ pmap_enter_quick_locked(pmap_t pmap, vm_offset_t va, vm_page_t m,
 
 	KASSERT(va < kmi.clean_sva || va >= kmi.clean_eva ||
 	    (m->oflags & VPO_UNMANAGED) != 0,
-	    ("pmap_enter_quick_locked: managed mapping within the clean submap"));
+	    ("%s: managed mapping within the clean submap", __func__));
 	rw_assert(&pvh_global_lock, RA_WLOCKED);
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
 
@@ -3818,7 +3818,7 @@ pmap_enter_quick_locked(pmap_t pmap, vm_offset_t va, vm_page_t m,
 		/*
 		 * Calculate pagetable page index
 		 */
-		ptepindex = va >> PDRSHIFT;
+		ptepindex = va >> PDR_SHIFT;
 		if (mpte && (mpte->pindex == ptepindex)) {
 			mpte->wire_count++;
 		} else {
@@ -3933,7 +3933,7 @@ pmap_object_init_pt(pmap_t pmap, vm_offset_t addr, vm_object_t object,
 	KASSERT(object->type == OBJT_DEVICE || object->type == OBJT_SG,
 	    ("pmap_object_init_pt: non-device object"));
 	if (pseflag && 
-	    (addr & (NBPDR - 1)) == 0 && (size & (NBPDR - 1)) == 0) {
+	    (addr & (PDR_SIZE - 1)) == 0 && (size & (PDR_SIZE - 1)) == 0) {
 		if (!vm_object_populate(object, pindex, pindex + atop(size)))
 			return;
 		p = vm_page_lookup(object, pindex);
@@ -3946,7 +3946,7 @@ pmap_object_init_pt(pmap_t pmap, vm_offset_t addr, vm_object_t object,
 		 * aligned to a 2/4MB page boundary.
 		 */
 		ptepa = VM_PAGE_TO_PHYS(p);
-		if (ptepa & (NBPDR - 1))
+		if (ptepa & (PDR_SIZE - 1))
 			return;
 
 		/*
@@ -3972,17 +3972,17 @@ pmap_object_init_pt(pmap_t pmap, vm_offset_t addr, vm_object_t object,
 		 */
 		PMAP_LOCK(pmap);
 		for (pa = ptepa | pmap_cache_bits(pat_mode, 1); pa < ptepa +
-		    size; pa += NBPDR) {
+		    size; pa += PDR_SIZE) {
 			pde = pmap_pde(pmap, addr);
 			if (*pde == 0) {
 				pde_store(pde, pa | PG_PS | PG_M | PG_A |
 				    PG_U | PG_RW | PG_V);
-				pmap->pm_stats.resident_count += NBPDR /
+				pmap->pm_stats.resident_count += PDR_SIZE /
 				    PAGE_SIZE;
 				pmap_pde_mappings++;
 			}
 			/* Else continue on if the PDE is already valid. */
-			addr += NBPDR;
+			addr += PDR_SIZE;
 		}
 		PMAP_UNLOCK(pmap);
 	}
@@ -4015,7 +4015,7 @@ resume:
 	}
 	PMAP_LOCK(pmap);
 	for (; sva < eva; sva = pdnxt) {
-		pdnxt = (sva + NBPDR) & ~PDRMASK;
+		pdnxt = (sva + PDR_SIZE) & ~PDR_MASK;
 		if (pdnxt < sva)
 			pdnxt = eva;
 		pde = pmap_pde(pmap, sva);
@@ -4023,21 +4023,21 @@ resume:
 			continue;
 		if ((*pde & PG_PS) != 0) {
 			if ((*pde & PG_WIRED) == 0)
-				panic("pmap_unwire: pde %#jx is missing PG_WIRED",
-				    (uintmax_t)*pde);
+				panic("%s: pde %#jx is missing PG_WIRED",
+				    __func__, (uintmax_t)*pde);
 
 			/*
 			 * Are we unwiring the entire large page?  If not,
 			 * demote the mapping and fall through.
 			 */
-			if (sva + NBPDR == pdnxt && eva >= pdnxt) {
+			if (sva + PDR_SIZE == pdnxt && eva >= pdnxt) {
 				/*
 				 * Regardless of whether a pde (or pte) is 32
 				 * or 64 bits in size, PG_WIRED is among the least
 				 * significant 32 bits.
 				 */
 				atomic_clear_int((u_int *)pde, PG_WIRED);
-				pmap->pm_stats.wired_count -= NBPDR /
+				pmap->pm_stats.wired_count -= PDR_SIZE /
 				    PAGE_SIZE;
 				continue;
 			} else {
@@ -4051,7 +4051,7 @@ resume:
 					sched_pin();
 				}
 				if (!pmap_demote_pde(pmap, pde, sva))
-					panic("pmap_unwire: demotion failed");
+					panic("%s: demotion failed", __func__);
 			}
 		}
 		if (pdnxt > eva)
@@ -4061,8 +4061,8 @@ resume:
 			if ((*pte & PG_V) == 0)
 				continue;
 			if ((*pte & PG_WIRED) == 0)
-				panic("pmap_unwire: pte %#jx is missing PG_WIRED",
-				    (uintmax_t)*pte);
+				panic("%s: pte %#jx is missing PG_WIRED",
+				    __func__, (uintmax_t)*pte);
 
 			/*
 			 * PG_WIRED must be cleared atomically.  Although the pmap
@@ -4124,17 +4124,17 @@ pmap_copy(pmap_t dst_pmap, pmap_t src_pmap, vm_offset_t dst_addr, vm_size_t len,
 		KASSERT(addr < UPT_MIN_ADDRESS,
 		    ("pmap_copy: invalid to pmap_copy page tables"));
 
-		pdnxt = (addr + NBPDR) & ~PDRMASK;
+		pdnxt = (addr + PDR_SIZE) & ~PDR_MASK;
 		if (pdnxt < addr)
 			pdnxt = end_addr;
-		ptepindex = addr >> PDRSHIFT;
+		ptepindex = addr >> PDR_SHIFT;
 
 		srcptepaddr = src_pmap->pm_pdir[ptepindex];
 		if (srcptepaddr == 0)
 			continue;
 			
 		if (srcptepaddr & PG_PS) {
-			if ((addr & PDRMASK) != 0 || addr + NBPDR > end_addr)
+			if ((addr & PDR_MASK) != 0 || addr + PDR_SIZE > end_addr)
 				continue;
 			if (dst_pmap->pm_pdir[ptepindex] == 0 &&
 			    ((srcptepaddr & PG_MANAGED) == 0 ||
@@ -4143,7 +4143,7 @@ pmap_copy(pmap_t dst_pmap, pmap_t src_pmap, vm_offset_t dst_addr, vm_size_t len,
 				dst_pmap->pm_pdir[ptepindex] = srcptepaddr &
 				    ~PG_WIRED;
 				dst_pmap->pm_stats.resident_count +=
-				    NBPDR / PAGE_SIZE;
+				    PDR_SIZE / PAGE_SIZE;
 				pmap_pde_mappings++;
 			}
 			continue;
@@ -4542,7 +4542,7 @@ pmap_remove_pages(pmap_t pmap)
 				 */
 				if ((tpte & (PG_M | PG_RW)) == (PG_M | PG_RW)) {
 					if ((tpte & PG_PS) != 0) {
-						for (mt = m; mt < &m[NBPDR / PAGE_SIZE]; mt++)
+						for (mt = m; mt < &m[PDR_SIZE / PAGE_SIZE]; mt++)
 							vm_page_dirty(mt);
 					} else
 						vm_page_dirty(m);
@@ -4554,11 +4554,11 @@ pmap_remove_pages(pmap_t pmap)
 				pv_entry_count--;
 				pc->pc_map[field] |= bitmask;
 				if ((tpte & PG_PS) != 0) {
-					pmap->pm_stats.resident_count -= NBPDR / PAGE_SIZE;
+					pmap->pm_stats.resident_count -= PDR_SIZE / PAGE_SIZE;
 					pvh = pa_to_pvh(tpte & PG_PS_FRAME);
 					TAILQ_REMOVE(&pvh->pv_list, pv, pv_next);
 					if (TAILQ_EMPTY(&pvh->pv_list)) {
-						for (mt = m; mt < &m[NBPDR / PAGE_SIZE]; mt++)
+						for (mt = m; mt < &m[PDR_SIZE / PAGE_SIZE]; mt++)
 							if (TAILQ_EMPTY(&mt->md.pv_list))
 								vm_page_aflag_clear(mt, PGA_WRITEABLE);
 					}
@@ -4855,7 +4855,7 @@ pmap_ts_referenced(vm_page_t m)
 			 * since the superpage is wired, the current state of
 			 * its reference bit won't affect page replacement.
 			 */
-			if ((((pa >> PAGE_SHIFT) ^ (pv->pv_va >> PDRSHIFT) ^
+			if ((((pa >> PAGE_SHIFT) ^ (pv->pv_va >> PDR_SHIFT) ^
 			    (uintptr_t)pmap) & (NPTEPG - 1)) == 0 &&
 			    (*pde & PG_WIRED) == 0) {
 				atomic_clear_int((u_int *)pde, PG_A);
@@ -4930,7 +4930,7 @@ resume:
 	anychanged = FALSE;
 	PMAP_LOCK(pmap);
 	for (; sva < eva; sva = pdnxt) {
-		pdnxt = (sva + NBPDR) & ~PDRMASK;
+		pdnxt = (sva + PDR_SIZE) & ~PDR_MASK;
 		if (pdnxt < sva)
 			pdnxt = eva;
 		pde = pmap_pde(pmap, sva);
@@ -5365,7 +5365,7 @@ pmap_change_attr(vm_offset_t va, vm_size_t size, int mode)
 			 * the next 2/4MB page frame.
 			 */
 			if ((*pde & PG_PDE_CACHE) == cache_bits_pde) {
-				tmpva = trunc_4mpage(tmpva) + NBPDR;
+				tmpva = trunc_4mpage(tmpva) + PDR_SIZE;
 				continue;
 			}
 
@@ -5375,9 +5375,9 @@ pmap_change_attr(vm_offset_t va, vm_size_t size, int mode)
 			 * within the range, then we need not break
 			 * down this page into 4KB pages.
 			 */
-			if ((tmpva & PDRMASK) == 0 &&
-			    tmpva + PDRMASK < base + size) {
-				tmpva += NBPDR;
+			if ((tmpva & PDR_MASK) == 0 &&
+			    tmpva + PDR_MASK < base + size) {
+				tmpva += PDR_SIZE;
 				continue;
 			}
 			if (!pmap_demote_pde(kernel_pmap, pde, tmpva)) {
@@ -5405,7 +5405,7 @@ pmap_change_attr(vm_offset_t va, vm_size_t size, int mode)
 				pmap_pde_attr(pde, cache_bits_pde);
 				changed = TRUE;
 			}
-			tmpva = trunc_4mpage(tmpva) + NBPDR;
+			tmpva = trunc_4mpage(tmpva) + PDR_SIZE;
 		} else {
 			pte = vtopte(tmpva);
 			if ((*pte & PG_PTE_CACHE) != cache_bits_pte) {
@@ -5445,7 +5445,7 @@ retry:
 		if (*pdep & PG_PS) {
 			pte = *pdep;
 			/* Compute the physical address of the 4KB page. */
-			pa = ((*pdep & PG_PS_FRAME) | (addr & PDRMASK)) &
+			pa = ((*pdep & PG_PS_FRAME) | (addr & PDR_MASK)) &
 			    PG_FRAME;
 			val = MINCORE_SUPER;
 		} else {
@@ -5533,18 +5533,18 @@ pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
 {
 	vm_offset_t superpage_offset;
 
-	if (size < NBPDR) //wyc: 4M
+	if (size < PDR_SIZE) //wyc: 4M
 		return;
 	if (object != NULL && (object->flags & OBJ_COLORED) != 0)
 		offset += ptoa(object->pg_color);
-	superpage_offset = offset & PDRMASK;
-	if (size - ((NBPDR - superpage_offset) & PDRMASK) < NBPDR ||
-	    (*addr & PDRMASK) == superpage_offset)
+	superpage_offset = offset & PDR_MASK;
+	if (size - ((PDR_SIZE - superpage_offset) & PDR_MASK) < PDR_SIZE ||
+	    (*addr & PDR_MASK) == superpage_offset)
 		return;
-	if ((*addr & PDRMASK) < superpage_offset)
-		*addr = (*addr & ~PDRMASK) + superpage_offset;
+	if ((*addr & PDR_MASK) < superpage_offset)
+		*addr = (*addr & ~PDR_MASK) + superpage_offset;
 	else
-		*addr = ((*addr + PDRMASK) & ~PDRMASK) + superpage_offset;
+		*addr = ((*addr + PDR_MASK) & ~PDR_MASK) + superpage_offset;
 }
 
 vm_offset_t
@@ -5601,7 +5601,7 @@ pmap_pid_dump(int pid)
 			for (i = 0; i < NPDEPTD; i++) {
 				pd_entry_t *pde;
 				pt_entry_t *pte;
-				vm_offset_t base = i << PDRSHIFT;
+				vm_offset_t base = i << PDR_SHIFT;
 				
 				pde = &pmap->pm_pdir[i];
 				if (pde && pmap_pde_v(pde)) {

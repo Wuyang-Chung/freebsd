@@ -134,7 +134,7 @@
  * Kernel physical load address.
  */
 #ifndef KERNLOAD
-#define	KERNLOAD		(1 << PDRSHIFT)		//wyc: 4M
+#define	KERNLOAD		(1 << PDR_SHIFT)		//wyc: 4M
 #endif /* !defined(KERNLOAD) */
 
 /*
@@ -182,7 +182,7 @@
  */
 #ifndef VM_KMEM_SIZE_MAX
 #define	VM_KMEM_SIZE_MAX	(((((VM_MAX_KERNEL_ADDRESS - \
-    VM_MIN_KERNEL_ADDRESS) >> (PDRSHIFT - 2)) + 5) / 10) << PDRSHIFT)
+    VM_MIN_KERNEL_ADDRESS) >> (PDR_SHIFT - 2)) + 5) / 10) << PDR_SHIFT)
 #endif
 
 /* initial pagein size of beginning of executable file */

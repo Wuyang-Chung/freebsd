@@ -68,7 +68,7 @@
  * Within PTmap, the page directory can be found (third indirection).
  */
 	.globl	PTmap,PTD,PTDpde
-	.set	PTmap,(PTDPTDI << PDRSHIFT)		/*wyc: == 3G-4M      == 0xBFC0_0000 */
+	.set	PTmap,(PTDPTDI << PDR_SHIFT)		/*wyc: == 3G-4M      == 0xBFC0_0000 */
 	.set	PTD,PTmap + (PTDPTDI * PAGE_SIZE)	/*wyc: == 3G-1M-4K   == 0xBFEF_F000 */
 	.set	PTDpde,PTD + (PTDPTDI * PDESIZE)	/*wyc: == 3G-1M-1K-4 == 0xBFEF_FBFC */
 
@@ -715,15 +715,15 @@ over_symalloc:
 	movl	%edi,%esi
 no_kernend:
 
-	addl	$PDRMASK,%esi		/* Play conservative for now, and */
-	andl	$~PDRMASK,%esi		/*   ... wrap to next 4M. */
+	addl	$PDR_MASK,%esi		/* Play conservative for now, and */
+	andl	$~PDR_MASK,%esi		/*   ... wrap to next 4M. */
 	movl	%esi,R(KERNend)		/* save end of kernel */
 	movl	%esi,R(physfree)	/* next free page is at end of kernel */
 
 /* Allocate Kernel Page Tables */
 	ALLOCPAGES(NKPT)
 	movl	%esi,R(KPTphys)
-	addl	$(KERNBASE-(KPTDI<<(PDRSHIFT-PAGE_SHIFT+PTESHIFT))),%esi
+	addl	$(KERNBASE-(KPTDI<<(PDR_SHIFT-PAGE_SHIFT+PTESHIFT))),%esi
 	movl	%esi,R(KPTmap)		/*wyc: KPTmap will be reintialized by pmap_bootstrap() */
 
 /* Allocate Page Table Directory */
@@ -847,7 +847,7 @@ no_kernend:
 	xorl	%ebx, %ebx
 	movl	$NKPT, %ecx
 	fillkpt(R(IdlePTD), $PG_RW)
-#if KERNLOAD < (1 << PDRSHIFT)
+#if KERNLOAD < (1 << PDR_SHIFT)
 	testl	$PG_G, R(pgeflag)
 	jz	1f
 	ALLOCPAGES(1)
@@ -878,13 +878,13 @@ no_kernend:
 	movl	R(KERNend), %ecx
 	movl	$KERNLOAD, %eax
 	subl	%eax, %ecx
-	shrl	$PDRSHIFT, %ecx
-	movl	$(KPTDI+(KERNLOAD/(1 << PDRSHIFT))), %ebx
+	shrl	$PDR_SHIFT, %ecx
+	movl	$(KPTDI+(KERNLOAD/(1 << PDR_SHIFT))), %ebx
 	shll	$PDESHIFT, %ebx
 	addl	R(IdlePTD), %ebx
 	orl	$(PG_V|PG_RW|PG_PS), %eax
 1:	movl	%eax, (%ebx)
-	addl	$(1 << PDRSHIFT), %eax
+	addl	$(1 << PDR_SHIFT), %eax
 	addl	$PDESIZE, %ebx
 	loop	1b
 

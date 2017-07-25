@@ -291,7 +291,7 @@ init_secondary(void)
 
 	/* BSP may have changed PTD while we were waiting */
 	invltlb();
-	for (addr = 0; addr < NKPT * NBPDR - 1; addr += PAGE_SIZE)
+	for (addr = 0; addr < NKPT * PDR_SIZE - 1; addr += PAGE_SIZE)
 		invlpg(addr);
 
 #if defined(I586_CPU) && !defined(NO_F00F_HACK)
@@ -381,7 +381,7 @@ start_all_aps(void)
 	/* Undo V==P hack from above */
 	for (i = TMPMAP_START; i < NKPT; i++)
 		PTD[i] = 0;
-	pmap_invalidate_range(kernel_pmap, 0, NKPT * NBPDR - 1);
+	pmap_invalidate_range(kernel_pmap, 0, NKPT * PDR_SIZE - 1);
 
 	/* number of APs actually started */
 	return mp_naps;

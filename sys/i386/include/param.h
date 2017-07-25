@@ -92,23 +92,24 @@
 
 #if defined(PAE) || defined(PAE_TABLES)
 #define NPGPTD		4
-#define PDRSHIFT	21		/* LOG2(NBPDR) */
+//#define PDRSHIFT	21		/* LOG2(NBPDR) */
+#define PDR_SHIFT	21		/* LOG2(PDR_SIZE) */
 //#define NPGPTD_SHIFT	9	//wyc: not referenced
 #else
 #define NPGPTD		1
-#define PDRSHIFT	22		/* LOG2(NBPDR) */
+//#define PDRSHIFT	22		/* LOG2(NBPDR) */
 #define PDR_SHIFT	22	//wyc
 //#define NPGPTD_SHIFT	10	//wyc: not referenced
 #endif
 
-#define PDR_SIZE	(1<<PDR_SHIFT)	//wyc
-#define PDR_MASK	(PDR_SIZE-1)	//wyc
 
 #define NBPTD		(NPGPTD<<PAGE_SHIFT)		//wyc: size of PTD table
 #define NPDEPTD		(NBPTD/(sizeof (pd_entry_t)))	//wyc: # of PTDs in PTD table
 #define NPDEPG		(PAGE_SIZE/(sizeof (pd_entry_t))) //wyc: # of PDEs in a page
-#define NBPDR		(1<<PDRSHIFT)	/* bytes/page dir */
-#define PDRMASK		(NBPDR-1)
+//#define NBPDR		(1<<PDRSHIFT)	/* bytes/page dir */
+#define PDR_SIZE	(1<<PDR_SHIFT)	//wyc
+//#define PDRMASK		(NBPDR-1)
+#define PDR_MASK	(PDR_SIZE-1)	//wyc
 
 #define	MAXPAGESIZES	2	/* maximum number of supported page sizes */
 

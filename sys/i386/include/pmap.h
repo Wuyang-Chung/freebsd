@@ -122,16 +122,16 @@
 /*
  * Pte related macros
  */
-#define VADDR(pdi, pti) ((vm_offset_t)(((pdi)<<PDRSHIFT)|((pti)<<PAGE_SHIFT)))
+#define VADDR(pdi, pti) ((vm_offset_t)(((pdi)<<PDR_SHIFT)|((pti)<<PAGE_SHIFT)))
 
 /*
  * The initial number of kernel page table pages that are constructed
  * by locore must be sufficient to map vm_page_array.  That number can
  * be calculated as follows:
- *     max_phys / PAGE_SIZE * sizeof(struct vm_page) / NBPDR
- * PAE:      max_phys 16G, sizeof(vm_page) 76, NBPDR 2M, 152 page table pages.
- * PAE_TABLES: max_phys 4G,  sizeof(vm_page) 68, NBPDR 2M, 36 page table pages.
- * Non-PAE:  max_phys 4G,  sizeof(vm_page) 68, NBPDR 4M, 18 page table pages.
+ *     max_phys / PAGE_SIZE * sizeof(struct vm_page) / PDR_SIZE
+ * PAE:      max_phys 16G, sizeof(vm_page) 76, PDR_SIZE 2M, 152 page table pages.
+ * PAE_TABLES: max_phys 4G,  sizeof(vm_page) 68, PDR_SIZE 2M, 36 page table pages.
+ * Non-PAE:  max_phys 4G,  sizeof(vm_page) 68, PDR_SIZE 4M, 18 page table pages.
  */
 #ifndef NKPT
 #if defined(PAE)
@@ -245,8 +245,8 @@ pmap_kextract(vm_offset_t va)
 {
 	vm_paddr_t pa;
 
-	if ((pa = PTD[va >> PDRSHIFT]) & PG_PS) {
-		pa = (pa & PG_PS_FRAME) | (va & PDRMASK);
+	if ((pa = PTD[va >> PDR_SHIFT]) & PG_PS) {
+		pa = (pa & PG_PS_FRAME) | (va & PDR_MASK);
 	} else {
 		/*
 		 * Beware of a concurrent promotion that changes the PDE at

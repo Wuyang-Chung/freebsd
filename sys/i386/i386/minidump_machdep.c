@@ -191,14 +191,14 @@ minidumpsys(struct dumperinfo *di)
 	counter = 0;
 	/* Walk page table pages, set bits in vm_page_dump */
 	ptesize = 0;
-	for (va = KERNBASE; va < kernel_vm_end; va += NBPDR) {
+	for (va = KERNBASE; va < kernel_vm_end; va += PDR_SIZE) {
 		/*
 		 * We always write a page, even if it is zero. Each
 		 * page written corresponds to 2MB of space
 		 */
 		ptesize += PAGE_SIZE;
 		pd = (pd_entry_t *)((uintptr_t)IdlePTD + KERNBASE);	/* always mapped! */
-		j = va >> PDRSHIFT;
+		j = va >> PDR_SHIFT;
 		if ((pd[j] & (PG_PS | PG_V)) == (PG_PS | PG_V))  {
 			/* This is an entire 2M page. */
 			pa = pd[j] & PG_PS_FRAME;
@@ -294,10 +294,10 @@ minidumpsys(struct dumperinfo *di)
 		goto fail;
 
 	/* Dump kernel page table pages */
-	for (va = KERNBASE; va < kernel_vm_end; va += NBPDR) {
+	for (va = KERNBASE; va < kernel_vm_end; va += PDR_SIZE) {
 		/* We always write a page, even if it is zero */
 		pd = (pd_entry_t *)((uintptr_t)IdlePTD + KERNBASE);	/* always mapped! */
-		j = va >> PDRSHIFT;
+		j = va >> PDR_SHIFT;
 		if ((pd[j] & (PG_PS | PG_V)) == (PG_PS | PG_V))  {
 			/* This is a single 2M block. Generate a fake PTP */
 			pa = pd[j] & PG_PS_FRAME;

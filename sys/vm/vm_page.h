@@ -257,13 +257,13 @@ vm_pagequeue_cnt_add(struct vm_pagequeue *pq, int addend)
 extern struct mtx_padalign vm_page_queue_free_mtx;
 extern struct mtx_padalign pa_lock[];
 
-#if defined(__arm__)
-#define	PDRSHIFT	PDR_SHIFT
-#elif !defined(PDRSHIFT)
-#define PDRSHIFT	21
-#endif
+//#if defined(__arm__)
+//#define	PDRSHIFT	PDR_SHIFT
+//#elif !defined(PDRSHIFT)
+//#define PDRSHIFT	21
+//#endif
 
-#define	pa_index(pa)	((pa) >> PDRSHIFT)
+#define	pa_index(pa)	((pa) >> PDR_SHIFT)
 #define	PA_LOCKPTR(pa)	((struct mtx *)(&pa_lock[pa_index(pa) % PA_LOCK_COUNT]))
 #define	PA_LOCKOBJPTR(pa)	((struct lock_object *)PA_LOCKPTR((pa)))
 #define	PA_LOCK(pa)	mtx_lock(PA_LOCKPTR(pa))
