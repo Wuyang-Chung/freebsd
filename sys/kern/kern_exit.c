@@ -239,7 +239,7 @@ exit1(struct thread *td, int rval, int signo)
 		 * re-check all suspension request, the thread should
 		 * either be suspended there or exit.
 		 */
-		if (!thread_single(p, SINGLE_EXIT))
+		if (thread_single(p, SINGLE_EXIT)==ESUCCESS)
 			/*
 			 * All other activity in this process is now
 			 * stopped.  Threading support has been turned

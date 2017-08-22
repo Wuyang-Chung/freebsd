@@ -738,7 +738,7 @@ thread_single(struct proc *p, int mode)
 	PROC_LOCK_ASSERT(p, MA_OWNED);
 
 	if ((p->p_flag & P_HADTHREADS) == 0 && mode != SINGLE_ALLPROC)
-		return (0); //wyc: success
+		return ESUCCESS; //wyc: success
 
 	/* Is someone already single threading? */
 	if (p->p_singlethread != NULL && p->p_singlethread != td)
@@ -841,7 +841,7 @@ stopme:
 		}
 	}
 	PROC_SUNLOCK(p);
-	return (0);
+	return ESUCCESS;
 }
 
 bool

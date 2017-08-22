@@ -3034,7 +3034,7 @@ allproc_loop:
 		_PHOLD(p);
 		sx_xunlock(&allproc_lock);
 		r = thread_single(p, SINGLE_ALLPROC);
-		if (r != 0)
+		if (r != ESUCCESS)
 			restart = true;
 		else
 			stopped_some = true;

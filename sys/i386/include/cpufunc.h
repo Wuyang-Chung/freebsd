@@ -173,6 +173,7 @@ mfence(void)
 
 #define	HAVE_INLINE_FFS
 
+//wyc: find first bit set
 static __inline int
 ffs(int mask)
 {
@@ -195,6 +196,7 @@ ffsl(long mask)
 
 #define	HAVE_INLINE_FLS
 
+//wyc: find last bit set
 static __inline int
 fls(int mask)
 {
@@ -262,7 +264,7 @@ insl(u_int port, void *addr, size_t count)
 			 : "memory");
 }
 
-//wyc: Invalidate Internal Caches
+//wyc: Invalidate Internal Caches. ref wbinvd()
 static __inline void
 invd(void)
 {
@@ -380,6 +382,7 @@ rdtsc32(void)
 	return (rv);
 }
 
+//wyc: Write Back and Invalidate Cache. ref invd()
 static __inline void
 wbinvd(void)
 {

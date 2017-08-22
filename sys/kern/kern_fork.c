@@ -352,7 +352,7 @@ fork_norfproc(struct thread *td, int flags)
 	if (((p1->p_flag & (P_HADTHREADS|P_SYSTEM)) == P_HADTHREADS) &&
 	    (flags & (RFCFDG | RFFDG))) {
 		PROC_LOCK(p1);
-		if (thread_single(p1, SINGLE_BOUNDARY)) {
+		if (thread_single(p1, SINGLE_BOUNDARY)!=ESUCCESS) {
 			PROC_UNLOCK(p1);
 			return (ERESTART);
 		}

@@ -291,7 +291,7 @@ pre_execve(struct thread *td, struct vmspace **oldvmspace)
 	p = td->td_proc;
 	if ((p->p_flag & P_HADTHREADS) != 0) {
 		PROC_LOCK(p);
-		if (thread_single(p, SINGLE_BOUNDARY) != 0)
+		if (thread_single(p, SINGLE_BOUNDARY) != ESUCCESS)
 			error = ERESTART;
 		PROC_UNLOCK(p);
 	}

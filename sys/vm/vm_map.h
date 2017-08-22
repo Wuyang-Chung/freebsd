@@ -124,7 +124,8 @@ struct vm_map_entry {
 #define MAP_ENTRY_NOSYNC		0x0001
 #define MAP_ENTRY_IS_SUB_MAP		0x0002
 #define MAP_ENTRY_COW			0x0004
-#define MAP_ENTRY_NEEDS_COPY		0x0008
+#define MAP_ENTRY_NEEDS_COPY		0x0008	/*wyc: a new shadow vm_object is created if
+						       a page in the vm_object is modified */
 #define MAP_ENTRY_NOFAULT		0x0010	/*wyc: no page fault for this entry */
 #define MAP_ENTRY_USER_WIRED		0x0020
 

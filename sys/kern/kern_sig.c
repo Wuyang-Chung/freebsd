@@ -3033,7 +3033,7 @@ sigexit(td, sig)
 	 * XXX If another thread attempts to single-thread before us
 	 *     (e.g. via fork()), we won't get a dump at all.
 	 */
-	if ((sigprop(sig) & SA_CORE) && thread_single(p, SINGLE_NO_EXIT) == 0) {
+	if ((sigprop(sig) & SA_CORE) && thread_single(p, SINGLE_NO_EXIT) == ESUCCESS) {
 		p->p_sig = sig;
 		/*
 		 * Log signals which would cause core dumps
