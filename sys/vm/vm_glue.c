@@ -341,7 +341,7 @@ vm_thread_new(struct thread *td, int pages)
 			td->td_kstack_obj = ks_ce->ksobj;
 			td->td_kstack = (vm_offset_t)ks_ce;
 			td->td_kstack_pages = kstack_pages;
-			return (1);
+			return TRUE;
 		}
 		mtx_unlock(&kstack_cache_mtx);
 	}
@@ -370,7 +370,7 @@ vm_thread_new(struct thread *td, int pages)
 	if (ks == 0) {
 		printf("vm_thread_new: kstack allocation failed\n");
 		vm_object_deallocate(ksobj);
-		return (0);
+		return FALSE;
 	}
 
 	atomic_add_int(&kstacks, 1);
@@ -401,7 +401,7 @@ vm_thread_new(struct thread *td, int pages)
 	}
 	VM_OBJECT_WUNLOCK(ksobj);
 	pmap_qenter(ks, ma, pages);
-	return (1);
+	return TRUE;
 }
 
 static void

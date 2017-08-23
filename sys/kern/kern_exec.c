@@ -1401,8 +1401,8 @@ exec_copyout_strings(
 	p = imgp->proc;
 	szsigcode = 0;
 	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings; //wyc: PS_STRINGS
-	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: true
-		if (p->p_sysent->sv_szsigcode != NULL) //wyc: true
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: TRUE
+		if (p->p_sysent->sv_szsigcode != NULL) //wyc: TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;

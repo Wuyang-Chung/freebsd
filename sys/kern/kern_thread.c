@@ -363,9 +363,9 @@ thread_alloc_stack(struct thread *td, int pages)
 	KASSERT(td->td_kstack == 0,
 	    ("thread_alloc_stack called on a thread with kstack"));
 	if (!vm_thread_new(td, pages))
-		return (0);
+		return FALSE;
 	cpu_thread_alloc(td);
-	return (1);
+	return TRUE;
 }
 
 /*

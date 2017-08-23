@@ -111,6 +111,14 @@ thr_create_initthr(struct thread *td, void *thunk)
 	return (set_mcontext(td, &args->ctx.uc_mcontext));
 }
 
+#if defined(WYC)
+struct thr_create_args {
+	ucontext_t * ctx;
+	long * id;
+	int flags;
+};
+#endif
+
 int
 sys_thr_create(struct thread *td, struct thr_create_args *uap)
     /* ucontext_t *ctx, long *id, int flags */
@@ -124,8 +132,16 @@ sys_thr_create(struct thread *td, struct thr_create_args *uap)
 	return (thread_create(td, NULL, thr_create_initthr, &args));
 }
 
+#if defined(WYC)
+struct thr_new_args {
+	struct thr_param * param;
+	int param_size;
+};
+#endif
+
+//wyc: pthread_create() calls this syscall
 int
-sys_thr_new(struct thread *td, struct thr_new_args *uap)
+sys_thr_new(struct thread *td, struct thr_new_args *uap) __attribute__((optnone)) //wyc
     /* struct thr_param * */
 {
 	struct thr_param param;
