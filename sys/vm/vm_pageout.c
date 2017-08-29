@@ -143,7 +143,7 @@ SDT_PROBE_DEFINE(vm, , , vm__lowmem_scan);
 
 #if !defined(NO_SWAPPING)
 /* the kernel process "vm_daemon"*/
-static void vm_daemon(void);
+static void vm_daemon(void);	//wyc: swap out daemon
 static struct	proc *vmproc;
 
 static struct kproc_desc vm_kp = {

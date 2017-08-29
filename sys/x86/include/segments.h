@@ -245,11 +245,11 @@ union descriptor {
 /*
  * Entries in the Local Descriptor Table (LDT)
  */
-#define	LSYS5CALLS_SEL	0	/* wyc: disabled forced by intel BCS */
+#define	LSYS5CALLS_SEL	0	/* wyc: disabled. forced by intel BCS */
 #define	LSYS5SIGR_SEL	1
 #define	L43BSDCALLS_SEL	2	/* notyet */
 #define	LUCODE_SEL	3
-#define	LSOL26CALLS_SEL	4	/* wyc: disabled Solaris >= 2.6 system call gate */
+#define	LSOL26CALLS_SEL	4	/* wyc: disabled. Solaris >= 2.6 system call gate */
 #define	LUDATA_SEL	5
 /* separate stack, es,fs,gs sels ? */
 /* #define	LPOSIXCALLS_SEL	5*/	/* notyet */

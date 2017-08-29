@@ -221,9 +221,9 @@ vm_object_zinit(void *mem, int size, int flags)
 	return (0);
 }
 
-//wyc: rename _vm_object_allocate to _vm_object_init
+//wyc: rename _vm_object_allocate to vm_object_init
 static void
-_vm_object_init(vm_object_t object, objtype_t type, vm_pindex_t size)
+vm_object_init(vm_object_t object, objtype_t type, vm_pindex_t size)
 {
 
 	TAILQ_INIT(&object->memq);
@@ -280,7 +280,7 @@ vm_object_mod_init(void)
 	mtx_init(&vm_object_list_mtx, "vm object_list", NULL, MTX_DEF);
 	
 	rw_init(&kernel_object->lock, "kernel vm object");
-	_vm_object_init(kernel_object, OBJT_PHYS, 
+	vm_object_init(kernel_object, OBJT_PHYS, 
 		OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS));
 #if VM_NRESERVLEVEL > 0
 	kernel_object->flags |= OBJ_COLORED;
@@ -288,7 +288,7 @@ vm_object_mod_init(void)
 #endif
 
 	rw_init(&kmem_object->lock, "kmem vm object");
-	_vm_object_init(kmem_object, OBJT_PHYS, 
+	vm_object_init(kmem_object, OBJT_PHYS, 
 		OFF_TO_IDX(VM_MAX_KERNEL_ADDRESS - VM_MIN_KERNEL_ADDRESS));
 #if VM_NRESERVLEVEL > 0
 	kmem_object->flags |= OBJ_COLORED;
@@ -417,7 +417,7 @@ vm_object_allocate(objtype_t type, vm_pindex_t size)
 	vm_object_t object;
 
 	object = (vm_object_t)uma_zalloc(obj_zone, M_WAITOK);
-	_vm_object_init(object, type, size);
+	vm_object_init(object, type, size);
 	return (object);
 }
 

@@ -97,12 +97,12 @@ struct fork_args {
 };
 #endif
 
-struct {
-	unsigned fork;
-	unsigned pdfork;
-	unsigned vfork;
-	unsigned rfork;
-} fork_st;
+struct {		// fresh boot	after kernel build
+	unsigned fork;	// 490		 3,979
+	unsigned vfork;	// 203		35,400
+	unsigned pdfork;// 0
+	unsigned rfork;	// 0
+} fork_st;	//wyc
 
 /* ARGSUSED */
 int

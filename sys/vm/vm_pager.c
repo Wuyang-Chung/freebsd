@@ -232,7 +232,12 @@ vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
 	//wyc ops = pagertab[type];
 	pgo_alloc = pagertab[type]->pgo_alloc;
 	if (pgo_alloc)
+#if defined(WYC)
+		ret = vnode_pager_alloc(handle, size, prot, off, cred); //wyc: for vnode pager
+		ret = phys_pager_alloc(handle, size, prot, off, cred); //wyc: for phys pager
+#else
 		ret = (*pgo_alloc) (handle, size, prot, off, cred); //wyc: vnode_pager_alloc()
+#endif
 	else
 		ret = NULL;
 	return (ret);

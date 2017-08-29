@@ -785,8 +785,8 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 	const Elf_Phdr *phdr;
 	Elf_Auxargs *elf_auxargs;
 	struct vmspace *vmspace;
-	const char *err_str, *newinterp, *interp;
-	char *interp_buf, *path;
+	const char *err_str, *newinterp;
+	char *interp, *interp_buf, *path;
 	Elf_Brandinfo *brand_info;
 	struct sysentvec *sv;
 	vm_prot_t prot;
@@ -875,9 +875,8 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnon
 				interp_buf[interp_name_len] = '\0';
 				interp = interp_buf;
 			} else {
-				//wyc: don't need to use __DECONST(), change the 
-				//     variable type of interp instead
-				interp = imgp->image_header + phdr[i].p_offset;
+				interp = __DECONST(char *, imgp->image_header) +
+				    phdr[i].p_offset;
 			}
 			break;
 		case PT_GNU_STACK:

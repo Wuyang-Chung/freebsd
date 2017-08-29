@@ -255,12 +255,18 @@ alloc_sv_tk_compat32(void)
 }
 #endif
 
+//wyc: 'param' is always &elf32_freebsd_sysvec
 void
 exec_sysvec_init(void *param)
 {
 	struct sysentvec *sv;
 
+#if defined(WYC)
+	sv = &elf32_freebsd_sysvec;
+#else
 	sv = (struct sysentvec *)param;
+#endif
+
 	if ((sv->sv_flags & SV_SHP) == 0) //wyc: FALSE
 		return;
 	sv->sv_shared_page_obj = shared_page_obj;
