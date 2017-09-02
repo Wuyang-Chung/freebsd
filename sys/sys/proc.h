@@ -207,6 +207,14 @@ struct rusage_ext {
  * This is what is put to sleep and reactivated.
  * Thread context.  Processes may have multiple threads.
  */
+enum _td_state { //wyc
+	TDS_INACTIVE,
+	TDS_INHIBITED,
+	TDS_CAN_RUN,
+	TDS_RUNQ,
+	TDS_RUNNING,
+};
+
 struct thread {
 	struct mtx	*volatile td_lock; /* replaces sched lock */
 	struct proc	*td_proc;	/* (*) Associated process. */
@@ -305,13 +313,7 @@ struct thread {
  * or already have been set in the allocator, constructor, etc.
  */
 	struct pcb	*td_pcb;	/* (k) Kernel VA of pcb and kstack. */
-	enum {
-		TDS_INACTIVE = 0x0,
-		TDS_INHIBITED,
-		TDS_CAN_RUN,
-		TDS_RUNQ,
-		TDS_RUNNING
-	} td_state;			/* (t) thread state */
+	enum _td_state	td_state;	/* (t) thread state */
 	union {
 		register_t	tdu_retval[2];
 		off_t		tdu_off;	
@@ -519,6 +521,12 @@ do {									\
 /*
  * Process structure.
  */
+enum proc_state {	//wyc
+	PRS_NEW,	/* In creation */
+	PRS_NORMAL,	/* threads can be run. */
+	PRS_ZOMBIE,
+};
+
 struct proc {
 	LIST_ENTRY(proc) p_list;	/* (d) List of all processes. */
 	TAILQ_HEAD(, thread) p_threads;	/* (c) all threads. */
@@ -533,11 +541,7 @@ struct proc {
 
 	int		p_flag;		/* (c) P_* flags. */
 	int		p_flag2;	/* (c) P2_* flags. */
-	enum {
-		PRS_NEW = 0,		/* In creation */
-		PRS_NORMAL,		/* threads can be run. */
-		PRS_ZOMBIE
-	} p_state;			/* (j/c) Process status. */
+	enum proc_state	p_state;	/* (j/c) Process status. */
 	pid_t		p_pid;		/* (b) Process identifier. */
 	LIST_ENTRY(proc) p_hash;	/* (d) Hash chain. */
 	LIST_ENTRY(proc) p_pglist;	/* (g + e) List of processes in pgrp. */

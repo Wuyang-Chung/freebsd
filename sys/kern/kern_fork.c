@@ -448,10 +448,10 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Copy filedesc.
 	 */
-	if (fr->fr_flags & RFCFDG) {
+	if (fr->fr_flags & RFCFDG) {	//wyc: close all fds
 		fd = fdinit(p1->p_fd, false);
 		fdtol = NULL;
-	} else if (fr->fr_flags & RFFDG) {
+	} else if (fr->fr_flags & RFFDG) {	//wyc: copy fd table
 		fd = fdcopy(p1->p_fd);
 		fdtol = NULL;
 	} else {
@@ -667,7 +667,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	sx_xunlock(&proctree_lock);
 
 	/* Inform accounting that we have forked. */
-	p2->p_acflag = AFORK; //wyc: forked but not exec'ed
+	p2->p_acflag = AFORK;
 	PROC_UNLOCK(p2);
 
 #ifdef KTRACE
@@ -680,19 +680,19 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 */
 	vm_forkproc(td, p2, td2, vm2, fr->fr_flags);
 
-	if (fr->fr_flags == (RFFDG | RFPROC)) {	//wyc: sys_fork
+	if (fr->fr_flags == (RFFDG | RFPROC)) {	//wyc: sys_fork()
 		PCPU_INC(cnt.v_forks);
 		PCPU_ADD(cnt.v_forkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
-	} else if (fr->fr_flags == (RFFDG | RFPROC | RFPPWAIT | RFMEM)) { //wyc: sys_vfork
+	} else if (fr->fr_flags == (RFFDG | RFPROC | RFPPWAIT | RFMEM)) { //wyc: sys_vfork()
 		PCPU_INC(cnt.v_vforks);
 		PCPU_ADD(cnt.v_vforkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
-	} else if (p1 == &proc0) {		//wyc: kproc_create
+	} else if (p1 == &proc0) {		//wyc: create kernel thread
 		PCPU_INC(cnt.v_kthreads);
 		PCPU_ADD(cnt.v_kthreadpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
-	} else {
+	} else {				//wyc: sys_rfork()
 		PCPU_INC(cnt.v_rforks);
 		PCPU_ADD(cnt.v_rforkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
@@ -750,7 +750,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 		td->td_dbg_forked = p2->p_pid;
 		td2->td_dbgflags |= TDB_STOPATFORK;
 	}
-	if (fr->fr_flags & RFPPWAIT) {
+	if (fr->fr_flags & RFPPWAIT) { //wyc: sys_vfork()
 		td->td_pflags |= TDP_RFPPWAIT;
 		td->td_rfppwait_p = p2;
 	}
@@ -931,7 +931,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	}
 
 	/*wyc
-	  For SASOS RFMEM will always be true
+	  For SAS RFMEM will always be true
 	*/
 	if ((flags & RFMEM) == 0) {
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
@@ -1015,7 +1015,7 @@ fail2:
 		fdrop(fp_procdesc, td);
 	}
 	atomic_add_int(&nprocs, -1);
-	pause("fork", hz / 2); //wyc: to slow down fork attack
+	pause("fork", hz / 2); //wyc: slow down to prevent fork attack
 	return (error);
 }
 

@@ -362,9 +362,9 @@ thread_alloc_stack(struct thread *td, int pages)
 
 	KASSERT(td->td_kstack == 0,
 	    ("thread_alloc_stack called on a thread with kstack"));
-	if (!vm_thread_new(td, pages))
+	if (!vm_thread_new(td, pages)) //wyc: create thread kernel stack
 		return FALSE;
-	cpu_thread_alloc(td);
+	cpu_thread_alloc(td); //wyc: initialize cpu dependant part of the thread structure
 	return TRUE;
 }
 

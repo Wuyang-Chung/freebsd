@@ -124,9 +124,9 @@ IDTVEC(fpusegm)
 	pushl $0; TRAP(T_FPOPFLT)
 IDTVEC(tss)
 	TRAP(T_TSSFLT)
-IDTVEC(missing)
+IDTVEC(missing)	//wyc: IDT_NP
 	TRAP(T_SEGNPFLT)
-IDTVEC(stk)
+IDTVEC(stk)	//wyc: IDT_SS
 	TRAP(T_STKFLT)
 IDTVEC(prot)
 	TRAP(T_PROTFLT)

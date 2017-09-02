@@ -462,6 +462,9 @@ ENTRY(fuswintr)
 END(suswintr)
 END(fuswintr)
 
+/*wyc
+int	fuword16(volatile const void *base);
+*/
 ENTRY(fuword16)
 	movl	PCPU(CURPCB),%ecx
 	movl	$fusufault,PCB_ONFAULT(%ecx)

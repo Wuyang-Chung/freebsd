@@ -624,6 +624,10 @@ vm_forkproc(
 	struct proc *p1 = td->td_proc;
 	int error;
 
+	//wyc: panic if p2 != td2->td_proc
+	if ( p2 != td2->td_proc )
+		panic("%s", __func__);
+
 	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
 		/*
 		 * Divorce the memory, if it is shared, essentially
