@@ -249,7 +249,7 @@ cpu_fork(
 
 	td2->td_frame->tf_eax = 0;		/* Child returns zero */
 	td2->td_frame->tf_eflags &= ~PSL_C;	/* success */
-	td2->td_frame->tf_edx = 1; //wyc: in parent process it is assigned to 0. Why?
+	td2->td_frame->tf_edx = 1; //wyc: Why?
 
 	/*
 	 * If the parent process has the trap bit set (i.e. a debugger had

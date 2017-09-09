@@ -277,7 +277,7 @@ threadinit(void)
 	 * pid_max cannot be greater than PID_MAX.
 	 * leave one number for thread0.
 	 */
-	tid_unrhdr = new_unrhdr(PID_MAX + 2, INT_MAX, &tid_lock);
+	tid_unrhdr = new_unrhdr(PID_MAX + 2, INT_MAX, &tid_lock); //wyc: unit number header
 
 	thread_zone = uma_zcreate("THREAD", sched_sizeof_thread(),
 	    thread_ctor, thread_dtor, thread_init, thread_fini,

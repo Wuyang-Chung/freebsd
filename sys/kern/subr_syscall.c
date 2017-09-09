@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD$");
 #endif
 #include <security/audit/audit.h>
 
-static inline int
+static /*inline*/ int //wyc: why inline
 syscallenter(struct thread *td, struct syscall_args *sa)
 {
 	struct proc *p;
@@ -161,7 +161,7 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 	return (error);
 }
 
-static inline void
+static /*inline*/ void //wyc: why inline
 syscallret(struct thread *td, int error, struct syscall_args *sa)
 {
 	struct proc *p, *p2;

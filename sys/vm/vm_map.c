@@ -284,6 +284,7 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 		panic("%s: pinit not NULL", __func__);	
 
+	//wyc if (!pinit(vmspace_pmap(vm))) {
 	if (!pmap_pinit(vmspace_pmap(vm))) {
 		uma_zfree(vmspace_zone, vm);
 		return (NULL);
