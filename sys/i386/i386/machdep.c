@@ -1380,7 +1380,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[GPANIC_SEL] = { //wyc: Panic Tss Descriptor
+[GPANIC_SEL] = { //wyc: Panic Tss Descriptor for IDT_DF
 	.ssd_base = (int) &dblfault_tss,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
