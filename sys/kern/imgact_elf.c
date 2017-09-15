@@ -2356,7 +2356,7 @@ __elfN(check_note)(struct image_params *imgp, Elf_Brandnote *checknote,
 /*
  * Tell kern_execve.c about it, with a little help from the linker.
  */
-static struct execsw __elfN(execsw) = {
+static struct execsw __elfN(execsw) = { //wyc: elf32_execsw
 	__CONCAT(exec_, __elfN(imgact)), //wyc: exec_elf32_imgact
 	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE)) //wyc: "ELF32"
 };
