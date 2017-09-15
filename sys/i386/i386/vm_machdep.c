@@ -142,7 +142,7 @@ get_pcb_user_save_pcb(struct pcb *pcb)
 }
 
 struct pcb *
-get_pcb_td(struct thread *td)
+td_get_tcb(struct thread *td)
 {
 	vm_offset_t p;
 
@@ -221,7 +221,7 @@ cpu_fork(
 #endif
 
 	/* Point the pcb to the top of the stack */
-	pcb2 = get_pcb_td(td2);
+	pcb2 = td_get_tcb(td2);
 	td2->td_pcb = pcb2;
 
 	/* Copy td1's pcb */
@@ -350,9 +350,9 @@ cpu_exit(struct thread *td)
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
 		panic("%s: md_ldt != NULL", __func__);	//wyc
-		td->td_pcb->pcb_gs = _udatasel;
-		load_gs(_udatasel);
-		user_ldt_free(td);
+		//wyc td->td_pcb->pcb_gs = _udatasel;
+		//wyc load_gs(_udatasel);
+		//wyc user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
 }
@@ -411,7 +411,7 @@ cpu_thread_alloc(struct thread *td)
 	struct xstate_hdr *xhdr;
 #endif
 
-	td->td_pcb = pcb = get_pcb_td(td);
+	td->td_pcb = pcb = td_get_tcb(td);
 	td->td_frame = (struct trapframe *)((caddr_t)pcb - 16) - 1;
 	pcb->pcb_ext = NULL; 
 	pcb->pcb_save = get_pcb_user_save_pcb(pcb);

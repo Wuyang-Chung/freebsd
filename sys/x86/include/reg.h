@@ -79,6 +79,7 @@
 #define	tGS	(18)
 #endif /* __i386__ */
 
+#if !defined(WYC)
 /* Rename the structs below depending on the machine architecture. */
 #ifdef	__i386__
 #define	__reg32		reg
@@ -93,11 +94,16 @@
 #define	__dbreg64	dbreg
 #define	__HAVE_REG32
 #endif
+#endif
 
 /*
  * Register set accessible via /proc/$pid/regs and PT_{SET,GET}REGS.
  */
+#if defined(WYC)
+struct reg {
+#else
 struct __reg32 {
+#endif
 	__uint32_t	r_fs;
 	__uint32_t	r_es;
 	__uint32_t	r_ds;
@@ -155,7 +161,11 @@ struct __reg64 {
  * simplified struct.  This may be too much detail.  Perhaps
  * an array of unsigned longs is best.
  */
+#if defined(WYC)
+struct fpreg {
+#else
 struct __fpreg32 {
+#endif
 	__uint32_t	fpr_env[7];
 	__uint8_t	fpr_acc[8][10];
 	__uint32_t	fpr_ex_sw;
@@ -187,7 +197,11 @@ struct xmmreg {
 /*
  * Register set accessible via /proc/$pid/dbregs.
  */
+#if defined(WYC)
+struct dbreg {
+#else
 struct __dbreg32 {
+#endif
 	__uint32_t	dr[8];	/* debug registers */
 				/* Index 0-3: debug address registers */
 				/* Index 4-5: reserved */

@@ -2357,10 +2357,10 @@ __elfN(check_note)(struct image_params *imgp, Elf_Brandnote *checknote,
  * Tell kern_execve.c about it, with a little help from the linker.
  */
 static struct execsw __elfN(execsw) = {
-	__CONCAT(exec_, __elfN(imgact)),
-	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE))
+	__CONCAT(exec_, __elfN(imgact)), //wyc: exec_elf32_imgact
+	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE)) //wyc: "ELF32"
 };
-EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw));
+EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw)); //wyc: elf32_execsw
 
 static vm_prot_t
 __elfN(trans_prot)(Elf_Word flags)

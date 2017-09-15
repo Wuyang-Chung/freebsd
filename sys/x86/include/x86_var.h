@@ -112,6 +112,6 @@ void	pagecopy(void *from, void *to);
 void	printcpuinfo(void);
 int	user_dbreg_trap(void);
 int	minidumpsys(struct dumperinfo *);
-struct pcb *get_pcb_td(struct thread *td);
+struct pcb *td_get_tcb(struct thread *td);
 
 #endif

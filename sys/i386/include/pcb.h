@@ -48,6 +48,12 @@
  * NB: The fields marked with (*) are used by kernel debuggers.  Their
  * ABI should be preserved.
  */
+//wyc: pcb_flags
+#define	PCB_DBREGS	0x02	/* process using debug registers */
+#define	PCB_NPXINITDONE	0x08	/* fpu state is initialized */
+#define	PCB_VM86CALL	0x10	/* in vm86 call */
+#define	PCB_NPXUSERINITDONE 0x20 /* user fpu state is initialized */
+#define	PCB_KERNNPX	0x40	/* kernel uses npx */
 struct pcb {
 	int	pcb_edi;	/* (*) */
 	int	pcb_esi;	/* (*) */
@@ -79,11 +85,6 @@ struct pcb {
 	uint16_t	pcb_tr;
 
 	u_int	pcb_flags;
-#define	PCB_DBREGS	0x02	/* process using debug registers */
-#define	PCB_NPXINITDONE	0x08	/* fpu state is initialized */
-#define	PCB_VM86CALL	0x10	/* in vm86 call */
-#define	PCB_NPXUSERINITDONE 0x20 /* user fpu state is initialized */
-#define	PCB_KERNNPX	0x40	/* kernel uses npx */
 
 	uint16_t pcb_initial_npxcw;
 

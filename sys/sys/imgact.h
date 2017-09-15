@@ -54,6 +54,9 @@ struct image_args {
 	struct filedesc *fdp;	/* new file descriptor table */
 };
 
+#define IMGACT_SHELL	0x1
+#define IMGACT_BINMISC	0x2
+
 struct image_params {
 	struct proc *proc;	/* our process struct */
 	struct label *execlabel;	/* optional exec label */
@@ -64,8 +67,6 @@ struct image_params {
 	unsigned long entry_addr; /* entry address of target executable */
 	unsigned long reloc_base; /* load address of image */
 	char vmspace_destroyed;	/* flag - we've blown away original vm space */
-#define IMGACT_SHELL	0x1
-#define IMGACT_BINMISC	0x2
 	unsigned char interpreted;	/* mask of interpreters that have run */
 	char opened;		/* flag - we have opened executable vnode */
 	char *interpreter_name;	/* name of the interpreter */

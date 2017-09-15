@@ -87,49 +87,53 @@ struct __sigset;
 struct trapframe;
 struct vnode;
 
-struct sysentvec {
-	int		sv_size;	/* number of entries */
-	struct sysent	*sv_table;	/* pointer to sysent */ //wyc: ==sysent (global variable)
-	u_int		sv_mask;	/* optional mask to index */
-	int		sv_errsize;	/* size of errno translation table */
-	int 		*sv_errtbl;	/* errno translation table */
-	int		(*sv_transtrap)(int, int);
+struct sysentvec { //wyc: elf32_freebsd_sysvec
+	int		sv_size;	/* number of entries */ //wyc: SYS_MAXSYSCALL
+	struct sysent	*sv_table;	/* pointer to sysent */ //wyc: ==sysent
+	u_int		sv_mask;	/* optional mask to index */ //wyc: ==0
+	int		sv_errsize;	/* size of errno translation table */ //wyc: ==0
+	int 		*sv_errtbl;	/* errno translation table */ //wyc: ==NULL
+	int		(*sv_transtrap)(int, int); //wyc: ==NULL
 					/* translate trap-to-signal mapping */
-	int		(*sv_fixup)(register_t **, struct image_params *);
+	int		(*sv_fixup)(register_t **, struct image_params *); //wyc: ==elf32_freebsd_fixup
 					/* stack fixup function */
-	void		(*sv_sendsig)(void (*)(int), struct ksiginfo *, struct __sigset *);
+	void		(*sv_sendsig)  //wyc: ==sendsig
+			    (void (*)(int), struct ksiginfo *, struct __sigset *);
 			    		/* send signal */
 	char 		*sv_sigcode;	/* start of sigtramp code */ //wyc: ==sigcode
 	int 		*sv_szsigcode;	/* size of sigtramp code */ //wyc: ==&szsigcode
-	char		*sv_name;	/* name of binary type */
-	int		(*sv_coredump)(struct thread *, struct vnode *, off_t, int);
+	char		*sv_name;	/* name of binary type */ //wyc: =="FreeBSD ELF32"
+	int		(*sv_coredump) //wyc: ==elf32_coredump
+			    (struct thread *, struct vnode *, off_t, int);
 					/* function to dump core, or NULL */
-	int		(*sv_imgact_try)(struct image_params *);
-	int		sv_minsigstksz;	/* minimum signal stack size */
+	int		(*sv_imgact_try)(struct image_params *); //wyc: ==NULL
+	int		sv_minsigstksz;	/* minimum signal stack size */ //wyc: ==MINSIGSTKSZ
 	int		sv_pagesize;	/* pagesize */
 	vm_offset_t	sv_minuser;	/* VM_MIN_ADDRESS */ //wyc: ==0
 	vm_offset_t	sv_maxuser;	/* VM_MAXUSER_ADDRESS */ //wyc: == 3G-4M
 	vm_offset_t	sv_usrstack;	/* USRSTACK */ //wyc: 3G-4M-4K
-	vm_offset_t	sv_psstrings;	/* PS_STRINGS */
+	vm_offset_t	sv_psstrings;	/* PS_STRINGS */ //wyc: ==USRSTACK - sizeof(struct ps_strings)
 	int		sv_stackprot;	/* vm protection for stack */ //wyc: VM_PROT_ALL
-	register_t	*(*sv_copyout_strings)(struct image_params *); //wyc: ==exec_copyout_strings
-	void		(*sv_setregs)(struct thread *, struct image_params *,
-			    u_long); //wyc: ==exec_setregs
-	void		(*sv_fixlimit)(struct rlimit *, int);
-	u_long		*sv_maxssiz;
-	u_int		sv_flags;
-	void		(*sv_set_syscall_retval)(struct thread *, int);
-	int		(*sv_fetch_syscall_args)(struct thread *, struct
-			    syscall_args *);
-	const char	**sv_syscallnames;
+	register_t *	(*sv_copyout_strings) //wyc: ==exec_copyout_strings
+			    (struct image_params *);
+	void		(*sv_setregs)	//wyc: ==exec_setregs
+			    (struct thread *, struct image_params *, u_long); 
+	void		(*sv_fixlimit)(struct rlimit *, int); //wyc: ==NULL
+	u_long		*sv_maxssiz; //wyc: ==NULL
+	u_int		sv_flags; //wyc: ==SV_ABI_FREEBSD | SV_IA32 | SV_ILP32 | SV_SHP | SV_TIMEKEEP
+	void		(*sv_set_syscall_retval) //wyc: ==cpu_set_syscall_retval
+			    (struct thread *, int);
+	int		(*sv_fetch_syscall_args) //wyc: ==cpu_fetch_syscall_args
+			    (struct thread *, struct syscall_args *);
+	const char	**sv_syscallnames; //wyc: ==syscallnames
 	vm_offset_t	sv_timekeep_base;
-	vm_offset_t	sv_shared_page_base; //wyc: ==SHAREDPAGE for elf32_freebsd_sysvec
-	vm_offset_t	sv_shared_page_len;  //wyc: ==PAGE_SIZE  for elf32_freebsd_sysvec
+	vm_offset_t	sv_shared_page_base; //wyc: ==SHAREDPAGE==3G-4M-4K
+	vm_offset_t	sv_shared_page_len;  //wyc: ==PAGE_SIZE
 	vm_offset_t	sv_sigcode_base;
 	void		*sv_shared_page_obj; //wyc: ==shared_page_obj
-	void		(*sv_schedtail)(struct thread *);
-	void		(*sv_thread_detach)(struct thread *);
-	int		(*sv_trap)(struct thread *);
+	void		(*sv_schedtail)(struct thread *); //wyc: ==NULL
+	void		(*sv_thread_detach)(struct thread *); //wyc: ==NULL
+	int		(*sv_trap)(struct thread *); //wyc: ==NULL
 };
 
 #define	SV_ILP32	0x000100	/* 32-bit executable. */

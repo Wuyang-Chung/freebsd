@@ -382,8 +382,12 @@ do_execve(
 #ifdef HWPMC_HOOKS
 	struct pmckern_procexec pe;
 #endif
+	//wyc: static makes it as a global variable which 
+	//     makes the initialization more efficient
 	static const char fexecv_proc_title[] = "(fexecv)";
 
+	//wyc: why using pointer variable? 
+	//     It is not as efficient as using the structure itself.
 	imgp = &image_params;
 
 	/*
@@ -577,7 +581,7 @@ interpret:
 	else {
 		VOP_UNLOCK(imgp->vp, 0);
 		if (vn_fullpath(td, imgp->vp, &imgp->execpath,
-		    &imgp->freepath) != 0)
+		    &imgp->freepath) != ESUCCESS)
 			imgp->execpath = args->fname;
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
 	}
@@ -681,7 +685,7 @@ interpret:
 	/*
 	 * Copy out strings (args and env) and initialize stack base
 	 */
-	if (p->p_sysent->sv_copyout_strings) //wyc: sv_copyout_strings == exec_copyout_strings()
+	if (p->p_sysent->sv_copyout_strings) //wyc: == exec_copyout_strings()
 		stack_base = (*p->p_sysent->sv_copyout_strings)(imgp);
 	else
 		stack_base = exec_copyout_strings(imgp);

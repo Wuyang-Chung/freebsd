@@ -1151,7 +1151,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	if (td->td_proc->p_md.md_ldt) {
 		//wyc: panic if md_ldt != NULL
 		panic("%s: md_ldt != NULL", __func__);
-		user_ldt_free(td);
+		//wyc user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
   
@@ -1200,7 +1200,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 
 	/*
 	 * XXX - Linux emulator
-	 * Make sure sure edx is 0x0 on entry. Linux binaries depend
+	 * Make sure edx is 0x0 on entry. Linux binaries depend
 	 * on it.
 	 */
 	td->td_retval[1] = 0;
@@ -2580,8 +2580,6 @@ init386(int first)
 	    SDT_SYS386TGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
 	setidt(IDT_XF, &IDTVEC(xmm),
 	    SDT_SYS386TGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
- 	setidt(IDT_SYSCALL, &IDTVEC(int0x80_syscall),
-	    SDT_SYS386TGT, SEL_UPL, GSEL(GCODE_SEL, SEL_KPL));
 	setidt(IDT_DB, &IDTVEC(dbg),
 	    SDT_SYS386IGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
 	setidt(IDT_NMI, &IDTVEC(nmi),
@@ -2592,6 +2590,9 @@ init386(int first)
 	    SDT_SYS386IGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
 	setidt(IDT_DF, 0,
 	    SDT_SYSTASKGT, SEL_KPL, GSEL(GPANIC_SEL, SEL_KPL));
+
+ 	setidt(IDT_SYSCALL, &IDTVEC(int0x80_syscall),
+	    SDT_SYS386TGT, SEL_UPL, GSEL(GCODE_SEL, SEL_KPL));
 #ifdef KDTRACE_HOOKS
 	setidt(IDT_DTRACE_RET, &IDTVEC(dtrace_ret), SDT_SYS386TGT, SEL_UPL,
 	    GSEL(GCODE_SEL, SEL_KPL));
@@ -2634,10 +2635,10 @@ init386(int first)
 	clock_init();
 
 	finishidentcpu();	/* Final stage of CPU initialization */
-	setidt(IDT_UD, &IDTVEC(ill),  SDT_SYS386TGT, SEL_KPL,
-	    GSEL(GCODE_SEL, SEL_KPL));
-	setidt(IDT_GP, &IDTVEC(prot),  SDT_SYS386TGT, SEL_KPL,
-	    GSEL(GCODE_SEL, SEL_KPL));
+	setidt(IDT_UD, &IDTVEC(ill),
+	    SDT_SYS386TGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
+	setidt(IDT_GP, &IDTVEC(prot),
+	    SDT_SYS386TGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
 	initializecpu();	/* Initialize CPU registers */
 	initializecpucache();
 
@@ -2689,10 +2690,10 @@ init386(int first)
 	 * Point the ICU spurious interrupt vectors at the APIC spurious
 	 * interrupt handler.
 	 */
-	setidt(IDT_IO_INTS + 7, IDTVEC(spuriousint), SDT_SYS386IGT, SEL_KPL,
-	    GSEL(GCODE_SEL, SEL_KPL));
-	setidt(IDT_IO_INTS + 15, IDTVEC(spuriousint), SDT_SYS386IGT, SEL_KPL,
-	    GSEL(GCODE_SEL, SEL_KPL));
+	setidt(IDT_IO_INTS + 7, IDTVEC(spuriousint),
+	    SDT_SYS386IGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
+	setidt(IDT_IO_INTS + 15, IDTVEC(spuriousint),
+	    SDT_SYS386IGT, SEL_KPL, GSEL(GCODE_SEL, SEL_KPL));
 #endif
 #endif
 
@@ -2716,7 +2717,7 @@ init386(int first)
 	 * area size.  Zero out the extended state header in fpu save
 	 * area.
 	 */
-	thread0.td_pcb = get_pcb_td(&thread0);
+	thread0.td_pcb = td_get_tcb(&thread0);
 	bzero(get_pcb_user_save_td(&thread0), cpu_max_ext_state_size);
 #ifdef CPU_ENABLE_SSE
 	if (use_xsave) {
@@ -3202,7 +3203,7 @@ static void
 fpstate_drop(struct thread *td)
 {
 
-	KASSERT(PCB_USER_FPU(td->td_pcb), ("fpstate_drop: kernel-owned fpu"));
+	KASSERT(PCB_USER_FPU(td->td_pcb), ("%s: kernel-owned fpu", __func__));
 	critical_enter();
 #ifdef DEV_NPX
 	if (PCPU_GET(fpcurthread) == td)
