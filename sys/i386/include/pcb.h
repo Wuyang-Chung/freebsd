@@ -54,6 +54,7 @@
 #define	PCB_VM86CALL	0x10	/* in vm86 call */
 #define	PCB_NPXUSERINITDONE 0x20 /* user fpu state is initialized */
 #define	PCB_KERNNPX	0x40	/* kernel uses npx */
+
 struct pcb {
 	int	pcb_edi;	/* (*) */
 	int	pcb_esi;	/* (*) */

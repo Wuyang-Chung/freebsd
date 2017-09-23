@@ -2821,7 +2821,7 @@ _fdrop(struct file *fp, struct thread *td)
 	int error;
 
 	if (fp->f_count != 0)
-		panic("fdrop: count %d", fp->f_count);
+		panic("%s: count %d", __func__, fp->f_count);
 	error = fo_close(fp, td);
 	atomic_subtract_int(&openfiles, 1);
 	crfree(fp->f_cred);

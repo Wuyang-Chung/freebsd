@@ -72,7 +72,7 @@ idle_setup(void *dummy)
 		PCPU_SET(idlethread, td);
 #endif
 		if (error)
-			panic("idle_setup: kproc_create error %d\n", error);
+			panic("%s: kproc_create error %d\n", __func__, error);
 
 		thread_lock(td);
 		TD_SET_CAN_RUN(td);

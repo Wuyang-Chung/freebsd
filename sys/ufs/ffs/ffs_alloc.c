@@ -171,10 +171,10 @@ ffs_alloc(ip, lbn, bpref, size, flags, cred, bnp)
 		printf("dev = %s, bsize = %ld, size = %d, fs = %s\n",
 		    devtoname(ip->i_dev), (long)fs->fs_bsize, size,
 		    fs->fs_fsmnt);
-		panic("ffs_alloc: bad size");
+		panic("%s: bad size", __func__);
 	}
 	if (cred == NOCRED)
-		panic("ffs_alloc: missing credential");
+		panic("%s: missing credential", __func__);
 #endif /* INVARIANTS */
 	reclaimed = 0;
 retry:

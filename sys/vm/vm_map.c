@@ -279,12 +279,13 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
 
-	if (pinit != NULL)
+	if (pinit == NULL)
+		pinit = &pmap_pinit;
+	else {
 		//wyc: 'pinit' is always NULL in i386.
 		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 		panic("%s: pinit not NULL", __func__);	
-
-	//wyc if (!pinit(vmspace_pmap(vm))) {
+	}
 	if (!pmap_pinit(vmspace_pmap(vm))) {
 		uma_zfree(vmspace_zone, vm);
 		return (NULL);

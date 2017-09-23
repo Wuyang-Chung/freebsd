@@ -829,7 +829,7 @@ malloc_init(void *data)
 
 	mtp = data;
 	if (mtp->ks_magic != M_MAGIC)
-		panic("malloc_init: bad malloc type magic");
+		panic("%s: bad malloc type magic", __func__);
 
 	mtip = uma_zalloc(mt_zone, M_WAITOK | M_ZERO);
 	mtp->ks_handle = mtip;

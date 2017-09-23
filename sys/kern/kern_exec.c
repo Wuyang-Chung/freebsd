@@ -192,7 +192,7 @@ sysctl_kern_stackprot(SYSCTL_HANDLER_ARGS)
  * Each of the items is a pointer to a `const struct execsw', hence the
  * double pointer here.
  */
-static const struct execsw **_execsw;
+static /*wyc const*/ struct execsw **_execsw;
 
 #ifndef _SYS_SYSPROTO_H_
 struct execve_args {
@@ -216,7 +216,7 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	    uap->argv, uap->envv); //wyc: the size of args is 1KiB+256KiB
 	if (error == 0)
 		error = kern_execve(td, &args, NULL);
-	//wyc: will not run to here if kern_execve succeeds
+	//wyc: will run to here even if kern_execve succeeds
 	post_execve(td, error, oldvmspace);
 	return (error);
 }
@@ -474,7 +474,7 @@ interpret:
 		goto exec_fail_dealloc;
 
 	imgp->object = imgp->vp->v_object;
-	if (imgp->object != NULL)
+	if (__predict_true(imgp->object != NULL)) //wyc: imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
 	/*
@@ -695,7 +695,7 @@ interpret:
 	 * let it do the stack setup.
 	 * Else stuff argument count as first item on stack
 	 */
-	if (p->p_sysent->sv_fixup != NULL) //wyc: ==elf32_freebsd_fixup()
+	if (p->p_sysent->sv_fixup != NULL)
 #if defined(WYC)
 		elf32_freebsd_fixup(&stack_base, imgp);
 #else
@@ -888,8 +888,8 @@ interpret:
 #endif
 
 	/* Set values passed into the program in registers. */
-	if (p->p_sysent->sv_setregs)
-		(*p->p_sysent->sv_setregs)(td, imgp, 
+	if (p->p_sysent->sv_setregs) //wyc: ==exec_setregs
+		(*p->p_sysent->sv_setregs)(td, imgp,
 		    (u_long)(uintptr_t)stack_base);
 	else
 		exec_setregs(td, imgp, (u_long)(uintptr_t)stack_base);
@@ -1434,6 +1434,7 @@ exec_copyout_strings(
 	 */
 	arc4rand(canary, sizeof(canary), 0);
 	destp -= sizeof(canary);
+	//wyc???: should do rounddown2(destp, ??) here.
 	imgp->canary = destp;
 	copyout(canary, (void *)destp, sizeof(canary));
 	imgp->canarylen = sizeof(canary);
@@ -1608,9 +1609,9 @@ exec_check_permissions(
  */
 int
 exec_register(
-	const struct execsw *execsw_arg)
+	/*wyc const*/ struct execsw *execsw_arg)
 {
-	const struct execsw **es, **xs, **newexecsw;
+	/*wyc const*/ struct execsw **es, **xs, **newexecsw;
 	int count = 2;	/* New slot and trailing NULL */
 
 	if (_execsw)
@@ -1631,9 +1632,9 @@ exec_register(
 
 int
 exec_unregister(
-	const struct execsw *execsw_arg)
+	/*wyc const*/ struct execsw *execsw_arg)
 {
-	const struct execsw **es, **xs, **newexecsw;
+	/*wyc const*/ struct execsw **es, **xs, **newexecsw;
 	int count = 1;
 
 	if (_execsw == NULL)

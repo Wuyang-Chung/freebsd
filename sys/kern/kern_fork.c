@@ -391,7 +391,7 @@ fail:
 
 static void
 do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *td2,
-    struct vmspace *vm2, struct file *fp_procdesc)
+    struct vmspace *vm2, struct file *fp_procdesc) __attribute__((optnone)) //wyc
 {
 	struct proc *p1, *pptr;
 	int trypid;
@@ -405,7 +405,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	p1 = td->td_proc;
 	//wyc: panic if p2 != td2->td_proc
 	if ( p2 != td2->td_proc )
-		panic("%s", __func__);
+		panic("%s: p2 != td2->td_proc", __func__);
 
 	trypid = fork_findpid(fr->fr_flags);
 

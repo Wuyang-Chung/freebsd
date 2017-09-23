@@ -61,8 +61,9 @@ struct ps_strings {
 struct image_params;
 
 struct execsw {
-	int (*ex_imgact)(struct image_params *);
-	const char *ex_name;
+	int (* const ex_imgact)(struct image_params *);
+	char const * const ex_name;
+	struct execsw	*next;
 };
 
 #include <machine/exec.h>
@@ -80,8 +81,8 @@ struct execsw {
 int exec_map_first_page(struct image_params *);        
 void exec_unmap_first_page(struct image_params *);       
 
-int exec_register(const struct execsw *);
-int exec_unregister(const struct execsw *);
+int exec_register(/*wyc const*/ struct execsw *);
+int exec_unregister(/*wyc const*/ struct execsw *);
 
 extern int coredump_pack_fileinfo;
 extern int coredump_pack_vmmapinfo;

@@ -212,7 +212,7 @@ __curthread(void)
 #endif
 #define	curthread		(__curthread())
 
-#define	OFFSETOF_CURPCB		16
+#define	OFFSETOF_CURPCB		16 //wyc: offsetof(struct pcpu, pc_curpcb)
 static __inline __pure2 struct pcb *
 __curpcb(void)
 {

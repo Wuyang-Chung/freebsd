@@ -63,7 +63,7 @@ kproc_start(const void *udata)
 	error = kproc_create((void (*)(void *))kp->func, NULL,
 		    kp->global_procpp, 0, 0, "%s", kp->arg0);
 	if (error)
-		panic("kproc_start: %s: error %d", kp->arg0, error);
+		panic("%s: %s: error %d", __func__, kp->arg0, error);
 }
 
 /*
@@ -87,7 +87,7 @@ kproc_create(void (*func)(void *), void *arg,
 	struct proc *p2;
 
 	if (!proc0.p_stats)
-		panic("kproc_create called too soon");
+		panic("%s called too soon", __func__);
 
 	bzero(&fr, sizeof(fr));
 	fr.fr_flags = RFMEM | RFFDG | RFPROC | RFSTOPPED | flags;
@@ -236,7 +236,7 @@ kthread_start(const void *udata)
 	error = kthread_add((void (*)(void *))kp->func, NULL,
 		    NULL, kp->global_threadpp, 0, 0, "%s", kp->arg0);
 	if (error)
-		panic("kthread_start: %s: error %d", kp->arg0, error);
+		panic("%s: %s: error %d", __func__, kp->arg0, error);
 }
 
 /*
@@ -257,7 +257,7 @@ kthread_add(void (*func)(void *), void *arg, struct proc *p,
 	struct thread *newtd, *oldtd;
 
 	if (!proc0.p_stats)
-		panic("kthread_add called too soon");
+		panic("%s called too soon", __func__);
 
 	/* If no process supplied, put it on proc0 */
 	if (p == NULL)

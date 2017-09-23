@@ -1158,7 +1158,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	bzero((char *)regs, sizeof(struct trapframe));
 	regs->tf_eip = imgp->entry_addr; //wyc: start address
 	regs->tf_esp = stack;
-	regs->tf_eflags = PSL_USER | (regs->tf_eflags & PSL_T);
+	regs->tf_eflags = PSL_USER; //wyc??? | (regs->tf_eflags & PSL_T);
 	regs->tf_ss = _udatasel;
 	regs->tf_ds = _udatasel;
 	regs->tf_es = _udatasel;
@@ -1203,7 +1203,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	 * Make sure edx is 0x0 on entry. Linux binaries depend
 	 * on it.
 	 */
-	td->td_retval[1] = 0;
+	td->td_retval[1] = 0; //XXX - Linux emulator
 }
 
 void
@@ -2740,6 +2740,7 @@ init386(int first)
 	/* make a call gate to reenter kernel with */
 	gdp = &ldt[LSYS5CALLS_SEL].gd;
 
+	//x = (int) &IDTVEC(lcall_syscall);
 	x = (int) &IDTVEC(rsvd); //wyc: replace lcall_syscall with rsvd
 	gdp->gd_looffset = x;
 	gdp->gd_selector = GSEL(GCODE_SEL,SEL_KPL);

@@ -228,6 +228,10 @@ norm_ill:
  * final spot. It has to be done this way because esp can`t be just
  * temporarily altered for the pushfl - an interrupt might come in
  * and clobber the saved cs/eip.
+
+wyc:
+    Will not call to this function because the call to this function
+    has been replaced with call to rsvd
  */
 	SUPERALIGN_TEXT
 IDTVEC(lcall_syscall)
@@ -266,12 +270,12 @@ IDTVEC(int0x80_syscall)
 	pushl	$0			/* tf_trapno */
 	pushal
 	pushl	$0
-	movw	%ds,(%esp)
+	movw	%ds,(%esp)	//wyc: 16-bit
 	pushl	$0
 	movw	%es,(%esp)
 	pushl	$0
 	movw	%fs,(%esp)
-	SET_KERNEL_SREGS
+	SET_KERNEL_SREGS	//wyc: Setup the kernel segment registers
 	cld
 	FAKE_MCOUNT(TF_EIP(%esp))
 	pushl	%esp

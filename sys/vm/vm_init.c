@@ -98,8 +98,8 @@ SYSCTL_INT(_vm, OID_AUTO, exec_map_entries, CTLFLAG_RDTUN, &exec_map_entries, 0,
 /*
  * System initialization
  */
-static void vm_mem_init(void *);
-SYSINIT(vm_mem, SI_SUB_VM, SI_ORDER_FIRST, vm_mem_init, NULL);
+//static void vm_mem_init(void *);
+//SYSINIT(vm_mem, SI_SUB_VM, SI_ORDER_FIRST, vm_mem_init, NULL);
 
 /*
  * Import kva into the kernel arena.
@@ -163,6 +163,7 @@ vm_mem_init(void *dummy)
 	pmap_init();
 	vm_pager_init();
 }
+SYSINIT(vm_mem, SI_SUB_VM, SI_ORDER_FIRST, vm_mem_init, NULL);
 
 void
 vm_ksubmap_init(struct kva_md_info *kmi)

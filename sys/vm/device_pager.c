@@ -370,7 +370,7 @@ dev_pager_putpages(vm_object_t object, vm_page_t *m, int count, int flags,
     int *rtvals)
 {
 
-	panic("dev_pager_putpage called");
+	panic("%s called", __func__);
 }
 
 static boolean_t

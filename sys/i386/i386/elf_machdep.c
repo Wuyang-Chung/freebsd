@@ -200,7 +200,7 @@ elf_reloc_internal(linker_file_t lf, Elf_Addr relocbase, const void *data,
 		symidx = ELF_R_SYM(rela->r_info);
 		break;
 	default:
-		panic("unknown reloc type %d\n", type);
+		panic("%s: unknown reloc type %d\n", __func__, type);
 	}
 
 	if (local) {

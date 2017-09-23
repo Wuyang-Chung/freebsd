@@ -798,7 +798,7 @@ filt_usertouch(struct knote *kn, struct kevent *kev, u_long type)
 		break;
 
 	default:
-		panic("filt_usertouch() - invalid type (%ld)", type);
+		panic("%s: invalid type (%ld)", __func__, type);
 		break;
 	}
 }

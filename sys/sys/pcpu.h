@@ -48,7 +48,7 @@
 #include <machine/pcpu.h>
 
 #define	DPCPU_SETNAME		"set_pcpu"
-//#define	DPCPU_SYMPREFIX		"pcpu_entry_"	//wyc: not referenced
+#define	DPCPU_SYMPREFIX		"pcpu_entry_"	//wyc: not referenced
 
 #ifdef _KERNEL
 
@@ -75,7 +75,7 @@ extern uintptr_t dpcpu_off[];	//wyc: base address of dpcpu for each cpu
 #define	DPCPU_BYTES		(DPCPU_STOP - DPCPU_START)
 #define	DPCPU_MODMIN		2048
 #define	DPCPU_SIZE		roundup2(DPCPU_BYTES, PAGE_SIZE)
-//#define	DPCPU_MODSIZE		(DPCPU_SIZE - (DPCPU_BYTES - DPCPU_MODMIN)) //wyc: not referenced
+#define	DPCPU_MODSIZE		(DPCPU_SIZE - (DPCPU_BYTES - DPCPU_MODMIN)) //wyc: not referenced
 
 /*
  * Declaration and definition.

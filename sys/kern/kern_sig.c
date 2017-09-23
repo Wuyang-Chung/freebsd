@@ -2656,7 +2656,7 @@ sigdeferstop_impl(int mode)
 		nflags = (cflags | TDF_SBDRY | TDF_SERESTART) & ~TDF_SEINTR;
 		break;
 	default:
-		panic("sigdeferstop: invalid mode %x", mode);
+		panic("%s: invalid mode %x", __func__, mode);
 		break;
 	}
 	if (cflags == nflags)

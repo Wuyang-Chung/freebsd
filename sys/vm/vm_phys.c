@@ -1079,8 +1079,8 @@ vm_phys_paddr_to_segind(vm_paddr_t pa)
 		if (pa >= seg->start && pa < seg->end)
 			return (segind);
 	}
-	panic("vm_phys_paddr_to_segind: paddr %#jx is not in any segment" ,
-	    (uintmax_t)pa);
+	panic("%s: paddr %#jx is not in any segment",
+	    __func__, (uintmax_t)pa);
 }
 
 /*

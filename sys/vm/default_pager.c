@@ -82,7 +82,7 @@ default_pager_alloc(void *handle, vm_ooffset_t size, vm_prot_t prot,
 	vm_object_t object;
 
 	if (handle != NULL)
-		panic("default_pager_alloc: handle specified");
+		panic("%s: handle specified", __func__);
 	if (cred != NULL) {
 		if (!swap_reserve_by_cred(size, cred))
 			return (NULL);
