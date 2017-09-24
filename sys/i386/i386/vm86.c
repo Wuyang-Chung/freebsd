@@ -653,9 +653,9 @@ vm86_getptr(vmc, kva, sel, off)
 }
 	
 int
-vm86_sysarch(td, args)
-	struct thread *td;
-	char *args;
+vm86_sysarch(
+	struct thread *td,
+	char *args)
 {
 	int error = 0;
 	struct i386_vm86_args ua;

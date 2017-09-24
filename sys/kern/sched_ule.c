@@ -1888,10 +1888,10 @@ sched_switch(struct thread *td, struct thread *newtd, int flags)
 	int cpuid, preempted;
 
 	THREAD_LOCK_ASSERT(td, MA_OWNED);
-	KASSERT(newtd == NULL, ("sched_switch: Unsupported newtd argument"));
+	KASSERT(newtd == NULL, ("%s: Unsupported newtd argument", __func__));
 
 	cpuid = PCPU_GET(cpuid);
-	tdq = TDQ_CPU(cpuid);
+	tdq = TDQ_CPU(cpuid);	//wyc: the thread queue for processor 'cpuid'
 	ts = td_get_sched(td);
 	mtx = td->td_lock;
 	sched_pctcpu_update(ts, 1);

@@ -232,9 +232,9 @@ cpu_fork(
 	bcopy(get_pcb_user_save_td(td1), get_pcb_user_save_pcb(pcb2),
 	    cpu_max_ext_state_size);
 
-	/* Point mdproc and then copy over td1's contents */
-	if (p1->p_md.md_ldt != NULL)
+	if (p1->p_md.md_ldt != NULL)	//wyc
 		panic("%s %d: md_ldt != NULL", __func__, __LINE__); //wyc
+	/* Point mdproc and then copy over td1's contents */
 	mdp2 = &p2->p_md;
 	bcopy(&p1->p_md, mdp2, sizeof(*mdp2));
 

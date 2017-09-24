@@ -1886,6 +1886,26 @@ uma_set_align(int align)
 }
 
 /* See uma.h */
+/* wyc copied from uma.h
+ * Create a new uma zone
+ *
+ * Arguments:
+ *	name  The text name of the zone for debugging and stats. This memory
+ *		should not be freed until the zone has been deallocated.
+ *	size  The size of the object that is being created.
+ *	ctor  The constructor that is called when the object is allocated.
+ *	dtor  The destructor that is called when the object is freed.
+ *	init  An initializer that sets up the initial state of the memory.
+ *	fini  A discard function that undoes initialization done by init.
+ *		ctor/dtor/init/fini may all be null, see notes above.
+ *	align A bitmask that corresponds to the requested alignment
+ *		eg 4 would be 0x3
+ *	flags A set of parameters that control the behavior of the zone.
+ *
+ * Returns:
+ *	A pointer to a structure which is intended to be opaque to users of
+ *	the interface.  The value may be null if the wait flag is not set.
+ */
 uma_zone_t
 uma_zcreate(const char *name, size_t size, uma_ctor ctor, uma_dtor dtor,
 		uma_init uminit, uma_fini fini, int align, uint32_t flags)

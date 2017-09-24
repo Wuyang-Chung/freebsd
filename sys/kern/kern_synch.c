@@ -400,16 +400,16 @@ mi_switch(int flags, struct thread *newtd)
 
 	td = curthread;			/* XXX */
 	THREAD_LOCK_ASSERT(td, MA_OWNED | MA_NOTRECURSED);
-	KASSERT(!TD_ON_RUNQ(td), ("mi_switch: called by old code"));
+	KASSERT(!TD_ON_RUNQ(td), ("%s: called by old code", __func__));
 #ifdef INVARIANTS
 	if (!TD_ON_LOCK(td) && !TD_IS_RUNNING(td))
 		mtx_assert(&Giant, MA_NOTOWNED);
 #endif
 	KASSERT(td->td_critnest == 1 || panicstr,
-	    ("mi_switch: switch in a critical section"));
+	    ("%s: switch in a critical section", __func__));
 	KASSERT((flags & (SW_INVOL | SW_VOL)) != 0,
-	    ("mi_switch: switch must be voluntary or involuntary"));
-	KASSERT(newtd != curthread, ("mi_switch: preempting back to ourself"));
+	    ("%s: switch must be voluntary or involuntary", __func__));
+	KASSERT(newtd != curthread, ("%s: preempting back to ourself", __func__));
 
 	/*
 	 * Don't perform context switches from the debugger.

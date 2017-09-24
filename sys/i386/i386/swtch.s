@@ -62,7 +62,7 @@
 	.text
 
 /*
- * void cpu_throw(struct thread *oldtd, struct thread *newtd); // __noreturn__
+ * void cpu_throw(struct thread *oldtd, struct thread *newtd) __attribute__((__noreturn__));
  *
  * This is the second half of cpu_switch(). It is used when the current
  * thread is either a dummy or slated to die, and we no longer care
@@ -83,7 +83,7 @@ ENTRY(cpu_throw)
 #ifdef SMP
 	lock
 #endif
-	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old */
+	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old */ //wyc: bit test and reset
 1:
 	movl	8(%esp),%ecx			/* New thread */
 	movl	TD_PCB(%ecx),%edx
@@ -97,7 +97,7 @@ ENTRY(cpu_throw)
 #ifdef SMP
 	lock
 #endif
-	btsl	%esi, PM_ACTIVE(%ebx)		/* set new */
+	btsl	%esi, PM_ACTIVE(%ebx)		/* set new */ //wyc: bit test and set
 	jmp	sw1
 END(cpu_throw)
 
