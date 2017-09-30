@@ -350,6 +350,7 @@ kern_execve(struct thread *td, struct image_args *args, struct mac *mac_p)
  * In-kernel implementation of execve().  All arguments are assumed to be
  * userspace pointers from the passed thread.
  */
+//wyc: mac_p is usually NULL
 static int
 do_execve(
 	struct thread *td,
@@ -386,7 +387,7 @@ do_execve(
 	//     makes the initialization more efficient
 	static const char fexecv_proc_title[] = "(fexecv)";
 
-	//wyc: why using pointer variable? 
+	//wyc???: why using pointer variable? 
 	//     It is not as efficient as using the structure itself.
 	imgp = &image_params;
 
@@ -1404,7 +1405,11 @@ exec_copyout_strings(
 		execpath_len = 0;
 	p = imgp->proc;
 	szsigcode = 0;
-	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings; //wyc: PS_STRINGS
+#if defined(WYC)
+	arginfo = (struct ps_strings *)PS_STRINGS; //wyc: 3G-4M-4K-sizeof(struct ps_strings)
+#else
+	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
+#endif
 	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: TRUE
 		if (p->p_sysent->sv_szsigcode != NULL) //wyc: TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);

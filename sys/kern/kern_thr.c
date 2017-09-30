@@ -134,7 +134,7 @@ sys_thr_create(struct thread *td, struct thr_create_args *uap)
 
 #if defined(WYC)
 struct thr_new_args {
-	struct thr_param * param;
+	struct thr_param *param;
 	int param_size;
 };
 #endif

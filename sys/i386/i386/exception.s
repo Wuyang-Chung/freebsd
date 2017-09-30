@@ -124,9 +124,9 @@ IDTVEC(fpusegm)
 	pushl $0; TRAP(T_FPOPFLT)
 IDTVEC(tss)
 	TRAP(T_TSSFLT)
-IDTVEC(missing)	//wyc: IDT_NP
+IDTVEC(missing)	//wyc: IDT_NP, #NP: Segment Not Present
 	TRAP(T_SEGNPFLT)
-IDTVEC(stk)	//wyc: IDT_SS
+IDTVEC(stk)	//wyc: IDT_SS, #SS: Stack Segment Fault
 	TRAP(T_STKFLT)
 IDTVEC(prot)
 	TRAP(T_PROTFLT)
@@ -284,11 +284,17 @@ IDTVEC(int0x80_syscall)
 	MEXITCOUNT
 	jmp	doreti
 
+/*wyc:
+    input:
+	%esi: function
+	%ebx: arg1 of the above function
+	%esp: trapframe
+*/
 ENTRY(fork_trampoline)
 	pushl	%esp			/* trapframe pointer */
 	pushl	%ebx			/* arg1 */
 	pushl	%esi			/* function */
-	call	fork_exit
+	call	fork_exit //wyc: fork_exit(function, arg1, frame)
 	addl	$12,%esp
 	/* cut from syscall */
 

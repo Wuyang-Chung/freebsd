@@ -113,18 +113,18 @@ END(cpu_throw)
  */
 ENTRY(cpu_switch)
 
-	/* Switch to new thread.  First, save context. */
-	movl	4(%esp),%ecx
+	/* First, save old thread context. */
+	movl	4(%esp),%ecx	//wyc: oldtd
 
 #ifdef INVARIANTS
 	testl	%ecx,%ecx			/* no thread? */
 	jz	badsw2				/* no, panic */
 #endif
 
-	movl	TD_PCB(%ecx),%edx
+	movl	TD_PCB(%ecx),%edx	//wyc: %edx = oldtd->td_pcb
 
 	movl	(%esp),%eax			/* Hardware registers */
-	movl	%eax,PCB_EIP(%edx)
+	movl	%eax,PCB_EIP(%edx) //wyc: store this function`s return address to oldtd`s %EIP
 	movl	%ebx,PCB_EBX(%edx)
 	movl	%esp,PCB_ESP(%edx)
 	movl	%ebp,PCB_EBP(%edx)
@@ -162,15 +162,15 @@ ENTRY(cpu_switch)
 1:
 #endif
 
-	/* Save is done.  Now fire up new thread. Leave old vmspace. */
-	movl	4(%esp),%edi
+	/* Second fire up new thread. Leave old vmspace. */
+	movl	4(%esp),%edi	//wyc: old thread
 	movl	8(%esp),%ecx			/* New thread */
 	movl	12(%esp),%esi			/* New lock */
 #ifdef INVARIANTS
 	testl	%ecx,%ecx			/* no thread? wyc: bitwise AND, set EFLAGS */
 	jz	badsw3				/* no, panic */
 #endif
-	movl	TD_PCB(%ecx),%edx
+	movl	TD_PCB(%ecx),%edx	//wyc: %edx = newtd->td_pcb
 
 	/* switch address space */
 	movl	PCB_CR3(%edx),%eax
@@ -180,7 +180,7 @@ ENTRY(cpu_switch)
 	movl	%eax,%cr3			/* new address space */
 	movl	%esi,%eax
 	movl	PCPU(CPUID),%esi
-	SETOP	%eax,TD_LOCK(%edi)		/* Switchout td_lock */
+	SETOP	%eax,TD_LOCK(%edi) //wyc: oldtd->td_lock = newlock; /* Switchout td_lock */
 
 	/* Release bit from old pmap->pm_active */
 	movl	PCPU(CURPMAP), %ebx
@@ -192,7 +192,7 @@ ENTRY(cpu_switch)
 	/* Set bit in new pmap->pm_active */
 	movl	TD_PROC(%ecx),%eax		/* newproc */
 	movl	P_VMSPACE(%eax), %ebx
-	addl	$VM_PMAP, %ebx
+	addl	$VM_PMAP, %ebx		//wyc: %ebx = &newtd->td_proc->p_vmspace.vm_pmap;
 	movl	%ebx, PCPU(CURPMAP)
 #ifdef SMP
 	lock
@@ -201,8 +201,12 @@ ENTRY(cpu_switch)
 	jmp	sw1
 
 sw0:
-	SETOP	%esi,TD_LOCK(%edi)		/* Switchout td_lock */
+	SETOP	%esi,TD_LOCK(%edi) //wyc: oldtd->td_lock = newlock; /* Switchout td_lock */
 sw1:
+	/*wyc
+	    ecx: newtd
+	    edx: newpcb
+	*/
 	BLOCK_SPIN(%ecx)
 	/*
 	 * At this point, we`ve switched address spaces and are ready
@@ -213,8 +217,8 @@ sw1:
 	movl	$1, PCPU(PRIVATE_TSS) 		/* mark use of private tss */
 	movl	PCB_EXT(%edx), %edi		/* new tss descriptor */
 	jmp	2f				/* Load it up */
-
-1:	/*
+1:
+	/*
 	 * Use the common default TSS instead of our own.
 	 * Set our stack pointer into the TSS, it`s set to just
 	 * below the PCB.  In C, common_tss.tss_esp0 = &pcb - 16;
@@ -229,7 +233,7 @@ sw1:
 	cmpl	$0, PCPU(PRIVATE_TSS)		/* Already using the common? */
 	je	3f				/* if so, skip reloading */
 	movl	$0, PCPU(PRIVATE_TSS)
-	PCPU_ADDR(COMMON_TSSD, %edi)
+	PCPU_ADDR(COMMON_TSSD, %edi)	//wyc: %edi = &COMMON_TSSD
 2:
 	/* Move correct tss descriptor into GDT slot, then reload tr. */
 	movl	PCPU(TSS_GDT), %ebx		/* entry in GDT */
@@ -237,10 +241,9 @@ sw1:
 	movl	4(%edi), %esi
 	movl	%eax, 0(%ebx)
 	movl	%esi, 4(%ebx)
-	movl	$GPROC0_SEL*8, %esi		/* GSEL(GPROC0_SEL, SEL_KPL) */
-	ltr	%si
+	movl	$GPROC0_SEL*8, %esi	//wyc: Proc 0 Tss Descriptor
+	ltr	%si			//wyc: load task register
 3:
-
 	/* Copy the %fs and %gs selectors into this pcpu gdt */
 	leal	PCB_FSD(%edx), %esi
 	movl	PCPU(FSGS_GDT), %edi
@@ -260,19 +263,19 @@ sw1:
 	movl	PCB_ESI(%edx),%esi
 	movl	PCB_EDI(%edx),%edi
 	movl	PCB_EIP(%edx),%eax
-	movl	%eax,(%esp)
+	movl	%eax,(%esp)	//wyc: store newtd`s %EIP to function`s return address 
 	pushl	PCB_PSL(%edx)
 	popfl
 
 	movl	%edx, PCPU(CURPCB)
-	movl	TD_TID(%ecx),%eax	/* wyc: TD_TID is not used after loaded to eax */
+	//movl	TD_TID(%ecx),%eax	/* wyc???: TD_TID is not used after loaded to eax */
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
 	/*
 	 * Determine the LDT to use and load it if is the default one and
 	 * that is not the current one.
 	 */
-	movl	TD_PROC(%ecx),%eax
+	movl	TD_PROC(%ecx),%eax	//wyc: %eax = newproc
 	cmpl    $0,P_MD+MD_LDT(%eax)
 	jnz	1f
 	movl	_default_ldt,%eax

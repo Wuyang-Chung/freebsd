@@ -1178,7 +1178,7 @@ vn_fullpath(struct thread *td, struct vnode *vn, char **retbuf, char **freebuf)
 	error = vn_fullpath1(td, vn, rdir, buf, retbuf, MAXPATHLEN);
 	vrele(rdir);
 
-	if (!error)
+	if (error==ESUCCESS)
 		*freebuf = buf;
 	else
 		free(buf, M_TEMP);

@@ -271,6 +271,12 @@ cpu_fork(
 #else
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
+#if defined(WYC)
+	//wyc: the thread 'td2' will resume by executing fork_trampoline and
+	//    fork_trampline() will call
+	//    fork_exit(fork_return, td2, td2->td_frame - sizeof(void *)
+	fork_exit(fork_return, td2, (int)td2->td_frame - sizeof(void *);
+#endif
 	pcb2->pcb_edi = 0;
 	pcb2->pcb_esi = (int)fork_return;	/* fork_exit(callout,,)*/
 	pcb2->pcb_ebp = 0;
@@ -504,12 +510,18 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * Set registers for trampoline to user mode.  Leave space for the
 	 * return address on stack.  These are the kernel mode register values.
 	 */
+#if defined(WYC)
+	//wyc: the thread 'td' will resume by executing fork_trampoline and
+	//    fork_trampline() will call
+	//    fork_exit(fork_return, td, td->td_frame - sizeof(void *)
+	fork_exit(fork_return, td, (int)td->td_frame - sizeof(void *);
+#endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline() arg */
+	pcb2->pcb_esi = (int)fork_return;	/* fork_exit(callout,,) */
 	pcb2->pcb_ebp = 0;
-	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* fork_trampoline() arg */
-	pcb2->pcb_ebx = (int)td;		/* fork_trampoline() arg */
-	pcb2->pcb_eip = (int)fork_trampoline;
+	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* fork_exit(,,frame) */
+	pcb2->pcb_ebx = (int)td;		/* fork_exit(,arg1,) */
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc: this function will call fork_exit
 	pcb2->pcb_psl &= ~(PSL_I);	/* interrupts must be disabled */
 	pcb2->pcb_gs = rgs();
 	/*

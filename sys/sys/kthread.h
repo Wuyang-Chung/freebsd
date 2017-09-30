@@ -37,7 +37,7 @@
  * Note: global_procpp may be NULL for no global save area.
  */
 struct kproc_desc {
-	const char	*arg0;			/* arg 0 (for 'ps' listing) */
+	const char	*name;			/* arg 0 (for 'ps' listing) */
 	void		(*func)(void);		/* "main" for kernel process */
 	struct proc	**global_procpp;	/* ptr to proc ptr save area */
 };

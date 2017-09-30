@@ -1878,6 +1878,7 @@ thread_unblock_switch(struct thread *td, struct mtx *mtx)
  * migrating a thread from one queue to another as running threads may
  * be assigned elsewhere via binding.
  */
+//wyc: the parameter 'newtd' is NULL
 void
 sched_switch(struct thread *td, struct thread *newtd, int flags)
 {

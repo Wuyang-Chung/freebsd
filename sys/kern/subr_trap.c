@@ -128,8 +128,10 @@ userret(struct thread *td, struct trapframe *frame)
 #ifdef KTRACE
 	KTRUSERRET(td);
 #endif
-	if (softdep_ast_cleanup != NULL)
+	if (softdep_ast_cleanup != NULL) {
+		//wyc: cannot find where softdep_ast_cleanup is modified
 		softdep_ast_cleanup();
+	}
 
 	/*
 	 * If this thread tickled GEOM, we need to wait for the giggling to

@@ -4029,7 +4029,7 @@ RetryLookup:;
 	/*
 	 * Lookup the faulting address.
 	 */
-	if (!vm_map_lookup_entry(map, vaddr, out_entry)) {
+	if (vm_map_lookup_entry(map, vaddr, out_entry)==FALSE) {
 		vm_map_unlock_read(map);
 		return (KERN_INVALID_ADDRESS);
 	}

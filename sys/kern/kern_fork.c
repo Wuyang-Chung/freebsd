@@ -1027,7 +1027,8 @@ void
 fork_exit(
     void (*callout)(void *, struct trapframe *),//wyc: fork_return()
     void *arg,			//wyc: struct thread *td
-    struct trapframe *frame)	//wyc: (int)td->td_frame - sizeof(void *)
+    struct trapframe *frame	//wyc: (int)td->td_frame - sizeof(void *)
+    ) __attribute__((optnone))	//wyc
 {
 	struct proc *p;
 	struct thread *td;
@@ -1058,7 +1059,11 @@ fork_exit(
 	 * initproc has its own fork handler, but it does return.
 	 */
 	KASSERT(callout != NULL, ("NULL callout in fork_exit"));
-	callout(arg, frame); //wyc: fork_return(arg, frame)
+#if defined(WYC)
+	fork_return(arg, frame); //wyc: for normal case
+#else
+	callout(arg, frame);
+#endif
 
 	/*
 	 * Check if a kernel thread misbehaved and returned from its main

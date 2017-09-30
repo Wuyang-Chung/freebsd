@@ -302,7 +302,7 @@ trap(struct trapframe *frame)
 		 * we must not reenable interrupts.  This might be a
 		 * spurious page fault.
 		 */
-		eva = rcr2();
+		eva = rcr2(); //wyc: page-fault linear address
 		if (td->td_md.md_spinlock_count == 0)
 			enable_intr();
 	}
