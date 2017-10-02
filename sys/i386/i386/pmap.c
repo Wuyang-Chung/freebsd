@@ -5480,7 +5480,8 @@ retry:
 }
 
 void
-pmap_activate(struct thread *td) __attribute__((optnone)) //wyc
+pmap_activate(struct thread *td)
+__attribute__((optnone)) //wyc
 {
 	pmap_t	pmap, oldpmap;
 	u_int	cpuid;

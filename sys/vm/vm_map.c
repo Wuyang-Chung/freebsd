@@ -1462,7 +1462,8 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 int
 vm_map_fixed(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_size_t length, vm_prot_t prot,
-    vm_prot_t max, int cow) __attribute__((optnone)) //wyc
+    vm_prot_t max, int cow)
+__attribute__((optnone)) //wyc
 // cow == 0x8001(COWF_ACC_NO_CHARGE|COWF_INHERIT_SHARE)
 {
 	vm_offset_t end;

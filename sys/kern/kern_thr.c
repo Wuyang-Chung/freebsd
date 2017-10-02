@@ -141,7 +141,8 @@ struct thr_new_args {
 
 //wyc: pthread_create() calls this syscall
 int
-sys_thr_new(struct thread *td, struct thr_new_args *uap) __attribute__((optnone)) //wyc
+sys_thr_new(struct thread *td, struct thr_new_args *uap)
+__attribute__((optnone)) //wyc
     /* struct thr_param * */
 {
 	struct thr_param param;
@@ -203,7 +204,7 @@ kern_thr_new(struct thread *td, struct thr_param *param)
 int
 thread_create(struct thread *td, struct rtprio *rtp,
     int (*initialize_thread)(struct thread *, void *), void *thunk)
-    __attribute__((optnone)) //wyc
+__attribute__((optnone)) //wyc
 {
 	struct thread *newtd;
 	struct proc *p;

@@ -511,8 +511,8 @@ __elfN(load_section)(
     size_t memsz, 
     size_t filsz, 
     vm_prot_t prot,
-    size_t pagesize
-    ) __attribute__((optnone)) //wyc
+    size_t pagesize)
+__attribute__((optnone)) //wyc
 {
 	struct sf_buf *sf;
 	size_t map_len;
@@ -777,7 +777,8 @@ static int
 exec_elf32_imgact(struct image_params *imgp)
 #else
 static int
-__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp) __attribute__((optnone)) //wyc
+__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
+__attribute__((optnone)) //wyc
 #endif
 {
 	struct thread *td;

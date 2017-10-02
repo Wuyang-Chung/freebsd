@@ -97,8 +97,8 @@ CTASSERT(MAXSHELLCMDLEN >= MAXINTERP + 3);
  * 6.x branch on May 28, 2005 (matching __FreeBSD_version 600029).
  */
 int
-exec_shell_imgact(
-	struct image_params *imgp) __attribute__((optnone)) //wyc
+exec_shell_imgact(struct image_params *imgp)
+__attribute__((optnone)) //wyc
 {
 	const char *image_header = imgp->image_header;
 	const char *ihp, *interpb, *interpe, *maxp, *optb, *opte, *fname;

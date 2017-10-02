@@ -391,7 +391,8 @@ fail:
 
 static void
 do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *td2,
-    struct vmspace *vm2, struct file *fp_procdesc) __attribute__((optnone)) //wyc
+    struct vmspace *vm2, struct file *fp_procdesc)
+__attribute__((optnone)) //wyc
 {
 	struct proc *p1, *pptr;
 	int trypid;
@@ -1027,8 +1028,8 @@ void
 fork_exit(
     void (*callout)(void *, struct trapframe *),//wyc: fork_return()
     void *arg,			//wyc: struct thread *td
-    struct trapframe *frame	//wyc: (int)td->td_frame - sizeof(void *)
-    ) __attribute__((optnone))	//wyc
+    struct trapframe *frame)	//wyc: (int)td->td_frame - sizeof(void *)
+__attribute__((optnone))	//wyc
 {
 	struct proc *p;
 	struct thread *td;

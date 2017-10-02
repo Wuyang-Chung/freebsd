@@ -353,9 +353,10 @@ kern_execve(struct thread *td, struct image_args *args, struct mac *mac_p)
 //wyc: mac_p is usually NULL
 static int
 do_execve(
-	struct thread *td,
-	struct image_args *args,
-	struct mac *mac_p) __attribute__((optnone)) //wyc
+    struct thread *td,
+    struct image_args *args,
+    struct mac *mac_p)
+__attribute__((optnone)) //wyc
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -1076,8 +1077,9 @@ exec_unmap_first_page(
  */
 int
 exec_new_vmspace(
-	struct image_params *imgp,
-	struct sysentvec *sv) __attribute__((optnone)) //wyc
+    struct image_params *imgp,
+    struct sysentvec *sv)
+__attribute__((optnone)) //wyc
 {
 	int error;
 	struct proc *p = imgp->proc; //wyc: ==curthread->td_proc
