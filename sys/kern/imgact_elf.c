@@ -740,8 +740,13 @@ __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 	for (i = 0, numsegs = 0; i < hdr->e_phnum; i++) {
 		if (phdr[i].p_type == PT_LOAD && phdr[i].p_memsz != 0) {
 			/* Loadable segment */
+#if defined(WYC)
+			prot = elf32_trans_prot(phdr[i].p_flags);
+			error = elf32_load_section(imgp, phdr[i].p_offset,
+#else
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
 			error = __elfN(load_section)(imgp, phdr[i].p_offset,
+#endif
 			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + rbase,
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot, pagesize);
 			if (error != 0)

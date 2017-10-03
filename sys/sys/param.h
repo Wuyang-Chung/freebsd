@@ -275,7 +275,7 @@
  * It should be set high enough to allow all legitimate uses, but halt
  * infinite loops reasonably quickly.
  */
-#define	MAXPATHLEN	PATH_MAX
+#define	MAXPATHLEN	PATH_MAX //wyc:1024
 #define MAXSYMLINKS	32
 
 /* Bit map related macros. */

@@ -477,8 +477,10 @@ interpret:
 		goto exec_fail_dealloc;
 
 	imgp->object = imgp->vp->v_object;
+
 	if (imgp->object == NULL) //wyc
 		panic("%s: imgp->object == NULL", __func__); //wyc
+
 	if (imgp->object != NULL) //wyc: imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
@@ -581,6 +583,7 @@ interpret:
 	/*
 	 * Do the best to calculate the full path to the image file.
 	 */
+	//wyc: get imgp->execpath
 	if (args->fname != NULL && args->fname[0] == '/')
 		imgp->execpath = args->fname;
 	else {

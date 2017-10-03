@@ -64,7 +64,11 @@ typedef struct {	/* Auxiliary vector entry on initial stack */
 		void	*a_ptr;		/* Address. */
 		void	(*a_fcn)(void);	/* Function pointer (not used). */
 	} a_un;
+#if defined(WYC)
+} Elf_Auxinfo;
+#else
 } Elf32_Auxinfo;
+#endif
 
 #if __ELF_WORD_SIZE == 64
 /* Fake for amd64 loader support */
