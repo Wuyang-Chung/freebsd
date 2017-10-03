@@ -54,7 +54,11 @@ typedef struct {
 	Elf_Size	flags;
 	Elf_Size	entry;
 	Elf_Word	hdr_eflags;		/* e_flags field from ehdr */
+#if defined(WYC)
+} Elf_Auxargs;
+#else
 } __ElfN(Auxargs);
+#endif
 
 typedef struct {
 	Elf_Note	hdr;
@@ -66,6 +70,9 @@ typedef struct {
 		/* after checking the image ABI specification, if needed. */
 } Elf_Brandnote;
 
+#define	BI_CAN_EXEC_DYN		0x0001
+#define	BI_BRAND_NOTE		0x0002	/* May have note.ABI-tag section. */
+#define	BI_BRAND_NOTE_MANDATORY	0x0004	/* Must have note.ABI-tag section. */
 typedef struct {
 	int brand;
 	int machine;
@@ -77,10 +84,11 @@ typedef struct {
 	int flags;
 	Elf_Brandnote *brand_note;
 	boolean_t	(*header_supported)(struct image_params *);
-#define	BI_CAN_EXEC_DYN		0x0001
-#define	BI_BRAND_NOTE		0x0002	/* May have note.ABI-tag section. */
-#define	BI_BRAND_NOTE_MANDATORY	0x0004	/* Must have note.ABI-tag section. */
+#if defined(WYC)
+} Elf_Brandinfo;
+#else
 } __ElfN(Brandinfo);
+#endif
 
 __ElfType(Auxargs);
 __ElfType(Brandinfo);

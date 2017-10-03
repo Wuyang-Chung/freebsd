@@ -67,7 +67,11 @@ typedef struct {
 	Elf32_Half	e_shentsize;	/* Size of section header entry. */
 	Elf32_Half	e_shnum;	/* Number of section header entries. */
 	Elf32_Half	e_shstrndx;	/* Section name strings section. */
+#if defined(WYC)
+} Elf_Ehdr;
+#else
 } Elf32_Ehdr;
+#endif
 
 /*
  * Shared object information, found in SHT_MIPS_LIBLIST.
@@ -79,7 +83,11 @@ typedef struct {
 	Elf32_Word l_checksum;		/* Checksum of visible symbols, sizes. */
 	Elf32_Word l_version;		/* Interface version string index. */
 	Elf32_Word l_flags;		/* Flags (LL_*). */
+#if defined(WYC)
+} Elf_Lib;
+#else
 } Elf32_Lib;
+#endif
 
 /*
  * Section header.
@@ -97,7 +105,11 @@ typedef struct {
 	Elf32_Word	sh_info;	/* Depends on section type. */
 	Elf32_Word	sh_addralign;	/* Alignment in bytes. */
 	Elf32_Word	sh_entsize;	/* Size of each entry in section. */
+#if defined(WYC)
+} Elf_Shdr;
+#else
 } Elf32_Shdr;
+#endif
 
 /*
  * Program header.
@@ -112,7 +124,11 @@ typedef struct {
 	Elf32_Word	p_memsz;	/* Size of contents in memory. */
 	Elf32_Word	p_flags;	/* Access permission flags. */
 	Elf32_Word	p_align;	/* Alignment in memory and file. */
+#if defined(WYC)
+} Elf_Phdr;
+#else
 } Elf32_Phdr;
+#endif
 
 /*
  * Dynamic structure.  The ".dynamic" section contains an array of them.
@@ -124,7 +140,11 @@ typedef struct {
 		Elf32_Word	d_val;	/* Integer value. */
 		Elf32_Addr	d_ptr;	/* Address value. */
 	} d_un;
+#if defined(WYC)
+} Elf_Dyn;
+#else
 } Elf32_Dyn;
+#endif
 
 /*
  * Relocation entries.
@@ -134,14 +154,22 @@ typedef struct {
 typedef struct {
 	Elf32_Addr	r_offset;	/* Location to be relocated. */
 	Elf32_Word	r_info;		/* Relocation type and symbol index. */
+#if defined(WYC)
+} Elf_Rel;
+#else
 } Elf32_Rel;
+#endif
 
 /* Relocations that need an addend field. */
 typedef struct {
 	Elf32_Addr	r_offset;	/* Location to be relocated. */
 	Elf32_Word	r_info;		/* Relocation type and symbol index. */
 	Elf32_Sword	r_addend;	/* Addend. */
+#if defined(WYC)
+} Elf_Rela;
+#else
 } Elf32_Rela;
+#endif
 
 /* Macros for accessing the fields of r_info. */
 #define ELF32_R_SYM(info)	((info) >> 8)
@@ -164,7 +192,11 @@ typedef struct {
 	Elf32_Word	m_poffset;	/* symbol offset */
 	Elf32_Half	m_repeat;	/* repeat count */
 	Elf32_Half	m_stride;	/* stride info */
+#if defined(WYC)
+} Elf_Move;
+#else
 } Elf32_Move;
+#endif
 
 /*
  *	The macros compose and decompose values for Move.r_info
@@ -186,7 +218,11 @@ typedef struct {
 		Elf32_Word	c_val;
 		Elf32_Addr	c_ptr;
 	} c_un;
+#if defined(WYC)
+} Elf_Cap;
+#else
 } Elf32_Cap;
+#endif
 
 /*
  * Symbol table entries.
@@ -199,7 +235,11 @@ typedef struct {
 	unsigned char	st_info;	/* Type and binding information. */
 	unsigned char	st_other;	/* Reserved (not used). */
 	Elf32_Half	st_shndx;	/* Section index of symbol. */
+#if defined(WYC)
+} Elf_Sym;
+#else
 } Elf32_Sym;
+#endif
 
 /* Macros for accessing the fields of st_info. */
 #define ELF32_ST_BIND(info)		((info) >> 4)
@@ -221,13 +261,21 @@ typedef struct
 	Elf32_Word	vd_hash;
 	Elf32_Word	vd_aux;
 	Elf32_Word	vd_next;
+#if defined(WYC)
+} Elf_Verdef;
+#else
 } Elf32_Verdef;
+#endif
 
 typedef struct
 {
 	Elf32_Word	vda_name;
 	Elf32_Word	vda_next;
+#if defined(WYC)
+} Elf_Verdaux;
+#else
 } Elf32_Verdaux;
+#endif
 
 typedef struct
 {
@@ -236,7 +284,11 @@ typedef struct
 	Elf32_Word	vn_file;
 	Elf32_Word	vn_aux;
 	Elf32_Word	vn_next;
+#if defined(WYC)
+} Elf_Verneed;
+#else
 } Elf32_Verneed;
+#endif
 
 typedef struct
 {
@@ -245,13 +297,21 @@ typedef struct
 	Elf32_Half	vna_other;
 	Elf32_Word	vna_name;
 	Elf32_Word	vna_next;
+#if defined(WYC)
+} Elf_Vernaux;
+#else
 } Elf32_Vernaux;
+#endif
 
 typedef Elf32_Half Elf32_Versym;
 
 typedef struct {
 	Elf32_Half	si_boundto;	/* direct bindings - symbol bound to */
 	Elf32_Half	si_flags;	/* per symbol flags */
+#if defined(WYC)
+} Elf_Syminfo;
+#else
 } Elf32_Syminfo;
+#endif
 
 #endif /* !_SYS_ELF32_H_ */

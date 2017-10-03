@@ -435,6 +435,7 @@ __attribute__((optnone)) //wyc
 	SDT_PROBE1(proc, , , exec, args->fname);
 
 interpret:
+	//wyc: get imgp->vp, newtextvp
 	if (args->fname != NULL) {
 #ifdef CAPABILITY_MODE //wyc: Capsicum
 		/*
@@ -476,7 +477,9 @@ interpret:
 		goto exec_fail_dealloc;
 
 	imgp->object = imgp->vp->v_object;
-	if (__predict_true(imgp->object != NULL)) //wyc: imgp->object should never be NULL
+	if (imgp->object == NULL) //wyc
+		panic("%s: imgp->object == NULL", __func__); //wyc
+	if (imgp->object != NULL) //wyc: imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
 	/*
@@ -1134,7 +1137,7 @@ __attribute__((optnone)) //wyc
 		error = vm_map_fixed(map, obj, 0,
 #if defined(WYC)
 		    elf32_freebsd_sysvec.sv_shared_page_base, //wyc: ==3G-4M-4K ==0xBFBF_F000
-		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==PAGE_SIZE
+		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==4K
 #else
 		    sv->sv_shared_page_base, sv->sv_shared_page_len,
 #endif

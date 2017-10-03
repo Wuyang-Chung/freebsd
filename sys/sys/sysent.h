@@ -128,7 +128,7 @@ struct sysentvec { //wyc: elf32_freebsd_sysvec
 	const char	**sv_syscallnames; //wyc: ==syscallnames
 	vm_offset_t	sv_timekeep_base;
 	vm_offset_t	sv_shared_page_base; //wyc: ==SHAREDPAGE==3G-4M-4K
-	vm_offset_t	sv_shared_page_len;  //wyc: ==PAGE_SIZE
+	vm_offset_t	sv_shared_page_len;  //wyc: ==4K
 	vm_offset_t	sv_sigcode_base;
 	void		*sv_shared_page_obj; //wyc: ==shared_page_obj
 	void		(*sv_schedtail)(struct thread *); //wyc: ==NULL

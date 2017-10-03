@@ -499,17 +499,16 @@ __elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	}
 }
 
+/*wyc
+    For data segment, 'memsz' is almost alway greater than 'filsz'
+*/
 static int
-#if defined(WYC)
-elf32_load_section(
-#else
 __elfN(load_section)(
-#endif
     struct image_params *imgp, 
-    vm_offset_t offset,
-    caddr_t vmaddr, 
-    size_t memsz, 
-    size_t filsz, 
+    vm_offset_t offset,	//wyc: offset in file
+    caddr_t vmaddr, 	//wyc: offset in virtual address
+    size_t memsz, 	//wyc: object size in memory
+    size_t filsz, 	//wyc: object size in file
     vm_prot_t prot,
     size_t pagesize)
 __attribute__((optnone)) //wyc
@@ -533,7 +532,7 @@ __attribute__((optnone)) //wyc
 	 * is invalid: filsz cannot be greater than memsz.
 	 */
 	if ((off_t)filsz + offset > imgp->attr->va_size || filsz > memsz) {
-		uprintf("elf_load_section: truncated ELF file\n");
+		uprintf("%s: truncated ELF file\n", __func__);
 		return (ENOEXEC);
 	}
 
