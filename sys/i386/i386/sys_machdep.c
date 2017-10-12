@@ -87,7 +87,7 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_p = 1;
 	sdp->sd_xx = 0;
 	sdp->sd_def32 = 1;
-	sdp->sd_gran = 1;
+	sdp->sd_gran = 1;	//wyc: page gran
 }
 
 #ifndef _SYS_SYSPROTO_H_
@@ -103,15 +103,21 @@ sysarch(
 	register struct sysarch_args *uap)
 {
 	int error;
-	//union descriptor *lp;		//wyc: unused variable
+#if defined(WYC)
+	union descriptor *lp;
+#endif
 	union {
-		//struct i386_ldt_args largs;	//wyc
+#if defined(WYC)
+		struct i386_ldt_args largs;
+#endif
 		struct i386_ioperm_args iargs;
 		struct i386_get_xfpustate xfpu;
 	} kargs;
 	uint32_t base;
 	struct segment_descriptor sd;
-	//struct segment_descriptor *sdp;
+#if defined(WYC)
+	struct segment_descriptor *sdp;
+#endif
 
 	AUDIT_ARG_CMD(uap->op);
 
@@ -123,12 +129,14 @@ sysarch(
 	 */
 	if (IN_CAPABILITY_MODE(td)) {
 		switch (uap->op) {
+		case I386_GET_LDT:
+		case I386_SET_LDT:
 		case I386_GET_IOPERM:
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
 		case I386_GET_GSBASE:
-		case I386_SET_GSBASE:
-		case I386_GET_XFPUSTATE:
+		case I386_SET_GSBASE: //wyc: must support
+		case I386_GET_XFPUSTATE: //wyc: must support
 			break;
 
 		case I386_SET_IOPERM:
@@ -143,13 +151,23 @@ sysarch(
 #endif
 
 	switch (uap->op) {
+#if defined(WYC)
+	case I386_GET_LDT:
+	case I386_SET_LDT:
+		if ((error = copyin(uap->parms, &kargs.largs,
+		    sizeof(struct i386_ldt_args))) != 0)
+			return (error);
+		if (kargs.largs.num > MAX_LD || kargs.largs.num <= 0)
+			return (EINVAL);
+		break;
 	case I386_GET_IOPERM:
 	case I386_SET_IOPERM:
 		if ((error = copyin(uap->parms, &kargs.iargs,
 		    sizeof(struct i386_ioperm_args))) != 0)
 			return (error);
 		break;
-	case I386_GET_XFPUSTATE:
+#endif
+	case I386_GET_XFPUSTATE: //wyc: must support
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
 			return (error);
@@ -159,32 +177,61 @@ sysarch(
 	}
 
 	switch(uap->op) {
+	case I386_GET_LDT:
+		panic("I386_GET_LDT");
+	    #if defined(WYC)
+		error = i386_get_ldt(td, &kargs.largs);
+	    #endif
+		break;
+	case I386_SET_LDT:
+		panic("I386_SET_LDT");
+	    #if defined(WYC)
+		if (kargs.largs.descs != NULL) {
+			lp = (union descriptor *)malloc(
+			    kargs.largs.num * sizeof(union descriptor),
+			    M_TEMP, M_WAITOK);
+			error = copyin(kargs.largs.descs, lp,
+			    kargs.largs.num * sizeof(union descriptor));
+			if (error == 0)
+				error = i386_set_ldt(td, &kargs.largs, lp);
+			free(lp, M_TEMP);
+		} else {
+			error = i386_set_ldt(td, &kargs.largs, NULL);
+		}
+	    #endif
+		break;
 	case I386_GET_IOPERM:
 		panic("I386_GET_IOPERM"); //wyc
-#if 0
+	    #if defined(WYC)
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
 			error = copyout(&kargs.iargs, uap->parms,
 			    sizeof(struct i386_ioperm_args));
-#endif
+	    #endif
 		break;
 	case I386_SET_IOPERM:
 		panic("I386_SET_IOPERM"); //wyc
-		//error = i386_set_ioperm(td, &kargs.iargs);
+	    #if defined(WYC)
+		error = i386_set_ioperm(td, &kargs.iargs);
+	    #endif
 		break;
 	case I386_VM86:
 		panic("I386_VM86"); //wyc
-		//error = vm86_sysarch(td, uap->parms);
+	    #if defined(WYC)
+		error = vm86_sysarch(td, uap->parms);
+	    #endif
 		break;
 	case I386_GET_FSBASE:
 		panic("I386_GET_FSBASE"); //wyc
-		//sdp = &td->td_pcb->pcb_fsd;
-		//base = sdp->sd_hibase << 24 | sdp->sd_lobase;
-		//error = copyout(&base, uap->parms, sizeof(base));
+	    #if defined(WYC)
+		sdp = &td->td_pcb->pcb_fsd;
+		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		error = copyout(&base, uap->parms, sizeof(base));
+	    #endif
 		break;
 	case I386_SET_FSBASE:
 		panic("I386_SET_FSBASE"); //wyc
-#if 0
+	    #if defined(WYC)
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
 			/*
@@ -200,15 +247,17 @@ sysarch(
 			critical_exit();
 			td->td_frame->tf_fs = GSEL(GUFS_SEL, SEL_UPL);
 		}
-#endif
+	    #endif
 		break;
 	case I386_GET_GSBASE:
 		panic("I386_GET_GSBASE"); //wyc
-		//sdp = &td->td_pcb->pcb_gsd;
-		//base = sdp->sd_hibase << 24 | sdp->sd_lobase;
-		//error = copyout(&base, uap->parms, sizeof(base));
+	    #if defined(WYC)
+		sdp = &td->td_pcb->pcb_gsd;
+		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		error = copyout(&base, uap->parms, sizeof(base));
+	    #endif
 		break;
-	case I386_SET_GSBASE: //wyc: called by pid 1 tid 100002
+	case I386_SET_GSBASE: //wyc: must support
 		//panic("I386_SET_GSBASE");
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
@@ -225,7 +274,7 @@ sysarch(
 			load_gs(GSEL(GUGS_SEL, SEL_UPL));
 		}
 		break;
-	case I386_GET_XFPUSTATE: //wyc: called by pid 660 tid 100065. pid 635 tid 100064
+	case I386_GET_XFPUSTATE: //wyc: must support
 		//panic("I386_GET_XFPUSTATE");
 		if (kargs.xfpu.len > cpu_max_ext_state_size -
 		    sizeof(union savefpu))

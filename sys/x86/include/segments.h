@@ -68,7 +68,7 @@ struct segment_descriptor {
 	unsigned sd_hilimit:4;		/* segment extent (msb) */
 	unsigned sd_xx:2;		/* unused */
 	unsigned sd_def32:1;		/* default 32 vs 16 bit size */
-	unsigned sd_gran:1;		/* limit granularity (byte/page units)*/
+	unsigned sd_gran:1;		/* limit granularity 0(byte)/1(page)*/
 	unsigned sd_hibase:8;		/* segment base address  (msb) */
 } __packed;
 

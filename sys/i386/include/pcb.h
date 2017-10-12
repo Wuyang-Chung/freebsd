@@ -62,8 +62,8 @@ struct pcb {
 	int	pcb_esp;	/* (*) */
 	int	pcb_ebx;	/* (*) */
 	int	pcb_eip;	/* (*) */
-	struct segment_descriptor pcb_fsd;
-	struct segment_descriptor pcb_gsd;
+	struct segment_descriptor pcb_fsd;	//wyc: user fs descriptor
+	struct segment_descriptor pcb_gsd;	//wyc: user gs descriptor
 	int	pcb_ds;
 	int	pcb_es;
 	int	pcb_fs;

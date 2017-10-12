@@ -513,7 +513,6 @@ __elfN(load_section)(
     size_t pagesize)
 __attribute__((optnone)) //wyc
 {
-	struct sf_buf *sf;
 	size_t map_len;
 	vm_map_t map;
 	vm_object_t object;
@@ -604,6 +603,7 @@ __attribute__((optnone)) //wyc
 
 	if (copy_len != 0) {
 		vm_offset_t off;
+		struct sf_buf *sf;
 
 		sf = vm_imgact_map_page(object, offset + filsz);
 		if (sf == NULL)

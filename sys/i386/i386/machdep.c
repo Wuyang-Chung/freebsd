@@ -1268,8 +1268,8 @@ extern  vm_offset_t	proc0kstack;
 /*
  * software prototypes -- in more palatable form.
  *
- * GCODE_SEL through GUDATA_SEL must be in this order for syscall/sysret
- * GUFS_SEL and GUGS_SEL must be in this order (swtch.s knows it)
+ * GCODE_SEL(4) through GUDATA_SEL(7) must be in this order for syscall/sysret
+ * GUFS_SEL(2) and GUGS_SEL(3) must be in this order (swtch.s knows it)
 
 wyc: use "[] =" to specify which array element to initialize
  */
@@ -1351,7 +1351,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1,
+	.ssd_p = 0, //wyc: this descriptor is not used
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},

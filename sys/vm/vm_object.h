@@ -116,11 +116,19 @@ struct vm_object {
 	int resident_page_count;	/* number of resident pages */
 	struct vm_object *backing_object; /* object that I'm a shadow of */
 	vm_ooffset_t backing_object_offset;/* Offset in backing object */
-	vm_offset_t backing_object_len; //wyc todo
 	TAILQ_ENTRY(vm_object) pager_object_list; /* list of all objects of this pager type */
 	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations wyc: superpage */
 	struct vm_radix cache;		/* (o + f) root of the cache page radix trie */
-	void *handle; //wyc: is vnode * for OBJT_VNODE, cdev * for OBJ_DEVICE, ...
+	void *handle; /*wyc:
+		OBJT_DEFAULT:
+		OBJT_SWAP:
+		OBJT_VNODE:	vnode *
+		OBJT_DEVICE:	cdve *
+		OBJT_PHYS:	0
+		OBJT_DEAD:
+		OBJT_SG:	sglist *
+		OBJT_MGTDEVICE:
+	*/
 	union {
 		/*
 		 * VNode pager
