@@ -562,8 +562,8 @@ free(void *addr, struct malloc_type *mtp)
 	slab = vtoslab((vm_offset_t)addr & (~UMA_SLAB_MASK));
 
 	if (slab == NULL)
-		panic("free: address %p(%p) has not been allocated.\n",
-		    addr, (void *)((u_long)addr & (~UMA_SLAB_MASK)));
+		panic("%s: address %p(%p) has not been allocated.\n",
+		    __func__, addr, (void *)((u_long)addr & (~UMA_SLAB_MASK)));
 
 	if (!(slab->us_flags & UMA_SLAB_MALLOC)) {
 #ifdef INVARIANTS

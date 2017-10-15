@@ -650,11 +650,11 @@ extern void x86_setldt(struct gdt *, uint16_t);
  * used.
  */
 
-#ifdef GNDIS_SEL
+//#ifdef GNDIS_SEL
 #define FREEBSD_EMPTYSEL	GNDIS_SEL
-#else
-#define FREEBSD_EMPTYSEL	GTGATE_SEL	/* slot 7 */
-#endif
+//#else
+//#define FREEBSD_EMPTYSEL	GTGATE_SEL	/* slot 7 */
+//#endif
 
 /*
  * The meanings of various bits in a descriptor vary a little

@@ -37,7 +37,7 @@
 
 #include <machine/asmacros.h>
 
-#include "assym.s"
+#include "assym.s" //wyc: in /usr/obj/nfs/vm.FreeBSD/sys/WYCVM
 
 #if defined(SMP) && defined(SCHED_ULE)
 #define	SETOP		xchgl
@@ -245,17 +245,18 @@ sw1:
 	ltr	%si			//wyc: load task register
 3:
 	/* Copy the %fs and %gs selectors into this pcpu gdt */
-	leal	PCB_FSD(%edx), %esi
+	leal	PCB_GSD(%edx), %esi	//wyc: PCB_FSD -> PCB_GSD
 	movl	PCPU(FSGS_GDT), %edi
-	movl	0(%esi), %eax		/* %fs selector */
+	movl	0(%esi), %eax		/* %gs selector */
 	movl	4(%esi), %ebx
 	movl	%eax, 0(%edi)
 	movl	%ebx, 4(%edi)
+#if defined(WYC)
 	movl	8(%esi), %eax		/* %gs selector, comes straight after */
 	movl	12(%esi), %ebx
 	movl	%eax, 8(%edi)
 	movl	%ebx, 12(%edi)
-
+#endif
 	/* Restore context. */
 	movl	PCB_EBX(%edx),%ebx
 	movl	PCB_ESP(%edx),%esp
@@ -271,9 +272,10 @@ sw1:
 	//movl	TD_TID(%ecx),%eax	/* wyc???: TD_TID is not used after loaded to eax */
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
+#if defined(WYC)
 	/*
-	 * Determine the LDT to use and load it if is the default one and
-	 * that is not the current one.
+	 * Determine the LDT to use and load it if the default one
+	 * is not the current one.
 	 */
 	movl	TD_PROC(%ecx),%eax	//wyc: %eax = newproc
 	cmpl    $0,P_MD+MD_LDT(%eax)
@@ -293,6 +295,9 @@ sw1:
 	addl	$4,%esp
 	popl	%edx
 2:
+#endif //defined(WYC)
+	//wyc: not using user LDT. only use default LDT
+	lldt	_default_ldt
 
 	/* This must be done after loading the user LDT. */
 	.globl	cpu_switch_load_gs

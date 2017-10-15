@@ -55,7 +55,9 @@ struct mdthread {
 };
 
 struct mdproc {
+#if defined(WYC)
 	struct proc_ldt *md_ldt;	/* (t) per-process ldt */
+#endif
 };
 
 #define	KINFO_PROC_SIZE 768

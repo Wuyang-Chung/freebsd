@@ -908,11 +908,15 @@ fasttrap_do_seg(fasttrap_tracepoint_t *tp, struct reg *rp, uintptr_t *addr)
 	 * Check the bounds and grab the descriptor out of the specified
 	 * descriptor table.
 	 */
+#if 0
+	/*wyc:
+	    md_ldt is not an array pointer, so it cannot be used
+	    as an array. md_ldt[ndx] is incorrect.
+	*/
 	if (ISLDT(sel)) {
 #ifdef __i386__
 		if (ndx > p->p_md.md_ldt->ldt_len)
 			return (-1);
-
 		desc = (struct segment_descriptor *)
 		    p->p_md.md_ldt[ndx].ldt_base;
 #else
@@ -921,9 +925,10 @@ fasttrap_do_seg(fasttrap_tracepoint_t *tp, struct reg *rp, uintptr_t *addr)
 
 		desc = (struct user_segment_descriptor *)
 		    p->p_md.md_ldt[ndx].ldt_base;
-#endif
-
-	} else {
+#endif //__i386__
+	} else 
+#endif //0
+	{
 		if (ndx >= NGDT)
 			return (-1);
 

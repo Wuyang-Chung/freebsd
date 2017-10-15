@@ -93,7 +93,7 @@ ASSYM(TD_TID, offsetof(struct thread, td_tid));
 ASSYM(TDP_CALLCHAIN, TDP_CALLCHAIN);
 
 ASSYM(P_MD, offsetof(struct proc, p_md));
-ASSYM(MD_LDT, offsetof(struct mdproc, md_ldt));
+//wyc ASSYM(MD_LDT, offsetof(struct mdproc, md_ldt));
 
 ASSYM(TDF_ASTPENDING, TDF_ASTPENDING);
 ASSYM(TDF_NEEDRESCHED, TDF_NEEDRESCHED);
@@ -147,7 +147,7 @@ ASSYM(PCB_PSL, offsetof(struct pcb, pcb_psl));
 ASSYM(PCB_DBREGS, PCB_DBREGS);
 ASSYM(PCB_EXT, offsetof(struct pcb, pcb_ext));
 
-ASSYM(PCB_FSD, offsetof(struct pcb, pcb_fsd));
+//wyc ASSYM(PCB_FSD, offsetof(struct pcb, pcb_fsd));
 ASSYM(PCB_GSD, offsetof(struct pcb, pcb_gsd));
 ASSYM(PCB_VM86, offsetof(struct pcb, pcb_vm86));
 ASSYM(PCB_FLAGS, offsetof(struct pcb, pcb_flags));

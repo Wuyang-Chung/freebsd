@@ -606,7 +606,7 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 	struct sigacts *psp;
 	char *sp;
 	struct trapframe *regs;
-	struct segment_descriptor *sdp;
+	//wyc struct segment_descriptor *sdp;
 	char *xfpusave;
 	size_t xfpusave_len;
 	int sig;
@@ -660,12 +660,14 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 	/*
 	 * Unconditionally fill the fsbase and gsbase into the mcontext.
 	 */
+#if defined(WYC)
 	sdp = &td->td_pcb->pcb_fsd;
 	sf.sf_uc.uc_mcontext.mc_fsbase = sdp->sd_hibase << 24 |
 	    sdp->sd_lobase;
 	sdp = &td->td_pcb->pcb_gsd;
 	sf.sf_uc.uc_mcontext.mc_gsbase = sdp->sd_hibase << 24 |
 	    sdp->sd_lobase;
+#endif
 	bzero(sf.sf_uc.uc_mcontext.mc_spare2,
 	    sizeof(sf.sf_uc.uc_mcontext.mc_spare2));
 	bzero(sf.sf_uc.__spare__, sizeof(sf.sf_uc.__spare__));
@@ -1147,14 +1149,15 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	pcb->pcb_gs = _udatasel;
 	load_gs(_udatasel);
 
+#if defined(WYC)
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
-		//wyc: panic if md_ldt != NULL
 		panic("%s: md_ldt != NULL", __func__);
-		//wyc user_ldt_free(td);
+		user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
-  
+#endif
+
 	bzero((char *)regs, sizeof(struct trapframe));
 	regs->tf_eip = imgp->entry_addr; //wyc: start address
 	regs->tf_esp = stack;
@@ -1346,30 +1349,30 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-[GBIOSLOWMEM_SEL] = { //BIOS access to realmode segment 0x40, must be #8 in GDT
-	.ssd_base = 0x400,
-	.ssd_limit = 0xfffff,
-	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = SEL_KPL,
-	.ssd_p = 0, //wyc: this descriptor is not used
-	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 1,
-	.ssd_gran = 1		},
 [GPROC0_SEL] = { //Proc 0 Tss Descriptor
 	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1,
+	.ssd_xx = 0, .ssd_xx1 = 0,
+	.ssd_def32 = 0,
+	.ssd_gran = 0		},
+[GPANIC_SEL] = { //Panic Tss Descriptor for IDT_DF
+	.ssd_base = (int) &dblfault_tss,
+	.ssd_limit = sizeof(struct i386tss)-1,
+	.ssd_type = SDT_SYS386TSS,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
 [GLDT_SEL] = { //LDT Descriptor
 	.ssd_base = (int) ldt,
-	.ssd_limit = sizeof(ldt)-1,
+	.ssd_limit = sizeof(ldt[0])-1, //wyc: 
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_UPL,
-	.ssd_p = 1, //wyc: can not set to 0
+	.ssd_p = 1, //wyc: CANNOT set to 0
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0, //wyc: not used by LDT
 	.ssd_gran = 0		},
@@ -1377,27 +1380,26 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = (int) ldt,
 	.ssd_limit = (512 * sizeof(union descriptor)-1), //wyc: there are only 17 local segment descriptors
 	.ssd_type = SDT_SYSLDT,
-	//.ssd_dpl = 0,	wyc???
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0, //wyc: not used by LDT
 	.ssd_gran = 0		},
-[GPANIC_SEL] = { //Panic Tss Descriptor for IDT_DF
-	.ssd_base = (int) &dblfault_tss,
-	.ssd_limit = sizeof(struct i386tss)-1,
-	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+[_GBIOSLOWMEM_SEL] = { //BIOS access to realmode segment 0x40, must be #8 in GDT
+	.ssd_base = 0x400,
+	.ssd_limit = 0xfffff,
+	.ssd_type = SDT_MEMRWA,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: this descriptor is not used
 	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 0,
-	.ssd_gran = 0		},
+	.ssd_def32 = 1,
+	.ssd_gran = 1		},
 [GBIOSCODE32_SEL] = { //BIOS 32-bit interface (32bit Code)
 	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1405,8 +1407,8 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1414,8 +1416,8 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
@@ -1423,8 +1425,8 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1432,8 +1434,8 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
-	.ssd_p = 1,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1441,8 +1443,8 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
-	.ssd_p = 0,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 0, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
@@ -2646,7 +2648,7 @@ init386(int first)
 	initializecpucache();
 
 	/* pointer to selector slot for %fs/%gs */
-	PCPU_SET(fsgs_gdt, &gdt[GUFS_SEL].sd);
+	PCPU_SET(fsgs_gdt, &gdt[GUGS_SEL].sd); //wyc: GUFS_SEL -> GUGS_SEL
 
 	dblfault_tss.tss_esp = dblfault_tss.tss_esp0 = dblfault_tss.tss_esp1 =
 	    dblfault_tss.tss_esp2 = (int)&dblfault_stack[sizeof(dblfault_stack)];
@@ -3043,7 +3045,7 @@ int
 get_mcontext(struct thread *td, mcontext_t *mcp, int flags)
 {
 	struct trapframe *tp;
-	struct segment_descriptor *sdp;
+	//wyc struct segment_descriptor *sdp;
 
 	tp = td->td_frame;
 
@@ -3075,10 +3077,17 @@ get_mcontext(struct thread *td, mcontext_t *mcp, int flags)
 	mcp->mc_ss = tp->tf_ss;
 	mcp->mc_len = sizeof(*mcp);
 	get_fpcontext(td, mcp, NULL, 0);
+#if defined(WYC)
+	/*wyc
+	    mc_fsbase, mcgsbase is saved in get_mcontext but
+	    not restored in set_mcontext. It should be ok
+	    to remove the save here.
+	*/
 	sdp = &td->td_pcb->pcb_fsd;
 	mcp->mc_fsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
 	sdp = &td->td_pcb->pcb_gsd;
 	mcp->mc_gsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
+#endif
 	mcp->mc_flags = 0;
 	mcp->mc_xfpustate = 0;
 	mcp->mc_xfpustate_len = 0;

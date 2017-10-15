@@ -269,7 +269,7 @@ init_secondary(void)
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
 	ltr(gsel_tss);
 
-	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUFS_SEL].sd);
+	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUGS_SEL].sd); //wyc: GUFS_SEL -> GUGS_SEL
 
 	/*
 	 * Set to a known state:

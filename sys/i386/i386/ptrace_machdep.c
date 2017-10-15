@@ -160,8 +160,10 @@ cpu_ptrace_xmm(struct thread *td, int req, void *addr, int data)
 int
 cpu_ptrace(struct thread *td, int req, void *addr, int data)
 {
-	struct segment_descriptor *sdp; //wyc### , sd;
+#if defined(WYC)
+	struct segment_descriptor *sdp, sd;
 	register_t r;
+#endif
 	int error;
 
 	switch (req) {
@@ -177,14 +179,21 @@ cpu_ptrace(struct thread *td, int req, void *addr, int data)
 
 	case PT_GETFSBASE:
 	case PT_GETGSBASE:
+		panic("%s", __func__);
+		return EOPNOTSUPP;
+#if defined(WYC)
 		sdp = req == PT_GETFSBASE ? &td->td_pcb->pcb_fsd :
 		    &td->td_pcb->pcb_gsd;
 		r = sdp->sd_hibase << 24 | sdp->sd_lobase;
 		error = copyout(&r, addr, sizeof(r));
+#endif
 		break;
 
 	case PT_SETFSBASE:
 	case PT_SETGSBASE:
+		panic("%s", __func__);
+		return EOPNOTSUPP;
+#if defined(WYC)
 		error = copyin(addr, &r, sizeof(r));
 		if (error != 0)
 			break;
@@ -199,6 +208,7 @@ cpu_ptrace(struct thread *td, int req, void *addr, int data)
 			td->td_pcb->pcb_gs = GSEL(GUGS_SEL, SEL_UPL);
 		}
 		fill_based_sd(sdp, r); //wyc###
+#endif
 		break;
 
 	default:

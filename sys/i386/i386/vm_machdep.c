@@ -189,6 +189,7 @@ cpu_fork(
 	p1 = td1->td_proc;
 	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
 		if ((flags & RFMEM) == 0) {
+#if defined(WYC)
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;
 			struct proc_ldt *pldt, *pldt1;
@@ -206,6 +207,7 @@ cpu_fork(
 			    }
 			} else
 				mtx_unlock_spin(&dt_lock);
+#endif //defined(WYC)
 		}
 		return;
 	}
@@ -232,8 +234,6 @@ cpu_fork(
 	bcopy(get_pcb_user_save_td(td1), get_pcb_user_save_pcb(pcb2),
 	    cpu_max_ext_state_size);
 
-	if (p1->p_md.md_ldt != NULL)	//wyc
-		panic("%s %d: md_ldt != NULL", __func__, __LINE__); //wyc
 	/* Point mdproc and then copy over td1's contents */
 	mdp2 = &p2->p_md;
 	bcopy(&p1->p_md, mdp2, sizeof(*mdp2));
@@ -298,6 +298,7 @@ cpu_fork(
 	 */
 	pcb2->pcb_ext = 0;
 
+#if defined(WYC)
 	/* Copy the LDT, if necessary. */
 	mtx_lock_spin(&dt_lock);
 	if (mdp2->md_ldt != NULL) {
@@ -312,6 +313,7 @@ cpu_fork(
 		}
 	}
 	mtx_unlock_spin(&dt_lock);
+#endif
 
 	/* Setup to release spin count in fork_exit(). */
 	td2->td_md.md_spinlock_count = 1;
@@ -348,7 +350,7 @@ cpu_fork_kthread_handler(struct thread *td, void (*func)(void *), void *arg)
 void
 cpu_exit(struct thread *td)
 {
-
+#if defined(WYC)
 	/*
 	 * If this process has a custom LDT, release it.  Reset pc->pcb_gs
 	 * and %gs before we free it in case they refer to an LDT entry.
@@ -356,11 +358,13 @@ cpu_exit(struct thread *td)
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt) {
 		panic("%s: md_ldt != NULL", __func__);	//wyc
-		//wyc td->td_pcb->pcb_gs = _udatasel;
-		//wyc load_gs(_udatasel);
-		//wyc user_ldt_free(td);
+
+		td->td_pcb->pcb_gs = _udatasel;
+		load_gs(_udatasel);
+		user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
+#endif
 }
 
 void
@@ -600,7 +604,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	/* set %gs */
 	td->td_pcb->pcb_gsd = sd;
 	if (td == curthread) {
-		PCPU_GET(fsgs_gdt)[1] = sd;
+		PCPU_GET(fsgs_gdt)[0] = sd;	//wyc: 0:gs, 1: not used
 		load_gs(GSEL(GUGS_SEL, SEL_UPL));
 	}
 	critical_exit();

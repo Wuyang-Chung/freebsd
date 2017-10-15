@@ -542,7 +542,7 @@ pmap_init_qpages(void)
 		pc = pcpu_find(i);
 		pc->pc_qmap_addr = kva_alloc(PAGE_SIZE); //wyc: pc_qmap_addr: KVA for temporary mappings
 		if (pc->pc_qmap_addr == 0)
-			panic("pmap_init_qpages: unable to allocate KVA");
+			panic("%s: unable to allocate KVA", __func__);
 	}
 }
 
@@ -725,11 +725,11 @@ pmap_ptelist_alloc(vm_offset_t *head)
 
 	va = *head;
 	if (va == 0)
-		panic("pmap_ptelist_alloc: exhausted ptelist KVA");
+		panic("%s: exhausted ptelist KVA", __func__);
 	pte = vtopte(va);
 	*head = *pte;
 	if (*head & PG_V)
-		panic("pmap_ptelist_alloc: va with PG_V set!");
+		panic("%s: va with PG_V set!", __func__);
 	*pte = 0;
 	return (va);
 }
@@ -740,7 +740,7 @@ pmap_ptelist_free(vm_offset_t *head, vm_offset_t va)
 	pt_entry_t *pte;
 
 	if (va & PG_V)
-		panic("pmap_ptelist_free: freeing va with PG_V set!");
+		panic("%s: freeing va with PG_V set!", __func__);
 	pte = vtopte(va);
 	*pte = *head;		/* virtual! PG_V is 0 though */
 	*head = va;
@@ -844,7 +844,7 @@ pmap_init(void)
 	pv_maxchunks = MAX(pv_entry_max / _NPCPV, maxproc);
 	pv_chunkbase = (struct pv_chunk *)kva_alloc(PAGE_SIZE * pv_maxchunks);
 	if (pv_chunkbase == NULL)
-		panic("pmap_init: not enough kvm for pv chunks");
+		panic("%s: not enough kvm for pv chunks", __func__);
 	pmap_ptelist_init(&pv_vafree, pv_chunkbase, pv_maxchunks);
 #if defined(PAE) || defined(PAE_TABLES)
 	pdptzone = uma_zcreate("PDPT", NPGPTD * sizeof(pdpt_entry_t), NULL,
@@ -904,7 +904,7 @@ pmap_cache_bits(int mode, boolean_t is_pde)
 	int cache_bits, pat_flag, pat_idx;
 
 	if (mode < 0 || mode >= PAT_INDEX_SIZE || pat_index[mode] < 0)
-		panic("Unknown caching mode %d\n", mode);
+		panic("%s: Unknown caching mode %d\n", __func__, mode);
 
 	/* The PAT bit is different for PTE's and PDE's. */
 	pat_flag = is_pde ? PG_PDE_PAT : PG_PTE_PAT;
@@ -2114,7 +2114,7 @@ pmap_growkernel(vm_offset_t addr)
 		    VM_ALLOC_INTERRUPT | VM_ALLOC_NOOBJ | VM_ALLOC_WIRED |
 		    VM_ALLOC_ZERO);
 		if (nkpg == NULL)
-			panic("pmap_growkernel: no memory to grow kernel");
+			panic("%s: no memory to grow kernel", __func__);
 
 		nkpt++;
 
@@ -2796,7 +2796,7 @@ pmap_remove_kernel_pde(pmap_t pmap, pd_entry_t *pde, vm_offset_t va)
 	PMAP_LOCK_ASSERT(pmap, MA_OWNED);
 	mpte = pmap_lookup_pt_page(pmap, va);
 	if (mpte == NULL)
-		panic("pmap_remove_kernel_pde: Missing pt page.");
+		panic("%s: Missing pt page.", __func__);
 
 	pmap_remove_pt_page(pmap, mpte);
 	mptepa = VM_PAGE_TO_PHYS(mpte);
@@ -4234,7 +4234,7 @@ pmap_zero_page_area(vm_page_t m, int off, int size)
 	sysmaps = &sysmaps_pcpu[PCPU_GET(cpuid)];
 	mtx_lock(&sysmaps->lock);
 	if (*sysmaps->CMAP2)
-		panic("pmap_zero_page_area: CMAP2 busy");
+		panic("%s: CMAP2 busy", __func__);
 	sched_pin();
 	*sysmaps->CMAP2 = PG_V | PG_RW | VM_PAGE_TO_PHYS(m) | PG_A | PG_M |
 	    pmap_cache_bits(m->md.pat_mode, 0);
@@ -4259,7 +4259,7 @@ pmap_zero_page_idle(vm_page_t m)
 {
 
 	if (*CMAP3)
-		panic("pmap_zero_page_idle: CMAP3 busy");
+		panic("%s: CMAP3 busy", __func__);
 	sched_pin();
 	*CMAP3 = PG_V | PG_RW | VM_PAGE_TO_PHYS(m) | PG_A | PG_M |
 	    pmap_cache_bits(m->md.pat_mode, 0);
@@ -4283,9 +4283,9 @@ pmap_copy_page(vm_page_t src, vm_page_t dst)
 	sysmaps = &sysmaps_pcpu[PCPU_GET(cpuid)];
 	mtx_lock(&sysmaps->lock);
 	if (*sysmaps->CMAP1)
-		panic("pmap_copy_page: CMAP1 busy");
+		panic("%s: CMAP1 busy", __func__);
 	if (*sysmaps->CMAP2)
-		panic("pmap_copy_page: CMAP2 busy");
+		panic("%s: CMAP2 busy", __func__);
 	sched_pin();
 	*sysmaps->CMAP1 = PG_V | VM_PAGE_TO_PHYS(src) | PG_A |
 	    pmap_cache_bits(src->md.pat_mode, 0);
@@ -4315,9 +4315,9 @@ pmap_copy_pages(vm_page_t ma[], vm_offset_t a_offset, vm_page_t mb[],
 	sysmaps = &sysmaps_pcpu[PCPU_GET(cpuid)];
 	mtx_lock(&sysmaps->lock);
 	if (*sysmaps->CMAP1 != 0)
-		panic("pmap_copy_pages: CMAP1 busy");
+		panic("%s: CMAP1 busy", __func__);
 	if (*sysmaps->CMAP2 != 0)
-		panic("pmap_copy_pages: CMAP2 busy");
+		panic("%s: CMAP2 busy", __func__);
 	sched_pin();
 	while (xfersize > 0) {
 		a_pg = ma[a_offset >> PAGE_SHIFT];
@@ -5282,7 +5282,7 @@ pmap_flush_page(vm_page_t m)
 		sysmaps = &sysmaps_pcpu[PCPU_GET(cpuid)];
 		mtx_lock(&sysmaps->lock);
 		if (*sysmaps->CMAP2)
-			panic("pmap_flush_page: CMAP2 busy");
+			panic("%s: CMAP2 busy", __func__);
 		sched_pin();
 		*sysmaps->CMAP2 = PG_V | PG_RW | VM_PAGE_TO_PHYS(m) |
 		    PG_A | PG_M | pmap_cache_bits(m->md.pat_mode, 0);

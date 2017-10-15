@@ -269,7 +269,7 @@ sysarch(
 			fill_based_sd(&sd, base);
 			critical_enter();
 			td->td_pcb->pcb_gsd = sd;
-			PCPU_GET(fsgs_gdt)[1] = sd;
+			PCPU_GET(fsgs_gdt)[0] = sd; //wyc: 0: gs, 1: not defined.
 			critical_exit();
 			load_gs(GSEL(GUGS_SEL, SEL_UPL));
 		}
@@ -293,6 +293,10 @@ sysarch(
 int
 i386_extend_pcb(struct thread *td)
 {
+	panic("%s", __func__);
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	int i, offset;
 	u_long *addr;
 	struct pcb_ext *ext;
@@ -341,8 +345,8 @@ i386_extend_pcb(struct thread *td)
 	*PCPU_GET(tss_gdt) = ext->ext_tssd;
 	ltr(GSEL(GPROC0_SEL, SEL_KPL));
 	critical_exit();
-
 	return 0;
+#endif //defined(WYC)
 }
 
 int
@@ -350,6 +354,10 @@ i386_set_ioperm(
 	struct thread *td,
 	struct i386_ioperm_args *uap)
 {
+	panic("%s", __func__);
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	char *iomap;
 	u_int i;
 	int error;
@@ -381,6 +389,7 @@ i386_set_ioperm(
 			iomap[i >> 3] |= (1 << (i & 7));
 	}
 	return (error);
+#endif //defined(WYC)
 }
 
 int
@@ -388,6 +397,10 @@ i386_get_ioperm(
 	struct thread *td,
 	struct i386_ioperm_args *uap)
 {
+	panic("%s", __func__);
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	int i, state;
 	char *iomap;
 
@@ -413,7 +426,8 @@ i386_get_ioperm(
 	}
 
 done:
-	return (0);
+	return ESUCCESS;
+#endif //defined(WYC)
 }
 
 /*
@@ -423,8 +437,9 @@ done:
 void
 set_user_ldt(struct mdproc *mdp)
 {
-	panic("%s called", __func__);	//wyc
-#if 0
+	panic("%s", __func__);	//wyc
+
+#if defined(WYC)
 	struct proc_ldt *pldt;
 	int dtlocked;
 
@@ -444,15 +459,16 @@ set_user_ldt(struct mdproc *mdp)
 	PCPU_SET(currentldt, GSEL(GUSERLDT_SEL, SEL_KPL));
 	if (dtlocked)
 		mtx_unlock_spin(&dt_lock);
-#endif
+#endif //defined(WYC)
 }
 
 #ifdef SMP
 static void
 set_user_ldt_rv(struct vmspace *vmsp)
 {
-	panic("%s called", __func__);	//wyc
-#if 0
+	panic("%s", __func__);	//wyc
+
+#if defined(WYC)
 	struct thread *td;
 
 	td = curthread;
@@ -460,7 +476,7 @@ set_user_ldt_rv(struct vmspace *vmsp)
 		return;
 
 	set_user_ldt(&td->td_proc->p_md);
-#endif
+#endif //defined(WYC)
 }
 #endif
 
@@ -470,9 +486,10 @@ set_user_ldt_rv(struct vmspace *vmsp)
 struct proc_ldt *
 user_ldt_alloc(struct mdproc *mdp, int len)
 {
-	panic("%s called", __func__);	//wyc
+	panic("%s", __func__);	//wyc
 	return NULL;
-#if 0
+
+#if defined(WYC)
 	struct proc_ldt *pldt, *new_ldt;
 
 	mtx_assert(&dt_lock, MA_OWNED);
@@ -500,7 +517,7 @@ user_ldt_alloc(struct mdproc *mdp, int len)
 		bcopy(ldt, new_ldt->ldt_base, sizeof(ldt));
 	
 	return (new_ldt);
-#endif
+#endif //defined(WYC)
 }
 
 /*
@@ -509,8 +526,9 @@ user_ldt_alloc(struct mdproc *mdp, int len)
 void
 user_ldt_free(struct thread *td)
 {
-	panic("%s called", __func__);	//wyc
-#if 0
+	panic("%s", __func__);	//wyc
+
+#if defined(WYC)
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt;
 
@@ -527,14 +545,15 @@ user_ldt_free(struct thread *td)
 
 	mdp->md_ldt = NULL;
 	user_ldt_deref(pldt);
-#endif
+#endif //defined(WYC)
 }
 
 void
 user_ldt_deref(struct proc_ldt *pldt)
 {
 	panic("%s called", __func__);	//wyc
-#if 0
+
+#if defined(WYC)
 	mtx_assert(&dt_lock, MA_OWNED);
 	if (--pldt->ldt_refcnt == 0) {
 		mtx_unlock_spin(&dt_lock);
@@ -543,7 +562,7 @@ user_ldt_deref(struct proc_ldt *pldt)
 		free(pldt, M_SUBPROC);
 	} else
 		mtx_unlock_spin(&dt_lock);
-#endif
+#endif //defined(WYC)
 }
 
 /*
@@ -557,8 +576,10 @@ i386_get_ldt(
 	struct thread *td,
 	struct i386_ldt_args *uap)
 {
+	panic("%s", __func__);
 	return EOPNOTSUPP;	//wyc
-#if 0
+
+#if defined(WYC)
 	int error = 0;
 	struct proc_ldt *pldt;
 	int nldt, num;
@@ -592,7 +613,7 @@ i386_get_ldt(
 		td->td_retval[0] = num;
 
 	return(error);
-#endif
+#endif //defined(WYC)
 }
 
 int
@@ -601,9 +622,10 @@ i386_set_ldt(
 	struct i386_ldt_args *uap,
 	union descriptor *descs)
 {
-	panic("%s called", __func__); //wyc
-	return 0;
-#if 0
+	panic("%s", __func__); //wyc
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	int error = 0, i;
 	int largest_ld;
 	struct mdproc *mdp = &td->td_proc->p_md;
@@ -756,16 +778,17 @@ again:
 	if (error == 0)
 		td->td_retval[0] = uap->start;
 	return (error);
-#endif
+#endif //defined(WYC)
 }
 
 static int
 i386_set_ldt_data(struct thread *td, int start, int num,
 	union descriptor *descs)
 {
-	panic("%s called", __func__);	//wyc
-	return 0;
-#if 0
+	panic("%s", __func__);	//wyc
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *pldt = mdp->md_ldt;
 
@@ -776,15 +799,16 @@ i386_set_ldt_data(struct thread *td, int start, int num,
 	    &((union descriptor *)(pldt->ldt_base))[start],
 	    num * sizeof(union descriptor));
 	return (0);
-#endif
+#endif //defined(WYC)
 }
 
 static int
 i386_ldt_grow(struct thread *td, int len) 
 {
-	panic("%s called", __func__);	//wyc
-	return 0;
-#if 0
+	panic("%s", __func__);	//wyc
+	return EOPNOTSUPP;
+
+#if defined(WYC)
 	struct mdproc *mdp = &td->td_proc->p_md;
 	struct proc_ldt *new_ldt, *pldt;
 	caddr_t old_ldt_base = NULL_LDT_BASE;
@@ -852,5 +876,5 @@ i386_ldt_grow(struct thread *td, int len)
 		mtx_lock_spin(&dt_lock);
 	}
 	return (0);
-#endif
+#endif //defined(WYC)
 }

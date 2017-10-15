@@ -657,6 +657,10 @@ vm86_sysarch(
 	struct thread *td,
 	char *args)
 {
+	panic("%s", __func__);
+	return 0;
+
+#if defined(WYC)
 	int error = 0;
 	struct i386_vm86_args ua;
 	struct vm86_kernel *vm86;
@@ -727,4 +731,5 @@ vm86_sysarch(
 		error = EINVAL;
 	}
 	return (error);
+#endif //defined(WYC)
 }
