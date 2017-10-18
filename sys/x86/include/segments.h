@@ -247,9 +247,7 @@ enum {
 	GBIOSUTIL_SEL,	/* 16 BIOS interface (Utility) */
 	GBIOSARGS_SEL,	/* 17 BIOS interface (Arguments) */
 	GNDIS_SEL,	/* 18 For the NDIS layer */
-	NSGDT,
-	GPCPU_SEL = NSGDT, //wyc: the starting descriptor for the per cpu segment
-	NGDT = GPCPU_SEL+MAXCPU, //wyc: MAXCPU entries for per cpu segment
+	NGDT
 };
 
 /*

@@ -33,7 +33,7 @@ options	DDB		# console debugger
 options	KDB		# Enable kernel debugger support.
 options	KDB_TRACE	# Print a stack trace for a panic.
 #options	KDB_UNATTENDED	# when panic occurs, reboot instead of enter into debugger
-options	MAXCPU=4	# defines the maximum number of CPUs that can boot in the system
+#options	MAXCPU=4	# defines the maximum number of CPUs that can boot in the system
 
 #options 	INVARIANTS		# enable extra sanity checking of internal structures
 
