@@ -82,8 +82,8 @@ typedef struct __mcontext {
 	 */
 	int	mc_fpstate[128] __aligned(16);
 
-	__register_t mc_fsbase;
-	__register_t mc_gsbase;
+	__register_t _mc_fsbase; //wyc
+	__register_t _mc_gsbase; //wyc
 
 	__register_t mc_xfpustate;
 	__register_t mc_xfpustate_len;

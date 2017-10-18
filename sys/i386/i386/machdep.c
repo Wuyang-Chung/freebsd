@@ -1276,7 +1276,7 @@ extern  vm_offset_t	proc0kstack;
 
 wyc: use "[] =" to specify which array element to initialize
  */
-struct soft_segment_descriptor gdt_segs[] = {
+struct soft_segment_descriptor gdt_segs[NSGDT] = {
 [GNULL_SEL] = { //Null Descriptor
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
@@ -2516,8 +2516,11 @@ init386(int first)
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 
-	for (x = 0; x < NGDT; x++)
+	for (x = 0; x < NSGDT; x++)
 		ssdtosd(&gdt_segs[x], &gdt[x].sd);
+
+	for (x = GPCPU_SEL; x < NGDT; x++)
+		bcopy(&gdt[GPRIV_SEL], &gdt[x], sizeof(gdt[0]));
 
 	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
 	r_gdt.rd_base =  (int) gdt;

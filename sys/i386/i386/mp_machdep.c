@@ -247,7 +247,7 @@ init_secondary(void)
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 
-	for (x = 0; x < NGDT; x++) {
+	for (x = 0; x < NSGDT; x++) {
 		ssdtosd(&gdt_segs[x], &gdt[myid * NGDT + x].sd);
 	}
 
