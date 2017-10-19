@@ -1276,7 +1276,7 @@ extern  vm_offset_t	proc0kstack;
 
 wyc: use "[] =" to specify which array element to initialize
  */
-struct soft_segment_descriptor gdt_segs[] = {
+struct soft_segment_descriptor gdt_segs[NGDT] = {
 [GNULL_SEL] = { //Null Descriptor
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
@@ -1288,13 +1288,14 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_gran = 0		},
 [GPRIV_SEL] = { //SMP Per-Processor Private Data Descriptor
 	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = sizeof(struct pcpu)-1, //wyc 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
-	.ssd_gran = 1		},
+	.ssd_gran = 0, //wyc set to byte granularity
+	},
 [GUFS_SEL] = { //%fs Descriptor for user
 	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
@@ -2512,7 +2513,7 @@ init386(int first)
 	gdt_segs[GUGS_SEL].ssd_limit = atop(0 - 1);
 
 	pc = &__pcpu[0];
-	gdt_segs[GPRIV_SEL].ssd_limit = atop(0 - 1);
+	//gdt_segs[GPRIV_SEL].ssd_limit = atop(0 - 1); //wyc init it elsewhere
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 

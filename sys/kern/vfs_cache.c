@@ -1305,7 +1305,7 @@ vn_fullpath1(struct thread *td, struct vnode *vp, struct vnode *rdir,
 	slash_prefixed = 0;
 
 	SDT_PROBE1(vfs, namecache, fullpath, entry, vp);
-	counter_u64_add(numfullpathcalls, 1);
+	counter_u64_add(numfullpathcalls, 1); //wyc: bug
 	vref(vp);
 	CACHE_RLOCK();
 	if (vp->v_type != VDIR) {
@@ -1374,7 +1374,7 @@ vn_fullpath1(struct thread *td, struct vnode *vp, struct vnode *rdir,
 		}
 		buf[--buflen] = '/';
 	}
-	counter_u64_add(numfullpathfound, 1);
+	counter_u64_add(numfullpathfound, 1); //wyc: bug
 	CACHE_RUNLOCK();
 	vrele(vp);
 
