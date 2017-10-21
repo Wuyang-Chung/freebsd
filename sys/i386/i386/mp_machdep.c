@@ -266,14 +266,14 @@ init_secondary(void)
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
 	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
 	PCPU_SET(tss_gdt, &gdt[myid * NGDT + GPROC0_SEL].sd);
-	if (pc->pc_tss_gdt != &gdt[myid * NGDT + GPROC0_SEL].sd)
-		panic("%s %d", __func__, __LINE__);
+	//if (pc->pc_tss_gdt != &gdt[myid * NGDT + GPROC0_SEL].sd) //wyc: verified
+	//	panic("%s %d", __func__, __LINE__);
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
 	ltr(gsel_tss);
 
 	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUGS_SEL].sd); //wyc: GUFS_SEL -> GUGS_SEL
-	if (pc->pc_fsgs_gdt != &gdt[myid*NGDT+GUGS_SEL].sd)
-		panic("%s %d", __func__, __LINE__);
+	//if (pc->pc_fsgs_gdt != &gdt[myid*NGDT+GUGS_SEL].sd) //wyc: verified
+	//	panic("%s %d", __func__, __LINE__);
 
 	/*
 	 * Set to a known state:
