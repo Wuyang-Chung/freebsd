@@ -165,15 +165,16 @@
  *
  * XXX currently, some operations without RFPROC set are not supported.
  */
-#define	RFNAMEG		(1<<0)	/* UNIMPL new plan9 `name space' */
-#define	RFENVG		(1<<1)	/* UNIMPL copy plan9 `env space' */
+//#define	RFNAMEG	(1<<0)	/* UNIMPL new plan9 `name space' */
+//#define	RFENVG	(1<<1)	/* UNIMPL copy plan9 `env space' */
 #define	RFFDG		(1<<2)	/* copy fd table */
-#define	RFNOTEG		(1<<3)	/* UNIMPL create new plan9 `note group' */
+//#define	RFNOTEG	(1<<3)	/* UNIMPL create new plan9 `note group' */
 #define	RFPROC		(1<<4)	/* change child (else changes curproc) */
 #define	RFMEM		(1<<5)	/* share `address space' */
 #define	RFNOWAIT	(1<<6)	/* give child to init */
-#define	RFCNAMEG	(1<<10)	/* UNIMPL zero plan9 `name space' */
-#define	RFCENVG		(1<<11)	/* UNIMPL zero plan9 `env space' */
+#define	RFSAS		(1<<7)	//wyc: single address space
+//#define	RFCNAMEG (1<<10)	/* UNIMPL zero plan9 `name space' */
+//#define	RFCENVG	(1<<11)	/* UNIMPL zero plan9 `env space' */
 #define	RFCFDG		(1<<12)	/* close all fds, zero fd table */
 #define	RFTHREAD	(1<<13)	/* enable kernel thread support */
 #define	RFSIGSHARE	(1<<14)	/* share signal handlers */

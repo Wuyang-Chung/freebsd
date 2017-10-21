@@ -109,7 +109,7 @@ struct vm_map_entry {
 	vm_size_t adj_free;		/* amount of adjacent free space */
 	vm_size_t max_free;		/* max free space in subtree */
 	union vm_map_object object;	/* object I point to */
-	vm_ooffset_t offset;		/* offset into object wyc???: __int64_t */
+	vm_ooffset_t offset;		/* offset into object */
 	vm_eflags_t eflags;		/* map entry flags */
 	vm_prot_t protection;		/* protection code */
 	vm_prot_t max_protection;	/* maximum protection */

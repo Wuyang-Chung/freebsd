@@ -48,22 +48,23 @@
 
 extern struct pcpu __pcpu[MAXCPU];
 
+//wyc: bug
 static inline void
 counter_64_inc_8b(uint64_t *p, int64_t inc)
 {
 
 	__asm __volatile(
-	"movl	%%fs:(%%esi),%%eax\n\t"
-	"movl	%%fs:4(%%esi),%%edx\n"
+	"movl	(%0),%%eax\n\t"
+	"movl	4(%0),%%edx\n"
 "1:\n\t"
 	"movl	%%eax,%%ebx\n\t"
 	"movl	%%edx,%%ecx\n\t"
 	"addl	(%%edi),%%ebx\n\t"
 	"adcl	4(%%edi),%%ecx\n\t"
-	"cmpxchg8b %%fs:(%%esi)\n\t"
+	"cmpxchg8b (%0)\n\t"
 	"jnz	1b"
 	:
-	: "S" ((char *)p - (char *)&__pcpu[0]), "D" (&inc)
+	: "SD" (p), "D" (&inc)
 	: "memory", "cc", "eax", "edx", "ebx", "ecx");
 }
 
@@ -159,7 +160,7 @@ counter_u64_zero_inline(counter_u64_t c)
 		CRITICAL_ASSERT(curthread);		\
 		*(uint64_t *)zpcpu_get(c) += (inc);	\
 	} else						\
-		counter_64_inc_8b((c), (inc));		\
+		counter_64_inc_8b(zpcpu_get(c), (inc));	/*wyc: bug*/	\
 } while (0)
 
 static inline void
@@ -171,7 +172,7 @@ counter_u64_add(counter_u64_t c, int64_t inc)
 		*(uint64_t *)zpcpu_get(c) += inc;
 		critical_exit();
 	} else {
-		counter_64_inc_8b(c, inc);
+		counter_64_inc_8b(zpcpu_get(c), inc); //wyc: bug
 	}
 }
 

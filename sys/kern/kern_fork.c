@@ -91,18 +91,18 @@ dtrace_fork_func_t	dtrace_fasttrap_fork;
 SDT_PROVIDER_DECLARE(proc);
 SDT_PROBE_DEFINE3(proc, , , create, "struct proc *", "struct proc *", "int");
 
-#ifndef _SYS_SYSPROTO_H_
-struct fork_args {
-	int     dummy;
-};
-#endif
-
 struct {		// fresh boot	after kernel build
 	unsigned fork;	// 490		 3,979
 	unsigned vfork;	// 203		35,400
 	unsigned pdfork;// 0
 	unsigned rfork;	// 0
 } fork_st;	//wyc
+
+#ifndef _SYS_SYSPROTO_H_
+struct fork_args {
+	int     dummy;
+};
+#endif
 
 /* ARGSUSED */
 int
@@ -122,6 +122,13 @@ sys_fork(struct thread *td, struct fork_args *uap)
 	}
 	return (error);
 }
+
+#if defined(WYC)
+struct pdfork_args {
+	int * fdp;
+	int flags;
+};
+#endif
 
 /* ARGUSED */
 int
@@ -150,6 +157,12 @@ sys_pdfork(struct thread *td, struct pdfork_args *uap)
 	return (error);
 }
 
+#if defined(WYC)
+struct vfork_args {
+	register_t dummy;
+};
+#endif
+
 /* ARGSUSED */
 int
 sys_vfork(struct thread *td, struct vfork_args *uap)
@@ -169,6 +182,32 @@ sys_vfork(struct thread *td, struct vfork_args *uap)
 	return (error);
 }
 
+#if defined(WYC)
+struct rfork_args {
+	int flags;
+};
+#endif
+
+/* ARGSUSED */
+int
+sys_rfork(struct thread *td, struct rfork_args *uap) 
+{
+	struct fork_req fr;
+	int error, pid;
+
+	++fork_st.rfork;
+	bzero(&fr, sizeof(fr));
+	fr.fr_flags = RFFDG | RFPROC | RFPPWAIT | RFMEM | RFSAS;
+	fr.fr_pidp = &pid;
+	error = fork1(td, &fr);
+	if (error == 0) {
+		td->td_retval[0] = pid;
+		td->td_retval[1] = 0;
+	}
+	return (error);
+}
+
+#if 0 //wyc: ori
 int
 sys_rfork(struct thread *td, struct rfork_args *uap)
 {
@@ -191,6 +230,7 @@ sys_rfork(struct thread *td, struct rfork_args *uap)
 	}
 	return (error);
 }
+#endif
 
 int	nprocs = 1;		/* process 0 */
 int	lastpid = 0;

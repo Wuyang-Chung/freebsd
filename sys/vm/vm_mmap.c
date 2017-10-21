@@ -1242,7 +1242,7 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 {
 	struct vattr va;
 	vm_object_t obj;
-	vm_offset_t foff;
+	vm_ooffset_t foff;  //wyc###: ori vm_offset_t
 	struct ucred *cred;
 	int error, flags, locktype;
 
@@ -1253,7 +1253,7 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 		locktype = LK_SHARED;
 	if ((error = vget(vp, locktype, td)) != 0) //wyc: get reference on the vnode
 		return (error);
-	foff = *foffp; //wyc???: assign int64 to uint32?
+	foff = *foffp;
 	flags = *flagsp;
 	obj = vp->v_object;
 	if (vp->v_type == VREG) { //wyc: it is a regular file

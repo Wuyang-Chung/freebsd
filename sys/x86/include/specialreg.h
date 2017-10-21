@@ -121,7 +121,7 @@
 #define	CPUID_MSR	0x00000020
 #define	CPUID_PAE	0x00000040
 #define	CPUID_MCE	0x00000080
-#define	CPUID_CX8	0x00000100
+#define	CPUID_CX8	0x00000100 //wyc: The compare-and-exchange 8 bytes (64 bits) instruction is supported
 #define	CPUID_APIC	0x00000200
 #define	CPUID_B10	0x00000400
 #define	CPUID_SEP	0x00000800
