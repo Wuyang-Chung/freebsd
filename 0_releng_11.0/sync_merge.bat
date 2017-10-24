@@ -1,4 +1,5 @@
 cd ..
+pwd
 echo "$ git fetch upstream"
 git fetch upstream
 echo
