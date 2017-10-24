@@ -631,5 +631,5 @@ kern_thr_alloc(struct proc *p, int pages, struct thread **ntd)
 	if (*ntd == NULL)
 		return (ENOMEM);
 
-	return (0);
+	return (ESUCCESS);
 }

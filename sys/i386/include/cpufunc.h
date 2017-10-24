@@ -322,6 +322,12 @@ outw(u_int port, u_short data)
 	__asm __volatile("outw %0, %w1" : : "a" (data), "Nd" (port));
 }
 
+/*wyc
+    pause: spin loop hint
+	1. like a NOP instruction
+	2. improves the performance of spin-wait loop.
+	3. reduces the power consumption while executing a spin loop. 
+*/
 static __inline void
 ia32_pause(void)
 {
