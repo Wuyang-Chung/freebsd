@@ -280,11 +280,11 @@ restart:
 			else if (func != NULL)
 				printf("   %s(%p)... ", func, (*sipp)->udata);
 			else
-#endif
+#endif //defined(DDB)
 				printf("   %p(%p)... ", (*sipp)->func,
 				    (*sipp)->udata);
 		}
-#endif
+#endif //defined(VERBOSE_SYSINIT)
 
 		/* Call function */
 		(*((*sipp)->func))((*sipp)->udata);
