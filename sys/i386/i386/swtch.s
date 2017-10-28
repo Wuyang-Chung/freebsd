@@ -377,10 +377,10 @@ ENTRY(savectx)
 	pushfl
 	popl	PCB_PSL(%ecx)
 
-	movl	%cr0,%eax
-	movl	%eax,PCB_CR0(%ecx)
-	movl	%cr2,%eax
-	movl	%eax,PCB_CR2(%ecx)
+	//movl	%cr0,%eax
+	//movl	%eax,PCB_CR0(%ecx)
+	//movl	%cr2,%eax
+	//movl	%eax,PCB_CR2(%ecx)
 	movl	%cr4,%eax
 	movl	%eax,PCB_CR4(%ecx)
 
@@ -434,14 +434,14 @@ ENTRY(resumectx)
 	mov	%ax,%ss
 
 	/* Restore CR2, CR4, CR3 and CR0 */
-	movl	PCB_CR2(%ecx),%eax
-	movl	%eax,%cr2
+	//movl	PCB_CR2(%ecx),%eax
+	//movl	%eax,%cr2
 	movl	PCB_CR4(%ecx),%eax
 	movl	%eax,%cr4
 	movl	PCB_CR3(%ecx),%eax
 	movl	%eax,%cr3
-	movl	PCB_CR0(%ecx),%eax
-	movl	%eax,%cr0
+	//movl	PCB_CR0(%ecx),%eax
+	//movl	%eax,%cr0
 	jmp	1f
 1:
 

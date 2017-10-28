@@ -161,7 +161,11 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 		td->td_dbgflags &= ~TDB_SCE;
 		PROC_UNLOCK(p);
 	}
+#if defined(WYC)
+	cpu_set_syscall_retval(td, error);
+#else
 	(p->p_sysent->sv_set_syscall_retval)(td, error); //wyc: cpu_set_syscall_retval
+#endif
 	return (error);
 }
 
@@ -218,7 +222,7 @@ syscallret(struct thread *td, int error, struct syscall_args *sa)
 		PROC_UNLOCK(p);
 	}
 
-	if (td->td_pflags & TDP_RFPPWAIT) {
+	if (td->td_pflags & TDP_RFPPWAIT) { //wyc: TRUE for vfork
 		/*
 		 * Preserve synchronization semantics of vfork.  If
 		 * waiting for child to exec or exit, fork set

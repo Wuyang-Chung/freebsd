@@ -71,16 +71,17 @@ struct pcb {
 	int	pcb_fs;
 	int	pcb_gs;
 	int	pcb_ss;
-	int	pcb_cr0;
-	int	pcb_cr2;
-	int	pcb_cr3;
-	int	pcb_cr4;
-	int     pcb_dr0;
-	int     pcb_dr1;
-	int     pcb_dr2;
-	int     pcb_dr3;
-	int     pcb_dr6;
-	int     pcb_dr7;
+	//int	pcb_cr0; //wyc: system control flags
+	//int	pcb_cr2; //wyc: the page-fault linear address
+	int	pcb_cr3; //wyc: the base address of page table
+	int	pcb_cr4; //wyc: group of flags that enable several architectureal extensions
+			 //wyc: refed by acpi_wakeup.c:234
+	int     pcb_dr0; //wyc: break point 0 linear address
+	int     pcb_dr1; //wyc: break point 1 linear address
+	int     pcb_dr2; //wyc: break point 2 linear address
+	int     pcb_dr3; //wyc: break point 3 linear address
+	int     pcb_dr6; //wyc: debug status register
+	int     pcb_dr7; //wyc: debug control register
 
 	struct region_descriptor pcb_gdt;
 	struct region_descriptor pcb_idt;
@@ -97,7 +98,7 @@ struct pcb {
 	u_long	pcb_vm86[2];	/* vm86bios scratch space */
 	union	savefpu *pcb_save;
 
-	uint32_t pcb_pad[10+2];	//wyc: pad pcb_fsd(2 words) here
+	uint32_t pcb_pad[10+4];	//wyc: pad pcb_fsd(2 words) here
 };
 
 /* Per-CPU state saved during suspend and resume. */
