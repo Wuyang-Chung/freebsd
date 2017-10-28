@@ -351,7 +351,7 @@ thread_alloc(int pages)
 		uma_zfree(thread_zone, td);
 		return (NULL);
 	}
-	cpu_thread_alloc(td); //wyc: function that starts with "cpu_" is a machine dependent function
+	cpu_thread_alloc(td); //wyc: init td_pcb and td_frame
 	vm_domain_policy_init(&td->td_vm_dom_policy);
 	return (td);
 }
@@ -364,7 +364,7 @@ thread_alloc_stack(struct thread *td, int pages)
 	    ("thread_alloc_stack called on a thread with kstack"));
 	if (!vm_thread_new(td, pages)) //wyc: create thread kernel stack
 		return FALSE;
-	cpu_thread_alloc(td); //wyc: initialize cpu dependant part of the thread structure
+	cpu_thread_alloc(td); //wyc: init td_pcb and td_frame
 	return TRUE;
 }
 

@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD$");
 #endif
 #include <security/audit/audit.h>
 
-static /*inline*/ int //wyc: why inline
+static /*inline*/ int //wyc???: why inline
 syscallenter(struct thread *td, struct syscall_args *sa)
 {
 	struct proc *p;
@@ -71,7 +71,11 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 			td->td_dbgflags |= TDB_SCE;
 		PROC_UNLOCK(p);
 	}
-	error = (p->p_sysent->sv_fetch_syscall_args)(td, sa); //wyc: called cpu_fetch_syscall_args()
+#if defined(WYC)
+	error = cpu_fetch_syscall_args(td, sa); //wyc: out: sa
+#else
+	error = (p->p_sysent->sv_fetch_syscall_args)(td, sa);
+#endif
 #ifdef KTRACE
 	if (KTRPOINT(td, KTR_SYSCALL))
 		ktrsyscall(sa->code, sa->narg, sa->args);

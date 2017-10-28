@@ -35,7 +35,7 @@
 #include <bsm/audit.h>
 
 struct rlimit;
-struct sysent;
+//struct sysent;
 struct thread;
 struct ksiginfo;
 struct syscall_args;

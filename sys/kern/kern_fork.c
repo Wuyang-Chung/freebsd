@@ -176,7 +176,7 @@ sys_vfork(struct thread *td, struct vfork_args *uap)
 	fr.fr_pidp = &pid;
 	error = fork1(td, &fr);
 	if (error == 0) {
-		td->td_retval[0] = pid;
+		td->td_retval[0] = pid; //wyc: child process id
 		td->td_retval[1] = 0;
 	}
 	return (error);
@@ -431,8 +431,9 @@ fail:
 
 static void
 do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *td2,
-    struct vmspace *vm2, struct file *fp_procdesc)
-__attribute__((optnone)) //wyc
+    struct vmspace *vm2, //wyc: NULL for vfork
+    struct file *fp_procdesc //wyc: NULL for vfork
+) __attribute__((optnone)) //wyc
 {
 	struct proc *p1, *pptr;
 	int trypid;
@@ -481,7 +482,7 @@ __attribute__((optnone)) //wyc
 	/*
 	 * Malloc things while we don't hold any locks.
 	 */
-	if (fr->fr_flags & RFSIGSHARE)
+	if (fr->fr_flags & RFSIGSHARE) //wyc: FALSE for vfork
 		newsigacts = NULL;
 	else
 		newsigacts = sigacts_alloc();
@@ -610,7 +611,7 @@ __attribute__((optnone)) //wyc
 	/*
 	 * Set up linkage for kernel based threading.
 	 */
-	if ((fr->fr_flags & RFTHREAD) != 0) {
+	if ((fr->fr_flags & RFTHREAD) != 0) { //wyc: FALSE for vfork
 		mtx_lock(&ppeers_lock);
 		p2->p_peers = p1->p_peers;
 		p1->p_peers = p2;
@@ -657,7 +658,7 @@ __attribute__((optnone)) //wyc
 	if (p1->p_session->s_ttyvp != NULL && p1->p_flag & P_CONTROLT)
 		p2->p_flag |= P_CONTROLT;
 	SESS_UNLOCK(p1->p_session);
-	if (fr->fr_flags & RFPPWAIT)
+	if (fr->fr_flags & RFPPWAIT) //wyc: TRUE for vfork
 		p2->p_flag |= P_PPWAIT;
 
 	p2->p_pgrp = p1->p_pgrp;
@@ -691,7 +692,7 @@ __attribute__((optnone)) //wyc
 	 * of init.  This effectively disassociates the child from the
 	 * parent.
 	 */
-	if ((fr->fr_flags & RFNOWAIT) != 0) {
+	if ((fr->fr_flags & RFNOWAIT) != 0) { //wyc: FALSE for vfork
 		pptr = p1->p_reaper; //wyc: normall reaper is init process.
 		p2->p_reaper = pptr;
 	} else {
@@ -809,12 +810,12 @@ __attribute__((optnone)) //wyc
 	knote_fork(p1->p_klist, p2->p_pid);
 	SDT_PROBE3(proc, , , create, p2, p1, fr->fr_flags);
 
-	if (fr->fr_flags & RFPROCDESC) {
+	if (fr->fr_flags & RFPROCDESC) { //wyc: FALSE for vfork
 		procdesc_finit(p2->p_procdesc, fp_procdesc);
 		fdrop(fp_procdesc, td);
 	}
 
-	if ((fr->fr_flags & RFSTOPPED) == 0) {
+	if ((fr->fr_flags & RFSTOPPED) == 0) { //wyc: TRUE for vfork
 		/*
 		 * If RFSTOPPED not requested, make child runnable and
 		 * add to run queue.
@@ -898,6 +899,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * certain parts of a process from itself.
 	 */
 	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified except for rfork
+		panic("%s: (flags & RFPROC) == 0", __func__); //wyc
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)
@@ -947,13 +949,13 @@ fork1(struct thread *td, struct fork_req *fr)
 	}
 
 	mem_charged = 0;
-	if (pages == 0)
+	if (pages == 0) //wyc: TRUE
 		pages = kstack_pages;
 	/* Allocate new proc. */
 	newproc = uma_zalloc(proc_zone, M_WAITOK);
 	td2 = FIRST_THREAD_IN_PROC(newproc);
 	if (__predict_false(td2 == NULL)) { //wyc
-		td2 = thread_alloc(pages);
+		td2 = thread_alloc(pages); //wyc: allocate kernel stack
 		if (td2 == NULL) {
 			error = ENOMEM;
 			goto fail2;
@@ -964,17 +966,14 @@ fork1(struct thread *td, struct fork_req *fr)
 				    td2->td_kstack_pages != pages)) { //wyc
 			if (td2->td_kstack != 0)
 				vm_thread_dispose(td2);
-			if (!thread_alloc_stack(td2, pages)) {
+			if (!thread_alloc_stack(td2, pages)) { //wyc: allocate kernel stack
 				error = ENOMEM;
 				goto fail2;
 			}
 		}
 	}
 
-	/*wyc
-	  For SAS RFMEM will always be true
-	*/
-	if ((flags & RFMEM) == 0) {
+	if ((flags & RFMEM) == 0) { //wyc: FALSE for vfork and sfork
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
 		if (vm2 == NULL) {
 			error = ENOMEM;

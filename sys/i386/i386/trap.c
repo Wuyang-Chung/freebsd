@@ -1072,9 +1072,13 @@ cpu_fetch_syscall_args(struct thread *td, struct syscall_args *sa)
  	if (p->p_sysent->sv_mask)
  		sa->code &= p->p_sysent->sv_mask;
  	if (sa->code >= p->p_sysent->sv_size)
- 		sa->callp = &p->p_sysent->sv_table[0];
+ 		sa->callp = &p->p_sysent->sv_table[0]; //wyc: nosys() returns ENOSYS
   	else
+#if defined(WYC)
+		sa->callp = &sysent[sa->code];
+#else
  		sa->callp = &p->p_sysent->sv_table[sa->code];
+#endif
 	sa->narg = sa->callp->sy_narg;
 
 	if (params != NULL && sa->narg != 0)
@@ -1115,7 +1119,7 @@ syscall(struct trapframe *frame)
 	orig_tf_eflags = frame->tf_eflags;
 
 	td = curthread;
-	td->td_frame = frame;
+	td->td_frame = frame; //wyc: trap frame
 
 	error = syscallenter(td, &sa);
 

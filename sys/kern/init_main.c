@@ -583,7 +583,12 @@ proc0_init(void *dummy __unused)
 	 * handling for sv_minuser here, like is done for exec_new_vmspace().
 	 */
 	vm_map_init(&vmspace0.vm_map, vmspace_pmap(&vmspace0),
+#if defined(WYC)
+	    null_sysvec.sv_minuser, null_sysvec.sv_maxuser,
+	    VM_MIN_ADDRESS, VM_MAXUSER_ADDRESS); //wyc: 0, 3G-4M
+#else
 	    p->p_sysent->sv_minuser, p->p_sysent->sv_maxuser);
+#endif
 
 	/*
 	 * Call the init and ctor for the new thread and proc.  We wait

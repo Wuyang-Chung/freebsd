@@ -145,7 +145,7 @@ sw1:
 	je	1b
 #endif
 	/*
-	 * At this point, we've switched address spaces and are ready
+	 * At this point, we`ve switched address spaces and are ready
 	 * to load up the rest of the next context.
 	 */
 
@@ -215,7 +215,7 @@ done_load_dr:
 	/*
 	 * We order these strangely for several reasons.
 	 * 1: I wanted to use static branch prediction hints
-	 * 2: Most athlon64/opteron cpus don't have them.  They define
+	 * 2: Most athlon64/opteron cpus don`t have them.  They define
 	 *    a forward branch as 'predict not taken'.  Intel cores have
 	 *    the 'rep' prefix to invert this.
 	 * So, to make it work on both forms of cpu we do the detour.

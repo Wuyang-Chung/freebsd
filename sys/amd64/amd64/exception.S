@@ -222,7 +222,7 @@ alltraps_pushregs_no_rdi:
 
 	/*
 	 * Set our jump address for the jump back in the event that
-	 * the breakpoint wasn't caused by DTrace at all.
+	 * the breakpoint wasn`t caused by DTrace at all.
 	 */
 	movq	$calltrap,dtrace_invop_calltrap_addr(%rip)
 
@@ -316,7 +316,7 @@ IDTVEC(page)
 
 	/*
 	 * We have to special-case this one.  If we get a trap in doreti() at
-	 * the iretq stage, we'll reenter with the wrong gs state.  We'll have
+	 * the iretq stage, we`ll reenter with the wrong gs state.  We`ll have
 	 * to do a special the swapgs in this case even coming from the kernel.
 	 * XXX linux has a trap handler for their equivalent of load_gs().
 	 */
@@ -353,7 +353,7 @@ prot_addrf:
  * entries from an LDT).
  */
 IDTVEC(fast_syscall)
-	swapgs
+	swapgs //exchanges the GS base with the value contained in MSR_KGSBASE
 	movq	%rsp,PCPU(SCRATCH_RSP)
 	movq	PCPU(RSP0),%rsp
 	/* Now emulate a trapframe. Make the 8 byte alignment odd for call. */
@@ -399,7 +399,7 @@ IDTVEC(fast_syscall)
 	cli
 	testl	$PCB_FULL_IRET,PCB_FLAGS(%rax)
 	jnz	3f
-	/* Check for and handle AST's on return to userland. */
+	/* Check for and handle AST`s on return to userland. */
 	movq	PCPU(CURTHREAD),%rax
 	testl	$TDF_ASTPENDING | TDF_NEEDRESCHED,TD_FLAGS(%rax)
 	jne	2f

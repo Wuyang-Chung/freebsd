@@ -645,7 +645,7 @@ vm_forkproc(
 		return (0);
 	}
 
-	if (flags & RFMEM) {
+	if (flags & RFMEM) { //wyc: TRUE for vfork
 		p2->p_vmspace = p1->p_vmspace;
 		atomic_add_int(&p1->p_vmspace->vm_refcnt, 1);
 	}
@@ -654,7 +654,7 @@ vm_forkproc(
 		VM_WAIT;
 	}
 
-	if ((flags & RFMEM) == 0) {
+	if ((flags & RFMEM) == 0) { //wyc: FALSE for vfork
 		p2->p_vmspace = vm2;
 		if (p1->p_vmspace->vm_shm)
 			shmfork(p1, p2);

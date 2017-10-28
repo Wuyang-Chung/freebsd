@@ -128,17 +128,17 @@ IDTVEC(missing)	//wyc: IDT_NP, #NP: Segment Not Present
 	TRAP(T_SEGNPFLT)
 IDTVEC(stk)	//wyc: IDT_SS, #SS: Stack Segment Fault
 	TRAP(T_STKFLT)
-IDTVEC(prot)
+IDTVEC(prot)	//wyc: IDT_GP, 
 	TRAP(T_PROTFLT)
-IDTVEC(page)
+IDTVEC(page)	//wyc: IDT_PF
 	TRAP(T_PAGEFLT)
-IDTVEC(mchk)
+IDTVEC(mchk)	//wyc: IDT_MC
 	pushl $0; TRAP(T_MCHK)
 IDTVEC(rsvd)
 	pushl $0; TRAP(T_RESERVED)
 IDTVEC(fpu)
 	pushl $0; TRAP(T_ARITHTRAP)
-IDTVEC(align)
+IDTVEC(align)	//wyc: IDT_AC
 	TRAP(T_ALIGNFLT)
 IDTVEC(xmm)
 	pushl $0; TRAP(T_XMMFLT)
