@@ -449,7 +449,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	if ( p2 != td2->td_proc )
 		panic("%s: p2 != td2->td_proc", __func__);
 
-	trypid = fork_findpid(fr->fr_flags);
+	trypid = fork_findpid(fr->fr_flags); //wyc: for thread, it is tid_alloc()
 
 	sx_sunlock(&proctree_lock);
 
@@ -569,16 +569,16 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	vm_domain_policy_localcopy(&p2->p_vm_dom_policy,
 	    &p1->p_vm_dom_policy);
 
-	if (fr->fr_flags & RFSIGSHARE) {
+	if (fr->fr_flags & RFSIGSHARE) { //wyc: used only by linux_clone
 		p2->p_sigacts = sigacts_hold(p1->p_sigacts);
 	} else {
 		sigacts_copy(newsigacts, p1->p_sigacts);
 		p2->p_sigacts = newsigacts;
 	}
 
-	if (fr->fr_flags & RFTSIGZMB)
+	if (fr->fr_flags & RFTSIGZMB) //wyc: used only by rfork
 	        p2->p_sigparent = RFTSIGNUM(fr->fr_flags);
-	else if (fr->fr_flags & RFLINUXTHPN)
+	else if (fr->fr_flags & RFLINUXTHPN) //wyc: used only by linux
 	        p2->p_sigparent = SIGUSR1;
 	else
 	        p2->p_sigparent = SIGCHLD;
@@ -720,7 +720,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * Finish creating the child process.  It will return via a different
 	 * execution path later.  (ie: directly into user mode)
 	 */
-	vm_forkproc(td, p2, td2, vm2, fr->fr_flags);
+	vm_forkproc(td, p2, td2, vm2, fr->fr_flags); //wyc: vm2 == NULL for vfork
 
 	if (fr->fr_flags == (RFFDG | RFPROC)) {	//wyc: sys_fork()
 		PCPU_INC(cnt.v_forks);
@@ -745,7 +745,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * can happen that might cause that process to need the descriptor.
 	 * However, don't do this until after fork(2) can no longer fail.
 	 */
-	if (fr->fr_flags & RFPROCDESC)
+	if (fr->fr_flags & RFPROCDESC) //wyc: FALSE for vfork
 		procdesc_new(p2, fr->fr_pd_flags);
 
 	/*
@@ -955,7 +955,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	newproc = uma_zalloc(proc_zone, M_WAITOK);
 	td2 = FIRST_THREAD_IN_PROC(newproc);
 	if (__predict_false(td2 == NULL)) { //wyc
-		td2 = thread_alloc(pages); //wyc: allocate kernel stack
+		td2 = thread_alloc(pages); //wyc: allocate thread and kernel stack
 		if (td2 == NULL) {
 			error = ENOMEM;
 			goto fail2;
@@ -1003,7 +1003,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * Initialize resource accounting for the child process.
 	 */
 	error = racct_proc_fork(p1, newproc);
-	if (error != 0) {
+	if (error != ESUCCESS) {
 		error = EAGAIN;
 		goto fail1;
 	}
@@ -1025,7 +1025,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * XXXRW: Can we avoid privilege here if it's not needed?
 	 */
 	error = priv_check_cred(td->td_ucred, PRIV_PROC_LIMIT, 0);
-	if (error == 0)
+	if (error == ESUCCESS)
 		ok = chgproccnt(td->td_ucred->cr_ruidinfo, 1, 0); //wyc: 0 means no limit
 	else {
 		ok = chgproccnt(td->td_ucred->cr_ruidinfo, 1,

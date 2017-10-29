@@ -618,7 +618,7 @@ vm_forkproc(
 	struct thread *td,
 	struct proc *p2,
 	struct thread *td2,
-	struct vmspace *vm2,
+	struct vmspace *vm2, //wyc: vm2 == NULL for vfork
 	int flags)
 {
 	struct proc *p1 = td->td_proc;
