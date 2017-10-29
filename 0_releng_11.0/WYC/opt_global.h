@@ -1,0 +1,11 @@
+#define MAXCPU 2
+#define AUDIT 1
+#define NEW_PCIB 1
+#define DEV_RANDOM 1
+#define RACCT_DEFAULT_TO_DISABLED 1
+#define I686_CPU 1
+#define RCTL 1
+#define RACCT 1
+#define SMP 1
+#define KDTRACE_HOOKS 1
+#define KDB 1

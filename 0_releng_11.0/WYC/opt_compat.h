@@ -1,0 +1,1 @@
+#define COMPAT_FREEBSD10 1
