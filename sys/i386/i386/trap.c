@@ -1081,6 +1081,8 @@ cpu_fetch_syscall_args(struct thread *td, struct syscall_args *sa)
 #endif
 	sa->narg = sa->callp->sy_narg;
 
+	if (params == NULL) //wyc
+		panic("%s: params == NULL", __func__);
 	if (params != NULL && sa->narg != 0)
 		error = copyin(params, (caddr_t)sa->args,
 		    (u_int)(sa->narg * sizeof(int)));

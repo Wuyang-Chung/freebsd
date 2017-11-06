@@ -490,10 +490,10 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Copy filedesc.
 	 */
-	if (fr->fr_flags & RFCFDG) {	//wyc: close all fds
+	if (fr->fr_flags & RFCFDG) {	//wyc: close all fds. FALSE for vfork
 		fd = fdinit(p1->p_fd, false);
 		fdtol = NULL;
-	} else if (fr->fr_flags & RFFDG) {	//wyc: copy fd table
+	} else if (fr->fr_flags & RFFDG) {	//wyc: copy fd table. TRUE for vfork
 		fd = fdcopy(p1->p_fd);
 		fdtol = NULL;
 	} else {
@@ -599,7 +599,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 
 	thread_cow_get_proc(td2, p2);
 
-	pstats_fork(p1->p_stats, p2->p_stats);
+	pstats_fork(p1->p_stats, p2->p_stats); //wyc: init p2's statictics
 
 	PROC_UNLOCK(p1);
 	PROC_UNLOCK(p2);
@@ -848,7 +848,6 @@ fork1(struct thread *td, struct fork_req *fr)
 	struct thread *td2;
 	struct vmspace *vm2;
 	struct file *fp_procdesc;
-	vm_ooffset_t mem_charged;
 	int error, nprocs_new, ok;
 	static int curfail;
 	static struct timeval lastfail;
@@ -948,7 +947,9 @@ fork1(struct thread *td, struct fork_req *fr)
 			goto fail2;
 	}
 
-	mem_charged = 0;
+	/*wyc
+	    allocate new proc, new thread and thread stack
+	*/
 	if (pages == 0) //wyc: TRUE
 		pages = kstack_pages;
 	/* Allocate new proc. */
@@ -974,6 +975,8 @@ fork1(struct thread *td, struct fork_req *fr)
 	}
 
 	if ((flags & RFMEM) == 0) { //wyc: FALSE for vfork and sfork
+		vm_ooffset_t mem_charged = 0; //wyc###
+
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
 		if (vm2 == NULL) {
 			error = ENOMEM;
@@ -1116,7 +1119,7 @@ __attribute__((optnone))	//wyc
 	}
 	mtx_assert(&Giant, MA_NOTOWNED);
 
-	if (p->p_sysent->sv_schedtail != NULL)
+	if (p->p_sysent->sv_schedtail != NULL) //wyc: FALSE
 		(p->p_sysent->sv_schedtail)(td);
 	td->td_pflags &= ~TDP_FORKING;
 }

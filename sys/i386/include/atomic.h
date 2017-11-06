@@ -186,10 +186,10 @@ atomic_cmpset_int(volatile u_int *dst, u_int expect, u_int src)
 	"       sete	%0 ;		"
 	"	popfl ;			"
 	"# atomic_cmpset_int"
-	: "=q" (res),			/* 0 */
-	  "+m" (*dst)			/* 1 */
-	: "r" (src),			/* 2 */
-	  "r" (expect)			/* 3 */
+	: "=q" (res),	/* 0 */
+	  "+m" (*dst)	/* 1 */
+	: "r" (src),	/* 2 */
+	  "r" (expect)	/* 3 */
 	: "memory");
 	return (res);
 }
@@ -206,10 +206,10 @@ atomic_cmpset_int(volatile u_int *dst, u_int expect, u_int src)
 	"	cmpxchgl %3,%1 ;	"
 	"       sete	%0 ;		"
 	"# atomic_cmpset_int"
-	: "=q" (res),			/* 0 */
-	  "+m" (*dst),			/* 1 */
-	  "+a" (expect)			/* 2 */
-	: "r" (src)			/* 3 */
+	: "=q" (res),	/* 0 */
+	  "+m" (*dst),	/* 1 */
+	  "+a" (expect)	/* 2 */
+	: "r" (src)	/* 3 */
 	: "memory", "cc");
 	return (res);
 }

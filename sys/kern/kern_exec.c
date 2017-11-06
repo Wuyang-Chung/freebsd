@@ -472,7 +472,7 @@ interpret:
 	/*
 	 * Check file permissions (also 'opens' file)
 	 */
-	error = exec_check_permissions(imgp);
+	error = exec_check_permissions(imgp); //wyc: get impg->attr
 	if (error)
 		goto exec_fail_dealloc;
 
@@ -494,7 +494,7 @@ interpret:
 	textset = VOP_IS_TEXT(imgp->vp);
 	VOP_SET_TEXT(imgp->vp);
 
-	error = exec_map_first_page(imgp);
+	error = exec_map_first_page(imgp); //wyc: get impg->image_header
 	if (error)
 		goto exec_fail_dealloc;
 
@@ -1112,12 +1112,16 @@ __attribute__((optnone)) //wyc
 		sv_minuser = sv->sv_minuser;
 	else
 		sv_minuser = MAX(sv->sv_minuser, PAGE_SIZE);
-	if (vmspace->vm_refcnt == 1 && vm_map_min(map) == sv_minuser &&
-	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE
+
+	if (vmspace->vm_refcnt == 1 && //wyc???: no lock before accessing vm_refcnt.
+	    vm_map_min(map) == sv_minuser &&
+	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE for fork
 		shmexit(vmspace);
 		pmap_remove_pages(vmspace_pmap(vmspace));
 		vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
-	} else {
+	} else { //wyc: for vfork
+		//wyc: the old vmspace will be released in post_execve()
+		//     the new vmspace will be stored in p->p_vmspace
 		error = vmspace_exec(p, sv_minuser, sv->sv_maxuser);
 		if (error)
 			return (error);
@@ -1154,6 +1158,8 @@ __attribute__((optnone)) //wyc
 	}
 
 	/* Allocate a new stack */
+	//wyc: user stack is allocated here
+	//wyctodo: allocate a stack segment here
 	if (imgp->stack_sz != 0) { //wyc: false
 		ssiz = trunc_page(imgp->stack_sz);
 		PROC_LOCK(p);
@@ -1549,6 +1555,10 @@ exec_copyout_strings(
  *	Called with imgp->vp locked.
  *	Return 0 for success or error code on failure.
  */
+/*wyc:
+    input impg->vp
+    output imgp->attr
+*/
 int
 exec_check_permissions(
 	struct image_params *imgp)

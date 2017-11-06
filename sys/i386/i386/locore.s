@@ -139,13 +139,18 @@ pc98_system_parameter:
 
 #define R(foo) ((foo)-KERNBASE)
 
+/*wyc###
+    %esi = physfree;
+    physfree += foo*PAGE_SIZE
+    bzero(%esi, foo*PAGE_SIZE);
+*/
 #define ALLOCPAGES(foo) \
 	movl	R(physfree), %esi ; \
-	movl	$((foo)*PAGE_SIZE), %eax ; \
+	movl	$((foo)*PAGE_SIZE), %ecx ; \
+	movl	%ecx, %eax ; \
 	addl	%esi, %eax ; \
 	movl	%eax, R(physfree) ; \
 	movl	%esi, %edi ; \
-	movl	$((foo)*PAGE_SIZE),%ecx ; \
 	xorl	%eax,%eax ; \
 	cld ; \
 	rep ; \
@@ -721,10 +726,10 @@ no_kernend:
 	movl	%esi,R(physfree)	/* next free page is at end of kernel */
 
 /* Allocate Kernel Page Tables */
-	ALLOCPAGES(NKPT)
+	ALLOCPAGES(NKPT) //wyc: 30
 	movl	%esi,R(KPTphys)
 	addl	$(KERNBASE-(KPTDI<<(PDR_SHIFT-PAGE_SHIFT+PTESHIFT))),%esi
-	movl	%esi,R(KPTmap)		/*wyc: KPTmap will be reintialized by pmap_bootstrap() */
+	movl	%esi,R(KPTmap) //wyc: KPTmap will be reintialized by pmap_bootstrap()
 
 /* Allocate Page Table Directory */
 #if defined(PAE) || defined(PAE_TABLES)
@@ -732,7 +737,7 @@ no_kernend:
 	ALLOCPAGES(1)
 	movl	%esi,R(IdlePDPT)
 #endif
-	ALLOCPAGES(NPGPTD)
+	ALLOCPAGES(NPGPTD) //wyc: 1
 	movl	%esi,R(IdlePTD)
 
 /* Allocate KSTACK */

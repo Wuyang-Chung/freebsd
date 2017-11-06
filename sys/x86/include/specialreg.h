@@ -114,7 +114,7 @@
  * CPUID instruction features register
  */
 #define	CPUID_FPU	0x00000001
-#define	CPUID_VME	0x00000002
+#define	CPUID_VME	0x00000002 //wyc: Virtual 8086 mode extensions
 #define	CPUID_DE	0x00000004
 #define	CPUID_PSE	0x00000008
 #define	CPUID_TSC	0x00000010

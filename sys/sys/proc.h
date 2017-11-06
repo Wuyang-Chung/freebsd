@@ -315,10 +315,10 @@ struct thread {
 	struct pcb	*td_pcb;	/* (k) Kernel VA of pcb and kstack. */
 	enum _td_state	td_state;	/* (t) thread state */
 	union {
-		register_t	tdu_retval[2];
-		off_t		tdu_off;	
-	} td_uretoff;			/* (k) Syscall aux returns. */
-#define td_retval	td_uretoff.tdu_retval
+		register_t	td_retval[2];
+		off_t		td_off;	
+	} /*td_uretoff*/;		/* (k) Syscall aux returns. */
+//#define td_retval	tdu_retval
 	u_int		td_cowgen;	/* (k) Generation of COW pointers. */
 	struct callout	td_slpcallout;	/* (h) Callout for sleep. */
 	struct trapframe *td_frame;	/* (k) */
@@ -694,7 +694,7 @@ struct proc {
 #define	P_STOPPED_TRACE	   0x40000 /* Stopped because of tracing. */
 #define	P_STOPPED_SINGLE   0x80000 /* Only 1 thread can continue (not to user). */
 #define	P_PROTECTED	  0x100000 /* Do not kill on memory overcommit. */
-#define	P_SIGEVENT	  0x200000 /* Process pending signals changed. */
+#define	_P_SIGEVENT	  0x200000 /*wyc### Process pending signals changed. */
 #define	P_SINGLE_BOUNDARY 0x400000 /* Threads should suspend at user boundary. */
 #define	P_HWPMC		  0x800000 /* Process is using HWPMCs */
 #define	P_JAILED	 0x1000000 /* Process is in jail. */
@@ -716,6 +716,7 @@ struct proc {
 #define	P2_NOTRACE_EXEC      0x00000004	/* Keep P2_NOPTRACE on exec(2). */
 #define	P2_AST_SU	     0x00000008	/* Handles SU ast for kthreads. */
 #define	P2_LWP_EVENTS	     0x00000010	/* Report LWP events via ptrace(2). */
+#define	P2_SAS		     0x00000020 //wyc: single address space	
 
 /* Flags protected by proctree_lock, kept in p_treeflags. */
 #define	P_TREE_ORPHANED		0x00000001	/* Reparented, on orphan list */

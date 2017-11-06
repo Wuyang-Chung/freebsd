@@ -949,7 +949,7 @@ __attribute__((optnone)) //wyc
 	 */
 	VOP_UNLOCK(imgp->vp, 0);
 
-	error = exec_new_vmspace(imgp, sv); //wyc: destroy old address and allocate a new stack
+	error = exec_new_vmspace(imgp, sv); //wyc: destroy old address and allocate a new user stack
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);

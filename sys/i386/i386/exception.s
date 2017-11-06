@@ -169,7 +169,7 @@ alltraps_with_regs_pushed:
 	FAKE_MCOUNT(TF_EIP(%esp))
 calltrap:
 	pushl	%esp
-	call	trap
+	call	trap //wyc void trap(struct trapframe *frame);
 	add	$4, %esp
 
 	/*

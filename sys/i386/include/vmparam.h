@@ -134,7 +134,7 @@
  * Kernel physical load address.
  */
 #ifndef KERNLOAD
-#define	KERNLOAD		(1 << PDR_SHIFT)		//wyc: 4M
+#define	KERNLOAD		(1 << PDR_SHIFT)	//wyc: 4M
 #endif /* !defined(KERNLOAD) */
 
 /*

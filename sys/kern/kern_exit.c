@@ -213,8 +213,10 @@ exit1(struct thread *td, int rval, int signo)
 	/*
 	 * Deref SU mp, since the thread does not return to userspace.
 	 */
-	if (softdep_ast_cleanup != NULL)
+	if (softdep_ast_cleanup != NULL) {
+		//wyc: written by softdep_initialize() in sys/ufs/ffs/ffs_softdep.c:2410
 		softdep_ast_cleanup();
+	}
 
 	/*
 	 * MUST abort all other threads before proceeding past here.
