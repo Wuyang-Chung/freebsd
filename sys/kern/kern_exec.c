@@ -600,7 +600,7 @@ interpret:
 	 *	scripts differently.
 	 */
 	error = -1;
-	if ((img_first = imgp->proc->p_sysent->sv_imgact_try) != NULL)
+	if ((img_first = imgp->proc->p_sysent->sv_imgact_try) != NULL) //wyc: FALSE
 		error = img_first(imgp);
 
 	/*

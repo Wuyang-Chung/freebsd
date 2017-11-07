@@ -130,7 +130,6 @@ struct pdfork_args {
 };
 #endif
 
-/* ARGUSED */
 int
 sys_pdfork(struct thread *td, struct pdfork_args *uap)
 {
@@ -188,26 +187,6 @@ struct rfork_args {
 };
 #endif
 
-/* ARGSUSED */
-int
-sys_rfork(struct thread *td, struct rfork_args *uap) 
-{
-	struct fork_req fr;
-	int error, pid;
-
-	++fork_st.rfork;
-	bzero(&fr, sizeof(fr));
-	fr.fr_flags = RFFDG | RFPROC | RFPPWAIT | RFMEM | RFSAS;
-	fr.fr_pidp = &pid;
-	error = fork1(td, &fr);
-	if (error == 0) {
-		td->td_retval[0] = pid;
-		td->td_retval[1] = 0;
-	}
-	return (error);
-}
-
-#if 0 //wyc: ori
 int
 sys_rfork(struct thread *td, struct rfork_args *uap)
 {
@@ -230,7 +209,6 @@ sys_rfork(struct thread *td, struct rfork_args *uap)
 	}
 	return (error);
 }
-#endif
 
 int	nprocs = 1;		/* process 0 */
 int	lastpid = 0;
