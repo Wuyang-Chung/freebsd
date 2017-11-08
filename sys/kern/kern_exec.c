@@ -1181,7 +1181,7 @@ __attribute__((optnone)) //wyc
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
 		sv->sv_stackprot,
-	    VM_PROT_ALL, COWF_STACK_GROWS_DOWN);
+	    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
 	if (error)
 		return (error);
 

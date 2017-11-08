@@ -1231,9 +1231,9 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		protoeflags |= MAP_ENTRY_NOSYNC;
 	if (cow & COWF_DISABLE_COREDUMP)
 		protoeflags |= MAP_ENTRY_NOCOREDUMP;
-	if (cow & COWF_STACK_GROWS_DOWN)
+	if (cow & COWF_STACK_GROWS_DEC)
 		protoeflags |= MAP_ENTRY_GROWS_DOWN;
-	if (cow & COWF_STACK_GROWS_UP)
+	if (cow & COWF_STACK_GROWS_INC)
 		protoeflags |= MAP_ENTRY_GROWS_UP;
 	if (cow & COWF_VN_WRITECOUNT)
 		protoeflags |= MAP_ENTRY_VN_WRITECNT;
@@ -1275,7 +1275,7 @@ charged:
 	}
 	else if ((prev_entry != MAP_ENTRY_SENTINEL(map)) &&
 		 (prev_entry->eflags == protoeflags) &&
-		 (cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 &&
+		 (cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) == 0 &&
 		 (prev_entry->end == start) &&
 		 (prev_entry->wired_count == 0) &&
 		 (prev_entry->cred == cred ||
@@ -1470,14 +1470,14 @@ __attribute__((optnone)) //wyc
 	int result;
 
 	end = start + length;
-	KASSERT((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 ||
+	KASSERT((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) == 0 ||
 	    object == NULL,
 	    ("vm_map_fixed: non-NULL backing object for stack"));
 	vm_map_lock(map);
 	VM_MAP_RANGE_CHECK(map, start, end);
 	if ((cow & COWF_CHECK_EXCL) == 0) //wyc: TRUE
 		vm_map_delete(map, start, end);
-	if ((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) != 0) { //wyc: FALSE
+	if ((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) != 0) { //wyc: FALSE
 		result = vm_map_stack_locked(map, start, length, sgrowsiz,
 		    prot, max, cow);
 	} else {
@@ -1506,7 +1506,7 @@ vm_map_find(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	vm_offset_t alignment, initial_addr, start;
 	int result;
 
-	KASSERT((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) == 0 ||
+	KASSERT((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) == 0 ||
 	    object == NULL,
 	    ("vm_map_find: non-NULL backing object for stack"));
 	if (find_space == VMFS_OPTIMAL_SPACE && (object == NULL ||
@@ -1550,7 +1550,7 @@ again:
 
 			start = *addr;
 		}
-		if ((cow & (COWF_STACK_GROWS_DOWN | COWF_STACK_GROWS_UP)) != 0) {
+		if ((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) != 0) {
 			result = vm_map_stack_locked(map, start, length,
 			    sgrowsiz, prot, max, cow);
 		} else {
@@ -3538,7 +3538,7 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * don't pass it around further.
 	 * NOTE: We explicitly allow bi-directional stacks.
 	 */
-	orient = cow & (COWF_STACK_GROWS_DOWN|COWF_STACK_GROWS_UP);
+	orient = cow & (COWF_STACK_GROWS_DEC|COWF_STACK_GROWS_INC);
 	KASSERT(orient != 0, ("No stack grow direction"));
 
 	if (addrbos < vm_map_min(map) ||
@@ -3575,9 +3575,9 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * and cow to be 0.  Possibly we should eliminate these as input
 	 * parameters, and just pass these values here in the insert call.
 	 */
-	if (orient == COWF_STACK_GROWS_DOWN)
+	if (orient == COWF_STACK_GROWS_DEC)
 		bot = addrbos + max_ssize - init_ssize;
-	else if (orient == COWF_STACK_GROWS_UP)
+	else if (orient == COWF_STACK_GROWS_INC)
 		bot = addrbos;
 	else
 		bot = round_page(addrbos + max_ssize/2 - init_ssize/2);
@@ -3591,10 +3591,10 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 			panic("Bad entry start/end for new stack entry");
 
 		new_entry->avail_ssize = max_ssize - init_ssize;
-		KASSERT((orient & COWF_STACK_GROWS_DOWN) == 0 ||
+		KASSERT((orient & COWF_STACK_GROWS_DEC) == 0 ||
 		    (new_entry->eflags & MAP_ENTRY_GROWS_DOWN) != 0,
 		    ("new entry lacks MAP_ENTRY_GROWS_DOWN"));
-		KASSERT((orient & COWF_STACK_GROWS_UP) == 0 ||
+		KASSERT((orient & COWF_STACK_GROWS_INC) == 0 ||
 		    (new_entry->eflags & MAP_ENTRY_GROWS_UP) != 0,
 		    ("new entry lacks MAP_ENTRY_GROWS_UP"));
 	}
@@ -3828,7 +3828,7 @@ Retry:
 
 		rv = vm_map_insert(map, NULL, 0, addr, stack_entry->start,
 		    next_entry->protection, next_entry->max_protection,
-		    COWF_STACK_GROWS_DOWN);
+		    COWF_STACK_GROWS_DEC);
 
 		/* Adjust the available stack space by the amount we grew. */
 		if (rv == KERN_SUCCESS) {

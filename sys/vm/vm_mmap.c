@@ -1562,7 +1562,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 	if (flags & MAP_STACK) {
 		if (object != NULL)
 			return (EINVAL);
-		docow |= COWF_STACK_GROWS_DOWN;
+		docow |= COWF_STACK_GROWS_DEC;
 	}
 	if ((flags & MAP_EXCL) != 0)
 		docow |= COWF_CHECK_EXCL;

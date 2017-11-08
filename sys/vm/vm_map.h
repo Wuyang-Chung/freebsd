@@ -344,8 +344,8 @@ long vmspace_resident_count(struct vmspace *vmspace);
 #define COWF_DISABLE_COREDUMP	0x0100	/*wyc: ==MAP_NOCORE == MAP_ENTRY_NOCOREDUMP */
 #define COWF_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
 #define	COWF_VN_WRITECOUNT	0x0400
-#define	COWF_STACK_GROWS_DOWN	0x1000
-#define	COWF_STACK_GROWS_UP	0x2000
+#define	COWF_STACK_GROWS_DEC	0x1000
+#define	COWF_STACK_GROWS_INC	0x2000
 #define	COWF_ACC_CHARGED	0x4000
 #define	COWF_ACC_NO_CHARGE	0x8000
 
