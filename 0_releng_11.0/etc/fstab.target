@@ -1,5 +1,0 @@
-# Device	Mountpoint	FStype	Options	Dump	Pass#
-/dev/ada0a	/		ufs	rw	1	1
-/dev/ada0b	none		swap	sw	0	0
-10.42.0.1:/home/jwy/git		/nfs	nfs	rw	0	0
-
