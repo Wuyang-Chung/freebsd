@@ -1169,7 +1169,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	regs->tf_cs = _ucodesel;
 
 	/* PS_STRINGS value for BSD/OS binaries.  It is 0 for non-BSD/OS. */
-	regs->tf_ebx = imgp->ps_strings;
+	regs->tf_ebx = imgp->ps_strings; //wyc: ==0
 
         /*
          * Reset the hardware debug registers if they were in use.

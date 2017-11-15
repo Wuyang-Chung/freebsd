@@ -98,10 +98,11 @@ void mi_startup(void);				/* Should be elsewhere */
 /* Components of the first process -- never freed. */
 static struct session session0;
 static struct pgrp pgrp0;
-struct	proc proc0;		//wyc: proc 0 swapper process
+struct proc proc0;		//wyc: proc 0 swapper process
 struct thread0_storage thread0_st __aligned(16);
-struct	vmspace vmspace0;	//wyc: vmspace for swapper
-struct	proc *initproc;		//wyc: proc 1 init process
+struct vmspace vmspace0;	//wyc: vmspace for swapper
+struct vmspace *saspace;	//wyc: single address space
+struct proc *initproc;		//wyc: proc 1 init process
 
 #ifndef BOOTHOWTO
 #define	BOOTHOWTO	0
@@ -203,8 +204,7 @@ symbol_name(vm_offset_t va, db_strategy_t strategy)
 void
 mi_startup(void)
 {
-
-	register struct sysinit **sipp;		/* system initialization*/
+	struct sysinit **sipp;		/* system initialization*/
 
 #if defined(VERBOSE_SYSINIT)
 	int last;
@@ -220,14 +220,15 @@ mi_startup(void)
 	}
 
 restart:
+#if 1
 	/* wyc: change to selection sort
-	 * Perform a bubble sort of the system initialization objects by
+	 * Perform a selection sort of the system initialization objects by
 	 * their subsystem (primary key) and order (secondary key).
 	 */
 	for (sipp = sysinit; sipp < sysinit_end-1; sipp++) {
-		register struct sysinit **xipp;	/* interior loop of sort*/
-		register struct sysinit **min;	//wyc: change to selection sort
-		register struct sysinit *save;	//wyc: change to selection sort
+		struct sysinit **xipp;	/* interior loop of sort*/
+		struct sysinit **min;
+		struct sysinit *save;
 
 		min = sipp;
 		for (xipp = sipp + 1; xipp < sysinit_end; xipp++) {
@@ -240,6 +241,22 @@ restart:
 		*sipp = *min;
 		*min = save;
 	}
+#else
+	for (sipp = sysinit; sipp < sysinit_end; sipp++) {
+		register struct sysinit **xipp;	/* interior loop of sort*/
+		register struct sysinit *save;	/* bubble*/
+
+		for (xipp = sipp + 1; xipp < sysinit_end; xipp++) {
+			if ((*sipp)->subsystem < (*xipp)->subsystem ||
+			     ((*sipp)->subsystem == (*xipp)->subsystem &&
+			      (*sipp)->order <= (*xipp)->order))
+				continue;	/* skip*/
+			save = *sipp;
+			*sipp = *xipp;
+			*xipp = save;
+		}
+	}
+#endif
 
 #if defined(VERBOSE_SYSINIT)
 	last = SI_SUB_COPYRIGHT;

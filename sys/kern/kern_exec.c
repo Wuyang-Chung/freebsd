@@ -1116,9 +1116,23 @@ __attribute__((optnone)) //wyc
 	if (vmspace->vm_refcnt == 1 && //wyc???: no lock before accessing vm_refcnt.
 	    vm_map_min(map) == sv_minuser &&
 	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE for fork
-		shmexit(vmspace);
-		pmap_remove_pages(vmspace_pmap(vmspace));
-		vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
+		if (!imgp->sas || saspace == NULL) {
+			shmexit(vmspace);
+			pmap_remove_pages(vmspace_pmap(vmspace));
+			vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
+		}
+		if (imgp->sas) {
+			if (saspace == NULL)
+				saspace = vmspace;
+			else {
+				p->p_vmspace = saspace;
+				if (p == curthread->td_proc)
+					pmap_activate(curthread);
+				curthread->td_pflags |= TDP_EXECVMSPC;
+				vmspace = saspace;
+				map = &vmspace->vm_map;
+			}
+		}
 	} else { //wyc: for vfork
 		//wyc: the old vmspace will be released in post_execve()
 		//     the new vmspace will be stored in p->p_vmspace
@@ -1134,63 +1148,76 @@ __attribute__((optnone)) //wyc
 	  a page near the top of your address space which is shared between
 	  user process and the kernel. Such as realtime timer.
 	*/
+	if (!imgp->sas || (curthread->td_pflags & TDP_EXECVMSPC)==0) {
 #if defined(WYC)
-	obj = shared_page_obj; //wyc: sv->sv_shared_page_obj == shared_page_obj
+		obj = shared_page_obj; //wyc: sv->sv_shared_page_obj == shared_page_obj
 #else
-	obj = sv->sv_shared_page_obj;
+		obj = sv->sv_shared_page_obj;
 #endif
-	if (obj != NULL) {	//wyc: TRUE
-		vm_object_reference(obj);
-		error = vm_map_fixed(map, obj, 0,
+		if (obj != NULL) {	//wyc: TRUE
+			vm_object_reference(obj);
+			error = vm_map_fixed(map, obj, 0,
 #if defined(WYC)
-		    elf32_freebsd_sysvec.sv_shared_page_base, //wyc: ==3G-4M-4K ==0xBFBF_F000
-		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==4K
+			    elf32_freebsd_sysvec.sv_shared_page_base, //wyc: ==3G-4M-4K ==0xBFBF_F000
+			    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==4K
 #else
-		    sv->sv_shared_page_base, sv->sv_shared_page_len,
+			    sv->sv_shared_page_base, sv->sv_shared_page_len,
 #endif
-		    VM_PROT_READ | VM_PROT_EXECUTE,
-		    VM_PROT_READ | VM_PROT_EXECUTE,
-		    COWF_INHERIT_SHARE | COWF_ACC_NO_CHARGE);
-		if (error) {
-			vm_object_deallocate(obj);
+			    VM_PROT_READ | VM_PROT_EXECUTE,
+			    VM_PROT_READ | VM_PROT_EXECUTE,
+			    COWF_INHERIT_SHARE | COWF_ACC_NO_CHARGE);
+			if (error) {
+				vm_object_deallocate(obj);
+				return (error);
+			}
+		}
+	}
+
+	if (!imgp->sas) {
+		/* Allocate a new stack */
+		if (imgp->stack_sz != 0) { //wyc: false
+			ssiz = trunc_page(imgp->stack_sz);
+			PROC_LOCK(p);
+			lim_rlimit_proc(p, RLIMIT_STACK, &rlim_stack);
+			PROC_UNLOCK(p);
+			if (ssiz > rlim_stack.rlim_max)
+				ssiz = rlim_stack.rlim_max;
+			if (ssiz > rlim_stack.rlim_cur) {
+				rlim_stack.rlim_cur = ssiz;
+				kern_setrlimit(curthread, RLIMIT_STACK, &rlim_stack);
+			}
+		} else if (sv->sv_maxssiz != NULL) { //wyc: false
+			ssiz = *sv->sv_maxssiz;
+		} else {
+			ssiz = maxssiz; //wyc: ssiz == maxssiz
+		}
+		//wyc: stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
+		stack_addr = sv->sv_usrstack - ssiz;
+		error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
+		    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
+			sv->sv_stackprot,
+		    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
+		if (error)
 			return (error);
-		}
-	}
 
-	/* Allocate a new stack */
-	//wyc: user stack is allocated here
-	//wyctodo: allocate a stack segment here
-	if (imgp->stack_sz != 0) { //wyc: false
-		ssiz = trunc_page(imgp->stack_sz);
-		PROC_LOCK(p);
-		lim_rlimit_proc(p, RLIMIT_STACK, &rlim_stack);
-		PROC_UNLOCK(p);
-		if (ssiz > rlim_stack.rlim_max)
-			ssiz = rlim_stack.rlim_max;
-		if (ssiz > rlim_stack.rlim_cur) {
-			rlim_stack.rlim_cur = ssiz;
-			kern_setrlimit(curthread, RLIMIT_STACK, &rlim_stack);
-		}
-	} else if (sv->sv_maxssiz != NULL) { //wyc: false
-		ssiz = *sv->sv_maxssiz;
-	} else {
-		ssiz = maxssiz; //wyc: ssiz == maxssiz
+		/*
+		 * vm_ssize and vm_maxsaddr are somewhat antiquated concepts, but they
+		 * are still used to enforce the stack rlimit on the process stack.
+		 */
+		vmspace->vm_ssize = sgrowsiz >> PAGE_SHIFT;
+		vmspace->vm_maxsaddr = (char *)stack_addr;
 	}
-	//wyc: stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
-	stack_addr = sv->sv_usrstack - ssiz;
-	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
-	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
-		sv->sv_stackprot,
-	    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
-	if (error)
-		return (error);
-
-	/*
-	 * vm_ssize and vm_maxsaddr are somewhat antiquated concepts, but they
-	 * are still used to enforce the stack rlimit on the process stack.
-	 */
-	vmspace->vm_ssize = sgrowsiz >> PAGE_SHIFT;
-	vmspace->vm_maxsaddr = (char *)stack_addr;
+	else {
+		//wyc: user stack is allocated here
+		error = vm_map_find(map, NULL, 0, &imgp->stack_addr, maxssiz, 0,
+		    VMFS_ANY_SPACE, imgp->stack_prot != 0 ? imgp->stack_prot :
+		    sv->sv_stackprot,
+		    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
+		if (error)
+			return error;
+		//wyctodo: allocate a stack segment here
+		
+	}
 
 	return (0);
 }
@@ -1422,7 +1449,10 @@ exec_copyout_strings(
 #if defined(WYC)
 	arginfo = (struct ps_strings *)PS_STRINGS; //wyc: 3G-4M-4K-sizeof(struct ps_strings)
 #else
-	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
+	if (!imgp->sas)
+		arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
+	else
+		arginfo = (struct ps_strings *)(imgp->stack_addr - sizeof(struct ps_strings));
 #endif
 	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: TRUE
 		if (p->p_sysent->sv_szsigcode != NULL) //wyc: TRUE

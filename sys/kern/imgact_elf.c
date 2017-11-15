@@ -387,7 +387,12 @@ __elfN(check_header)(const Elf_Ehdr *hdr)
 }
 
 static int
-__elfN(map_partial)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
+#if defined(WYC)
+elf32_map_partial(
+#else
+__elfN(map_partial)(
+#endif
+    vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot)
 {
 	struct sf_buf *sf;
@@ -422,40 +427,51 @@ __elfN(map_partial)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 }
 
 static int
-__elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
-    vm_offset_t start, vm_offset_t end, vm_prot_t prot, int cow)
+#if defined(WYC)
+elf32_map_insert(
+#else
+__elfN(map_insert)(
+#endif
+    vm_map_t map, vm_object_t object,
+    vm_ooffset_t offset,
+    vm_offset_t start,
+    vm_offset_t end, //wyc: it's actually end address + 1
+    vm_prot_t prot, int cow) __attribute__((optnone)) //wyc
 {
 	struct sf_buf *sf;
 	vm_offset_t off;
 	vm_size_t sz;
 	int error, rv;
 
-	if (start != trunc_page(start)) {
+	if (start != trunc_page(start)) { //wyc: false
+		panic("%s: start", __func__); //wyc
 #if defined(WYC)
-		rv = elf32_map_partial
+		rv = elf32_map_partial(
 #else
-		rv = __elfN(map_partial)
+		rv = __elfN(map_partial)(
 #endif
-		    (map, object, offset, start, round_page(start), prot);
+		    map, object, offset, start, round_page(start), prot);
 		if (rv)
 			return (rv);
 		offset += round_page(start) - start;
 		start = round_page(start);
 	}
-	if (end != round_page(end)) {
+	if (end != round_page(end)) { //wyc: false
+		panic("%s: end", __func__); //wyc
 #if defined(WYC)
-		rv = elf32_map_partial
+		rv = elf32_map_partial(
 #else
-		rv = __elfN(map_partial)
+		rv = __elfN(map_partial)(
 #endif
-		    (map, object, offset +
-		    trunc_page(end) - start, trunc_page(end), end, prot);
+		    map, object, offset + trunc_page(end) - start,
+		    trunc_page(end), end, prot);
 		if (rv)
 			return (rv);
 		end = trunc_page(end);
 	}
-	if (end > start) {
-		if (offset & PAGE_MASK) {
+	if (end > start) { //wyc: true
+		if (offset & PAGE_MASK) { //wyc: false
+			panic("%s: offset", __func__); //wyc
 			/*
 			 * The mapping is not page aligned. This means we have
 			 * to copy the data. Sigh.
@@ -495,6 +511,7 @@ __elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		}
 		return (rv);
 	} else {
+		panic("%s: end <= start", __func__);
 		return (KERN_SUCCESS);
 	}
 }
@@ -503,7 +520,11 @@ __elfN(map_insert)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     For data segment, 'memsz' is almost alway greater than 'filsz'
 */
 static int
+#if defined(WYC)
+elf32_load_section(
+#else
 __elfN(load_section)(
+#endif
     struct image_params *imgp, 
     vm_offset_t offset,	//wyc: offset in file
     caddr_t vmaddr, 	//wyc: offset in virtual address
@@ -546,9 +567,9 @@ __attribute__((optnone)) //wyc
 	 * early and copy the initialized data into that first page.  We
 	 * choose the second..
 	 */
-	if (memsz > filsz)
+	if (memsz > filsz) //wyc: data
 		map_len = trunc_page_ps(offset + filsz, pagesize) - file_addr;
-	else
+	else //wyc: code
 		map_len = round_page_ps(offset + filsz, pagesize) - file_addr;
 
 	if (map_len != 0) {
@@ -557,11 +578,11 @@ __attribute__((optnone)) //wyc
 		    (prot & VM_PROT_WRITE ? 0 : COWF_DISABLE_COREDUMP);
 
 #if defined(WYC)
-		rv = elf32_map_insert(map,
+		rv = elf32_map_insert(
 #else
-		rv = __elfN(map_insert)(map,
+		rv = __elfN(map_insert)(
 #endif
-				      object,
+				      map, object,
 				      file_addr,	/* file offset */
 				      map_addr,		/* virtual start */
 				      map_addr + map_len,/* virtual end */
@@ -572,10 +593,9 @@ __attribute__((optnone)) //wyc
 
 		/* we can stop now if we've covered it all */
 		if (memsz == filsz) {
-			return (0);
+			return (ESUCCESS);
 		}
 	}
-
 
 	/*
 	 * We have to get the remaining bit of the file into the first part
@@ -591,11 +611,11 @@ __attribute__((optnone)) //wyc
 	/* This had damn well better be true! */
 	if (map_len != 0) {
 #if defined(WYC)
-		rv = elf32_map_insert
+		rv = elf32_map_insert(
 #else
-		rv = __elfN(map_insert)
+		rv = __elfN(map_insert)(
 #endif
-		    (map, NULL, 0, map_addr, map_addr + map_len, VM_PROT_ALL, 0);
+		    map, NULL, 0, map_addr, map_addr + map_len, VM_PROT_ALL, 0);
 		if (rv != KERN_SUCCESS) {
 			return (EINVAL);
 		}
@@ -643,8 +663,13 @@ __attribute__((optnone)) //wyc
  * the entry point for the loaded file.
  */
 static int
-__elfN(load_file)(struct proc *p, const char *file, u_long *addr,
-	u_long *entry, size_t pagesize)
+#if defined(WYC)
+elf32_load_file(
+#else
+__elfN(load_file)(
+#endif
+    struct proc *p, const char *file, u_long *addr,
+    u_long *entry, size_t pagesize)
 {
 	struct {
 		struct nameidata nd;
@@ -833,6 +858,7 @@ __attribute__((optnone)) //wyc
 		return (ENOEXEC);
 	}
 
+	imgp->sas = hdr->e_flags; //wyc: sas flag is stored in e_flags
 	n = error = 0;
 	baddr = 0;
 	osrel = 0;
@@ -851,6 +877,7 @@ __attribute__((optnone)) //wyc
 			n++;
 			break;
 		case PT_INTERP:
+			//wyc: OUT interp
 			/* Path to interpreter */
 			if (phdr[i].p_filesz > MAXPATHLEN) {
 				uprintf("Invalid PT_INTERP\n");
@@ -873,7 +900,7 @@ __attribute__((optnone)) //wyc
 				    interp_name_len, phdr[i].p_offset,
 				    UIO_SYSSPACE, IO_NODELOCKED, td->td_ucred,
 				    NOCRED, NULL, td);
-				if (error != 0) {
+				if (error != ESUCCESS) {
 					uprintf("i/o error PT_INTERP\n");
 					goto ret;
 				}
@@ -953,7 +980,7 @@ __attribute__((optnone)) //wyc
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
-	if (error != 0)
+	if (error != ESUCCESS)
 		goto ret;
 
 	for (i = 0; i < hdr->e_phnum; i++) {
@@ -961,6 +988,7 @@ __attribute__((optnone)) //wyc
 		case PT_LOAD:	/* Loadable segment */
 			if (phdr[i].p_memsz == 0)
 				break;
+
 #if defined(WYC)
 			prot = elf32_trans_prot(phdr[i].p_flags);
 			error = elf32_load_section(imgp, phdr[i].p_offset,
@@ -1075,10 +1103,11 @@ __attribute__((optnone)) //wyc
 			snprintf(path, MAXPATHLEN, "%s%s",
 			    brand_info->emul_path, interp);
 #if defined(WYC)
-			error = elf32_load_file(imgp->proc, path, &addr,
+			error = elf32_load_file(
 #else
-			error = __elfN(load_file)(imgp->proc, path, &addr,
+			error = __elfN(load_file)(
 #endif
+			    imgp->proc, path, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 			free(path, M_TEMP);
 			if (error == 0)
@@ -1088,20 +1117,22 @@ __attribute__((optnone)) //wyc
 		    (brand_info->interp_path == NULL ||
 		    strcmp(interp, brand_info->interp_path) == 0)) {
 #if defined(WYC)
-			error = elf32_load_file(imgp->proc, newinterp, &addr,
+			error = elf32_load_file(
 #else
-			error = __elfN(load_file)(imgp->proc, newinterp, &addr,
+			error = __elfN(load_file)(
 #endif
+			    imgp->proc, newinterp, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 			if (error == 0)
 				have_interp = TRUE;
 		}
 		if (!have_interp) {
 #if defined(WYC)
-			error = elf32_load_file(imgp->proc, interp, &addr,
+			error = elf32_load_file(
 #else
-			error = __elfN(load_file)(imgp->proc, interp, &addr,
+			error = __elfN(load_file)(
 #endif
+			    imgp->proc, interp, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 		}
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
@@ -1141,8 +1172,13 @@ __attribute__((optnone)) //wyc
 #define	suword __CONCAT(suword, __ELF_WORD_SIZE)
 
 int
-__elfN(freebsd_fixup)(register_t **stack_base, struct image_params *imgp)
-__attribute__((optnone)) //wyc
+#if defined(WYC)
+elf32_freebsd_fixup(
+#else
+__elfN(freebsd_fixup)(
+#endif
+    register_t **stack_base, struct image_params *imgp)
+    __attribute__((optnone)) //wyc
 {
 	Elf_Auxargs *args = (Elf_Auxargs *)imgp->auxargs;
 	Elf_Addr *base;

@@ -486,19 +486,23 @@ typedef struct {
 #define	VERSYM_VERSION	0x7fff
 #define	VERSYM_HIDDEN	0x8000
 
+/*wyc
+  (x) not referenced by kernel
+*/
 /* Values for p_type. */
-#define	PT_NULL		0	/* Unused entry. */
+#define	PT_NULL		0	/* (x) Unused entry. */
 #define	PT_LOAD		1	/* Loadable segment. */
 #define	PT_DYNAMIC	2	/* Dynamic linking information segment. */
 #define	PT_INTERP	3	/* Pathname of interpreter. */
 #define	PT_NOTE		4	/* Auxiliary information. */
-#define	PT_SHLIB	5	/* Reserved (not used). */
+#define	PT_SHLIB	5	/* (x) Reserved (not used). */
 #define	PT_PHDR		6	/* Location of program header itself. */
-#define	PT_TLS		7	/* Thread local storage segment */
+#define	PT_TLS		7	/* (x) Thread local storage segment */
+
 #define	PT_LOOS		0x60000000	/* First OS-specific. */
 #define	PT_SUNW_UNWIND	0x6464e550	/* amd64 UNWIND program header */
 #define	PT_GNU_EH_FRAME	0x6474e550
-#define	PT_GNU_STACK	0x6474e551
+#define	PT_GNU_STACK	0x6474e551 //wyc (v) referenced by kernel
 #define	PT_GNU_RELRO	0x6474e552
 #define	PT_DUMP_DELTA	0x6fb5d000	/* va->pa map for kernel dumps
 					   (currently arm). */

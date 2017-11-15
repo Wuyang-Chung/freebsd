@@ -59,7 +59,7 @@ struct image_args {
 
 struct image_params {
 	struct proc *proc;	/* our process struct */
-	struct label *execlabel;	/* optional exec label */
+	struct label *execlabel;/* optional exec label */
 	struct vnode *vp;	/* pointer to vnode of file to exec */
 	struct vm_object *object;	/* The vm object for this vp */
 	struct vattr *attr;	/* attributes of file */
@@ -67,11 +67,12 @@ struct image_params {
 	unsigned long entry_addr; /* entry address of target executable */
 	unsigned long reloc_base; /* load address of image */
 	char vmspace_destroyed;	/* flag - we've blown away original vm space */
-	unsigned char interpreted;	/* mask of interpreters that have run */
 	char opened;		/* flag - we have opened executable vnode */
+	char sas;	     /*wyc flag - single address space */
+	unsigned char interpreted;	/* mask of interpreters that have run */
 	char *interpreter_name;	/* name of the interpreter */
 	void *auxargs;		/* ELF Auxinfo structure pointer */
-	struct sf_buf *firstpage;	/* first page that we mapped */
+	struct sf_buf *firstpage; /* first page that we mapped */
 	unsigned long ps_strings; /* PS_STRINGS for BSD/OS binaries */
 	size_t auxarg_size;
 	struct image_args *args;	/* system call arguments */
@@ -84,6 +85,7 @@ struct image_params {
 	unsigned long pagesizes;
 	int pagesizeslen;
 	vm_prot_t stack_prot;
+	vm_offset_t stack_addr; //wyc
 	u_long stack_sz;
 	struct ucred *newcred;		/* new credentials if changing */
 	bool credential_setid;		/* true if becoming setid */

@@ -88,11 +88,11 @@ struct trapframe;
 struct vnode;
 
 struct sysentvec { //wyc: elf32_freebsd_sysvec
-	int		sv_size;	/* number of entries */ //wyc: SYS_MAXSYSCALL
-	struct sysent	*sv_table;	/* pointer to sysent */ //wyc: ==sysent
-	u_int		sv_mask;	/* optional mask to index */ //wyc: ==0
-	int		sv_errsize;	/* size of errno translation table */ //wyc: ==0
-	int 		*sv_errtbl;	/* errno translation table */ //wyc: ==NULL
+	int		sv_size;	//wyc: SYS_MAXSYSCALL /* number of entries */
+	struct sysent	*sv_table;	//wyc: ==sysent /* pointer to sysent */
+	u_int		sv_mask;	//wyc: ==0 /* optional mask to index */
+	int		sv_errsize;	//wyc: ==0 /* size of errno translation table */
+	int 		*sv_errtbl;	//wyc: ==NULL /* errno translation table */
 	int		(*sv_transtrap)(int, int); //wyc: ==NULL
 					/* translate trap-to-signal mapping */
 	int		(*sv_fixup)(register_t **, struct image_params *); //wyc: ==elf32_freebsd_fixup
@@ -100,26 +100,26 @@ struct sysentvec { //wyc: elf32_freebsd_sysvec
 	void		(*sv_sendsig)  //wyc: ==sendsig
 			    (void (*)(int), struct ksiginfo *, struct __sigset *);
 			    		/* send signal */
-	char 		*sv_sigcode;	/* start of sigtramp code */ //wyc: ==sigcode
-	int 		*sv_szsigcode;	/* size of sigtramp code */ //wyc: ==&szsigcode
-	char		*sv_name;	/* name of binary type */ //wyc: =="FreeBSD ELF32"
-	int		(*sv_coredump) //wyc: ==elf32_coredump
+	char 		*sv_sigcode;	//wyc: ==sigcode /* start of sigtramp code */
+	int 		*sv_szsigcode;	//wyc: ==&szsigcode /* size of sigtramp code */
+	char		*sv_name;	//wyc: =="FreeBSD ELF32" /* name of binary type */
+	int		(*sv_coredump)	//wyc: ==elf32_coredump
 			    (struct thread *, struct vnode *, off_t, int);
 					/* function to dump core, or NULL */
 	int		(*sv_imgact_try)(struct image_params *); //wyc: ==NULL
-	int		sv_minsigstksz;	/* minimum signal stack size */ //wyc: ==MINSIGSTKSZ
-	int		sv_pagesize;	/* pagesize */
-	vm_offset_t	sv_minuser;	/* VM_MIN_ADDRESS */ //wyc: ==0
-	vm_offset_t	sv_maxuser;	/* VM_MAXUSER_ADDRESS */ //wyc: == 3G-4M
-	vm_offset_t	sv_usrstack;	/* USRSTACK */ //wyc: 3G-4M-4K
-	vm_offset_t	sv_psstrings;	/* PS_STRINGS */ //wyc: ==USRSTACK - sizeof(struct ps_strings)
-	int		sv_stackprot;	/* vm protection for stack */ //wyc: VM_PROT_ALL
+	int		sv_minsigstksz;	//wyc: ==MINSIGSTKSZ /* minimum signal stack size */
+	int		sv_pagesize;	//wyc: 4K /* pagesize */
+	vm_offset_t	sv_minuser;	//wyc: ==0 /* VM_MIN_ADDRESS */
+	vm_offset_t	sv_maxuser;	//wyc: == 3G-4M /* VM_MAXUSER_ADDRESS */
+	vm_offset_t	sv_usrstack;	//wyc: 3G-4M-4K /* USRSTACK */
+	vm_offset_t	sv_psstrings;	//wyc: ==USRSTACK - sizeof(struct ps_strings) /* PS_STRINGS */ 
+	int		sv_stackprot;	//wyc: VM_PROT_ALL /* vm protection for stack */
 	register_t *	(*sv_copyout_strings) //wyc: ==exec_copyout_strings
 			    (struct image_params *);
 	void		(*sv_setregs)	//wyc: ==exec_setregs
 			    (struct thread *, struct image_params *, u_long); 
 	void		(*sv_fixlimit)(struct rlimit *, int); //wyc: ==NULL
-	u_long		*sv_maxssiz; //wyc: ==NULL
+	u_long		*sv_maxssiz;	//wyc: ==NULL
 	u_int		sv_flags; //wyc: ==SV_ABI_FREEBSD | SV_IA32 | SV_ILP32 | SV_SHP | SV_TIMEKEEP
 	void		(*sv_set_syscall_retval) //wyc: ==cpu_set_syscall_retval
 			    (struct thread *, int);

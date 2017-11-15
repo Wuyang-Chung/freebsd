@@ -74,15 +74,15 @@ typedef struct {
 #define	BI_BRAND_NOTE		0x0002	/* May have note.ABI-tag section. */
 #define	BI_BRAND_NOTE_MANDATORY	0x0004	/* Must have note.ABI-tag section. */
 typedef struct {
-	int brand;
-	int machine;
-	const char *compat_3_brand;	/* pre Binutils 2.10 method (FBSD 3) */
-	const char *emul_path;
-	const char *interp_path;
-	struct sysentvec *sysvec;
-	const char *interp_newpath;
-	int flags;
-	Elf_Brandnote *brand_note;
+	int brand;	//wyc ELFOSABI_FREEBSD
+	int machine;	//wyc EM_386
+	const char *compat_3_brand; //wyc "FreeBSD"	/* pre Binutils 2.10 method (FBSD 3) */
+	const char *emul_path;		//wyc NULL
+	const char *interp_path;	//wyc "/libexec/ld-elf.so.1"
+	struct sysentvec *sysvec;	//wyc &elf32_freebsd_sysvec
+	const char *interp_newpath;	//wyc NULL
+	int flags;			//wyc BI_CAN_EXEC_DYN | BI_BRAND_NOTE
+	Elf_Brandnote *brand_note;	//wyc &elf32_freebsd_brandnote
 	boolean_t	(*header_supported)(struct image_params *);
 #if defined(WYC)
 } Elf_Brandinfo;

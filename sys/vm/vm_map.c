@@ -3934,7 +3934,7 @@ vmspace_exec(struct proc *p, vm_offset_t minuser, vm_offset_t maxuser)
 	newvmspace = vmspace_alloc(minuser, maxuser, NULL);
 	if (newvmspace == NULL)
 		return (ENOMEM);
-	newvmspace->vm_swrss = oldvmspace->vm_swrss;
+	newvmspace->vm_swrss = oldvmspace->vm_swrss; //wyc: resident set size before last swap
 	/*
 	 * This code is written like this for prototype purposes.  The
 	 * goal is to avoid running down the vmspace here, but let the
