@@ -438,13 +438,16 @@ __elfN(map_insert)(
     vm_offset_t end, //wyc: it's actually end address + 1
     vm_prot_t prot, int cow) __attribute__((optnone)) //wyc
 {
+#if 0
 	struct sf_buf *sf;
 	vm_offset_t off;
 	vm_size_t sz;
-	int error, rv;
+	int error;
+#endif
+	int rv;
 
+#if 0
 	if (start != trunc_page(start)) { //wyc: false
-		panic("%s: start", __func__); //wyc
 #if defined(WYC)
 		rv = elf32_map_partial(
 #else
@@ -457,7 +460,6 @@ __elfN(map_insert)(
 		start = round_page(start);
 	}
 	if (end != round_page(end)) { //wyc: false
-		panic("%s: end", __func__); //wyc
 #if defined(WYC)
 		rv = elf32_map_partial(
 #else
@@ -501,6 +503,7 @@ __elfN(map_insert)(
 			}
 			rv = KERN_SUCCESS;
 		} else {
+#endif
 			vm_object_reference(object);
 			vm_map_lock(map);
 			rv = vm_map_insert(map, object, offset, start, end,
@@ -508,12 +511,15 @@ __elfN(map_insert)(
 			vm_map_unlock(map);
 			if (rv != KERN_SUCCESS)
 				vm_object_deallocate(object);
+#if 0
 		}
+#endif
 		return (rv);
+#if 0
 	} else {
-		panic("%s: end <= start", __func__);
 		return (KERN_SUCCESS);
 	}
+#endif
 }
 
 /*wyc
@@ -960,6 +966,9 @@ __attribute__((optnone)) //wyc
 #else
 	sv = brand_info->sysvec;
 #endif
+	if (sv->sv_pagesize != 4096) //wyc
+		panic("%s: page size %d", __func__, sv->sv_pagesize);
+
 	if (interp != NULL && brand_info->interp_newpath != NULL)
 		newinterp = brand_info->interp_newpath;
 
@@ -991,11 +1000,12 @@ __attribute__((optnone)) //wyc
 
 #if defined(WYC)
 			prot = elf32_trans_prot(phdr[i].p_flags);
-			error = elf32_load_section(imgp, phdr[i].p_offset,
+			error = elf32_load_section(
 #else
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
-			error = __elfN(load_section)(imgp, phdr[i].p_offset,
+			error = __elfN(load_section)(
 #endif
+			    imgp, phdr[i].p_offset,
 			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc: et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
