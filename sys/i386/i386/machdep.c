@@ -1551,6 +1551,7 @@ setidt(
 	ip->gd_hioffset = ((int)func)>>16 ;
 }
 
+#if !defined(WYC) //can not be parsed by SI, so surround it with #if
 extern inthand_t
 	IDTVEC(div), IDTVEC(dbg), IDTVEC(nmi), IDTVEC(bpt), IDTVEC(ofl),
 	IDTVEC(bnd), IDTVEC(ill), IDTVEC(dna), IDTVEC(fpusegm),
@@ -1564,6 +1565,7 @@ extern inthand_t
 	IDTVEC(xen_intr_upcall),
 #endif
 	IDTVEC(lcall_syscall), IDTVEC(int0x80_syscall);
+#endif //!defined(WYC)
 
 #ifdef DDB
 /*
@@ -1633,8 +1635,8 @@ DB_SHOW_COMMAND(dbregs, db_show_dbregs)
 
 void
 sdtossd(
-	struct segment_descriptor *sd,
-	struct soft_segment_descriptor *ssd)
+    struct segment_descriptor *sd,
+    struct soft_segment_descriptor *ssd)
 {
 	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;

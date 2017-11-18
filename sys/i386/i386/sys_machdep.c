@@ -90,6 +90,39 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_gran = 1;	//wyc: page gran
 }
 
+static struct soft_segment_descriptor ssd = {
+	.ssd_dpl	= SEL_UPL,
+	.ssd_p		= 1,
+	.ssd_xx 	= 0,
+	.ssd_xx1	= 0,
+	.ssd_def32	= 1,
+	.ssd_gran	= 1,
+};
+
+//wyc
+void
+fill_cdseg(struct proc *p, vm_offset_t cdseg_base, vm_size_t cdseg_size)
+{
+
+	ssd.ssd_base = cdseg_base;
+	ssd.ssd_limit = (cdseg_size>>PAGE_SHIFT) - 1;
+	ssd.ssd_type = SDT_MEMERA;
+	ssdtosd(&ssd, &p->p_md.p_ldt[0]);	//code segment
+	ssd.ssd_type = SDT_MEMRWA;
+	ssdtosd(&ssd, &p->p_md.p_ldt[1]);	//data segment
+}
+
+//wyc
+void
+fill_sseg(struct proc *p, vm_offset_t cdseg_base, vm_size_t cdseg_size)
+{
+
+	ssd.ssd_base = cdseg_base;
+	ssd.ssd_limit = (cdseg_size>>PAGE_SHIFT) - 1;
+	ssd.ssd_type = SDT_MEMRWA;
+	ssdtosd(&ssd, &p->p_md.p_ldt[2]);	//stack segment
+}
+
 #ifndef _SYS_SYSPROTO_H_
 struct sysarch_args {
 	int op;

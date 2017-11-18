@@ -85,7 +85,8 @@ struct image_params {
 	unsigned long pagesizes;
 	int pagesizeslen;
 	vm_prot_t stack_prot;
-	vm_offset_t stack_addr; //wyc
+	vm_offset_t stack_base; //wyc
+	vm_size_t   stack_size; //wyc
 	u_long stack_sz;
 	struct ucred *newcred;		/* new credentials if changing */
 	bool credential_setid;		/* true if becoming setid */

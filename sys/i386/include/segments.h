@@ -92,7 +92,7 @@ void	lgdt(struct region_descriptor *rdp);
 void	sdtossd(struct segment_descriptor *sdp,
 	    struct soft_segment_descriptor *ssdp);
 void	ssdtosd(struct soft_segment_descriptor *ssdp,
-	    struct segment_descriptor *sdp);
+	    struct segment_descriptor *sdp);	//wyc in support.s
 #endif /* _KERNEL */
 
 #endif /* !_MACHINE_SEGMENTS_H_ */

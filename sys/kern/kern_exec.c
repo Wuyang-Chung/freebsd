@@ -1122,9 +1122,9 @@ __attribute__((optnone)) //wyc
 			vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
 		}
 		if (imgp->sas) {
-			if (saspace == NULL)
+			if (saspace == NULL) {
 				saspace = vmspace;
-			else {
+			} else {
 				p->p_vmspace = saspace;
 				if (p == curthread->td_proc)
 					pmap_activate(curthread);
@@ -1207,16 +1207,18 @@ __attribute__((optnone)) //wyc
 		vmspace->vm_ssize = sgrowsiz >> PAGE_SHIFT;
 		vmspace->vm_maxsaddr = (char *)stack_addr;
 	}
-	else {
-		//wyc: user stack is allocated here
-		error = vm_map_find(map, NULL, 0, &imgp->stack_addr, maxssiz, 0,
+	else { //imgp->sas
+		//wyc: allocate stack segment
+		imgp->stack_base = 0;
+		imgp->stack_size = maxssiz;
+		error = vm_map_find(map, NULL, 0, &imgp->stack_base, maxssiz, 0,
 		    VMFS_ANY_SPACE, imgp->stack_prot != 0 ? imgp->stack_prot :
 		    sv->sv_stackprot,
 		    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
 		if (error)
 			return error;
 		//wyctodo: allocate a stack segment here
-		
+		fill_sseg(p, imgp->stack_base, imgp->stack_size);
 	}
 
 	return (0);
@@ -1452,7 +1454,8 @@ exec_copyout_strings(
 	if (!imgp->sas)
 		arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
 	else
-		arginfo = (struct ps_strings *)(imgp->stack_addr - sizeof(struct ps_strings));
+		arginfo = (struct ps_strings *)
+		    (imgp->stack_base + imgp->stack_size - sizeof(struct ps_strings));
 #endif
 	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: TRUE
 		if (p->p_sysent->sv_szsigcode != NULL) //wyc: TRUE

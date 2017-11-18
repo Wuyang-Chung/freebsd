@@ -253,7 +253,7 @@ typedef	__vm_offset_t	vm_offset_t;	//wyc: __uint32_t
 typedef	__vm_ooffset_t	vm_ooffset_t;	//wyc: __int64_t, object offset
 typedef	__vm_paddr_t	vm_paddr_t;
 typedef	__vm_pindex_t	vm_pindex_t;
-typedef	__vm_size_t	vm_size_t;
+typedef	__vm_size_t	vm_size_t;	//wyc: __uint32_t
 
 typedef __rman_res_t    rman_res_t;
 

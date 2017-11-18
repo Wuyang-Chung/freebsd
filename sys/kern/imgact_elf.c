@@ -386,6 +386,7 @@ __elfN(check_header)(const Elf_Ehdr *hdr)
 	return (ESUCCESS);
 }
 
+#if 0
 static int
 #if defined(WYC)
 elf32_map_partial(
@@ -425,6 +426,7 @@ __elfN(map_partial)(
 
 	return (KERN_SUCCESS);
 }
+#endif
 
 static int
 #if defined(WYC)
@@ -830,6 +832,8 @@ __attribute__((optnone)) //wyc
 	u_long seg_size, seg_addr, addr, baddr, et_dyn_addr, entry, proghdr;
 	int32_t osrel;
 	int error, i, n, interp_name_len, have_interp;
+	vm_offset_t cdseg_base;
+	vm_size_t cdseg_size;
 
 	hdr = (const Elf_Ehdr *)imgp->image_header;
 
@@ -865,6 +869,8 @@ __attribute__((optnone)) //wyc
 	}
 
 	imgp->sas = hdr->e_flags; //wyc: sas flag is stored in e_flags
+	if (hdr->e_flags) //wyc
+		imgp->proc->p_flag2 |= P2_SAS;
 	n = error = 0;
 	baddr = 0;
 	osrel = 0;
@@ -880,6 +886,9 @@ __attribute__((optnone)) //wyc
 		case PT_LOAD:
 			if (n == 0)
 				baddr = phdr[i].p_vaddr;
+			if (n == 1)
+				cdseg_size = round_page(phdr[i].p_vaddr+ phdr[i].p_memsz)
+				    + PAGE_SIZE;
 			n++;
 			break;
 		case PT_INTERP:
@@ -992,6 +1001,17 @@ __attribute__((optnone)) //wyc
 	if (error != ESUCCESS)
 		goto ret;
 
+	cdseg_base = 0;
+	if (imgp->sas) {
+		//wyc: allocate code and data segment
+		error = vm_map_find(&imgp->proc->p_vmspace->vm_map, imgp->object, 0,
+		    &cdseg_base, cdseg_size, 0, VMFS_ANY_SPACE,
+		    VM_PROT_ALL, VM_PROT_ALL, 0);
+		if (error != ESUCCESS)
+			goto ret;
+		fill_cdseg(imgp->proc, cdseg_base, cdseg_size);
+	}
+
 	for (i = 0; i < hdr->e_phnum; i++) {
 		switch (phdr[i].p_type) {
 		case PT_LOAD:	/* Loadable segment */
@@ -1006,7 +1026,7 @@ __attribute__((optnone)) //wyc
 			error = __elfN(load_section)(
 #endif
 			    imgp, phdr[i].p_offset,
-			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc: et_dyn_addr==0
+			    (caddr_t)cdseg_base + phdr[i].p_vaddr + et_dyn_addr, //wyc: et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
 			if (error != 0)
