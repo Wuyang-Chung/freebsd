@@ -550,6 +550,9 @@ __attribute__((optnone)) //wyc
 	size_t copy_len;
 	vm_offset_t file_addr;
 
+	if (pagesize != 4096) //wyc
+		panic("%s: page size %d", __func__, pagesize);
+
 	/*
 	 * It's necessary to fail if the filsz + offset taken from the
 	 * header is greater than the actual file pager object's size.
@@ -975,9 +978,6 @@ __attribute__((optnone)) //wyc
 #else
 	sv = brand_info->sysvec;
 #endif
-	if (sv->sv_pagesize != 4096) //wyc
-		panic("%s: page size %d", __func__, sv->sv_pagesize);
-
 	if (interp != NULL && brand_info->interp_newpath != NULL)
 		newinterp = brand_info->interp_newpath;
 

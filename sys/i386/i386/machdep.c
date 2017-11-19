@@ -1162,11 +1162,19 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	regs->tf_eip = imgp->entry_addr; //wyc: start address
 	regs->tf_esp = stack;
 	regs->tf_eflags = PSL_USER; //wyc??? | (regs->tf_eflags & PSL_T);
-	regs->tf_ss = _udatasel;
-	regs->tf_ds = _udatasel;
-	regs->tf_es = _udatasel;
-	regs->tf_fs = _udatasel;
-	regs->tf_cs = _ucodesel;
+	if (!imgp->sas) {
+		regs->tf_ss = _udatasel;
+		regs->tf_ds = _udatasel;
+		regs->tf_es = _udatasel;
+		regs->tf_fs = _udatasel;
+		regs->tf_cs = _ucodesel;
+	} else {
+		regs->tf_cs = LSEL(0, SEL_UPL);
+		regs->tf_ds = LSEL(1, SEL_UPL);
+		regs->tf_es = LSEL(1, SEL_UPL);
+		regs->tf_fs = LSEL(1, SEL_UPL);
+		regs->tf_ss = LSEL(2, SEL_UPL);
+	}
 
 	/* PS_STRINGS value for BSD/OS binaries.  It is 0 for non-BSD/OS. */
 	regs->tf_ebx = imgp->ps_strings; //wyc: ==0

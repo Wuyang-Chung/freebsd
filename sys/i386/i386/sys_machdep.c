@@ -101,11 +101,11 @@ static struct soft_segment_descriptor ssd = {
 
 //wyc
 void
-fill_cdseg(struct proc *p, vm_offset_t cdseg_base, vm_size_t cdseg_size)
+fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 {
 
-	ssd.ssd_base = cdseg_base;
-	ssd.ssd_limit = (cdseg_size>>PAGE_SHIFT) - 1;
+	ssd.ssd_base = seg_base;
+	ssd.ssd_limit = (seg_size>>PAGE_SHIFT) - 1;
 	ssd.ssd_type = SDT_MEMERA;
 	ssdtosd(&ssd, &p->p_md.p_ldt[0]);	//code segment
 	ssd.ssd_type = SDT_MEMRWA;
@@ -114,11 +114,11 @@ fill_cdseg(struct proc *p, vm_offset_t cdseg_base, vm_size_t cdseg_size)
 
 //wyc
 void
-fill_sseg(struct proc *p, vm_offset_t cdseg_base, vm_size_t cdseg_size)
+fill_sseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 {
 
-	ssd.ssd_base = cdseg_base;
-	ssd.ssd_limit = (cdseg_size>>PAGE_SHIFT) - 1;
+	ssd.ssd_base = seg_base;
+	ssd.ssd_limit = (seg_size>>PAGE_SHIFT) - 1;
 	ssd.ssd_type = SDT_MEMRWA;
 	ssdtosd(&ssd, &p->p_md.p_ldt[2]);	//stack segment
 }
