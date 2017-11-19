@@ -550,7 +550,7 @@ __attribute__((optnone)) //wyc
 	size_t copy_len;
 	vm_offset_t file_addr;
 
-	if (pagesize != 4096) //wyc
+	if (pagesize != PAGE_SIZE) //wyc
 		panic("%s: page size %d", __func__, pagesize);
 
 	/*
