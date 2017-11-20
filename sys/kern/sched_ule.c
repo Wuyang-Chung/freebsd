@@ -1965,7 +1965,7 @@ sched_switch(struct thread *td, struct thread *newtd, int flags)
 			(*dtrace_vtime_switch_func)(newtd);
 #endif
 
-		cpu_switch(td, newtd, mtx); //wyc: assembly. run in new thread
+		cpu_switch(td, newtd, mtx); //wyc: in swtch.s. run in new thread
 		/*
 		 * We may return from cpu_switch on a different cpu.  However,
 		 * we always return with td_lock pointing to the current cpu's

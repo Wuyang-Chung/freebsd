@@ -1629,7 +1629,7 @@ get_proc_vector32(struct thread *td, struct proc *p, char ***proc_vectorp,
 
 	error = 0;
 	if (proc_readmem(td, p, (vm_offset_t)p->p_sysent->sv_psstrings, &pss,
-	    sizeof(pss)) != sizeof(pss))
+	    sizeof(pss)) != sizeof(pss)) //wyctodo
 		return (ENOMEM);
 	switch (type) {
 	case PROC_ARG:

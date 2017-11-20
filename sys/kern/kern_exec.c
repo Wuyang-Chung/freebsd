@@ -1197,8 +1197,8 @@ __attribute__((optnone)) //wyc
 		    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
 			sv->sv_stackprot,
 		    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
-		if (error)
-			return (error);
+		if (error!=KERN_SUCCESS)
+			return ENOMEM; //wyc###
 
 		/*
 		 * vm_ssize and vm_maxsaddr are somewhat antiquated concepts, but they
@@ -1215,8 +1215,8 @@ __attribute__((optnone)) //wyc
 		    VMFS_ANY_SPACE, imgp->stack_prot != 0 ? imgp->stack_prot :
 		    sv->sv_stackprot,
 		    VM_PROT_ALL, COWF_STACK_GROWS_DEC);
-		if (error)
-			return error;
+		if (error!=KERN_SUCCESS)
+			return ENOMEM;
 		//wyctodo: allocate a stack segment here
 		fill_sseg(p, imgp->stack_base, imgp->stack_size);
 	}

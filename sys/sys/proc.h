@@ -518,15 +518,15 @@ do {									\
 #define	TD_SBDRY_ERRNO(td) \
     (((td)->td_flags & TDF_SEINTR) != 0 ? EINTR : ERESTART)
 
-/*
- * Process structure.
- */
 enum proc_state {	//wyc
 	PRS_NEW,	/* In creation */
 	PRS_NORMAL,	/* threads can be run. */
 	PRS_ZOMBIE,
 };
 
+/*
+ * Process structure.
+ */
 struct proc {
 	LIST_ENTRY(proc) p_list;	/* (d) List of all processes. */
 	TAILQ_HEAD(, thread) p_threads;	/* (c) all threads. */

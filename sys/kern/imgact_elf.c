@@ -998,17 +998,22 @@ __attribute__((optnone)) //wyc
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
-	if (error != ESUCCESS)
+	if (error != KERN_SUCCESS)
 		goto ret;
 
 	cdseg_base = 0;
 	if (imgp->sas) {
+		struct vm_map	*map;
+
 		//wyc: allocate code and data segment
-		error = vm_map_find(&imgp->proc->p_vmspace->vm_map, imgp->object, 0,
-		    &cdseg_base, cdseg_size, 0, VMFS_ANY_SPACE,
-		    VM_PROT_ALL, VM_PROT_ALL, 0);
-		if (error != ESUCCESS)
+		map = &imgp->proc->p_vmspace->vm_map;
+		vm_map_lock(map);
+		error = vm_map_findspace(map, 0, cdseg_size, &cdseg_base);
+		vm_map_unlock(map);
+		if (error != KERN_SUCCESS) {
+			error = ENOMEM;
 			goto ret;
+		}
 		fill_cdseg(imgp->proc, cdseg_base, cdseg_size);
 	}
 
