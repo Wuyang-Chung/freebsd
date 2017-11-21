@@ -66,6 +66,7 @@ struct pcb {
 	struct segment_descriptor pcb_fsd;	//wyc: user fs descriptor
 #endif
 	struct segment_descriptor pcb_gsd;	//wyc: user gs descriptor
+	int	pcb_cs;	//wyc???: why no cs?
 	int	pcb_ds;
 	int	pcb_es;
 	int	pcb_fs;
@@ -98,7 +99,7 @@ struct pcb {
 	u_long	pcb_vm86[2];	/* vm86bios scratch space */
 	union	savefpu *pcb_save;
 
-	uint32_t pcb_pad[10+4];	//wyc: pad pcb_fsd(2 words) here
+	uint32_t pcb_pad[10+3];	//wyc: pad pcb_fsd(2 words) here
 };
 
 /* Per-CPU state saved during suspend and resume. */

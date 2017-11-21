@@ -82,6 +82,7 @@ struct region_descriptor {
 
 #ifdef _KERNEL
 extern int	_default_ldt;
+extern int	sas_ldts;
 extern union descriptor gdt[];
 extern union descriptor ldt[]; //wyc: remove the array size "NLDT" since it is declared in variable definition
 extern struct soft_segment_descriptor gdt_segs[];

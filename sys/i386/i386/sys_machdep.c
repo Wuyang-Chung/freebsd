@@ -45,6 +45,8 @@ __FBSDID("$FreeBSD$");
 #include <sys/proc.h>
 #include <sys/smp.h>
 #include <sys/sysproto.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include <vm/vm.h>
 #include <vm/pmap.h>
@@ -99,10 +101,16 @@ static struct soft_segment_descriptor ssd = {
 	.ssd_gran	= 1,
 };
 
+static int sas_ldti = GUSERLDT0_SEL; //wyc
+SYSCTL_INT(_vm, OID_AUTO, sas_ldti, CTLFLAG_RW, &sas_ldti, 0, "sas ldt index"); //wyc
+
+int sas_ldts; //wyc: ldt selector
+
 //wyc
 void
 fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 {
+	int	i;
 
 	ssd.ssd_base = seg_base;
 	ssd.ssd_limit = (seg_size>>PAGE_SHIFT) - 1;
@@ -110,6 +118,14 @@ fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 	ssdtosd(&ssd, &p->p_md.p_ldt[0]);	//code segment
 	ssd.ssd_type = SDT_MEMRWA;
 	ssdtosd(&ssd, &p->p_md.p_ldt[1]);	//data segment
+
+	if (sas_ldti >= NGDT)
+		panic("%s", __func__);
+	gdt_segs[sas_ldti].ssd_base = (unsigned)p->p_md.p_ldt;
+	for (i=0; i<MAXCPU ; i++)
+		ssdtosd(&gdt_segs[sas_ldti], &gdt[NGDT*i + sas_ldti].sd);
+	sas_ldts = GSEL(sas_ldti, SEL_KPL);
+	sas_ldti++;
 }
 
 //wyc

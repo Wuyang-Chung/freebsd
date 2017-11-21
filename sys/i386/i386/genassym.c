@@ -94,6 +94,8 @@ ASSYM(TDP_CALLCHAIN, TDP_CALLCHAIN);
 
 ASSYM(P_MD, offsetof(struct proc, p_md));
 //wyc ASSYM(MD_LDT, offsetof(struct mdproc, md_ldt));
+ASSYM(P_FLAG2, offsetof(struct proc, p_flag2));
+ASSYM(P2_SAS, P2_SAS);
 
 ASSYM(TDF_ASTPENDING, TDF_ASTPENDING);
 ASSYM(TDF_NEEDRESCHED, TDF_NEEDRESCHED);

@@ -1163,11 +1163,11 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	regs->tf_esp = stack;
 	regs->tf_eflags = PSL_USER; //wyc??? | (regs->tf_eflags & PSL_T);
 	if (!imgp->sas) {
-		regs->tf_ss = _udatasel;
+		regs->tf_cs = _ucodesel;
 		regs->tf_ds = _udatasel;
 		regs->tf_es = _udatasel;
 		regs->tf_fs = _udatasel;
-		regs->tf_cs = _ucodesel;
+		regs->tf_ss = _udatasel;
 	} else {
 		regs->tf_cs = LSEL(0, SEL_UPL);
 		regs->tf_ds = LSEL(1, SEL_UPL);
@@ -1456,6 +1456,24 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_p = 0, //wyc: can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
+	.ssd_gran = 0		},
+[GUSERLDT0_SEL] = { //User LDT Descriptor per process
+	.ssd_base = 0,
+	.ssd_limit = (3 * sizeof(union descriptor)-1),
+	.ssd_type = SDT_SYSLDT,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1,
+	.ssd_xx = 0, .ssd_xx1 = 0,
+	.ssd_def32 = 0, //wyc: not used by LDT
+	.ssd_gran = 0		},
+[GUSERLDT1_SEL] = { //User LDT Descriptor per process
+	.ssd_base = 0,
+	.ssd_limit = (3 * sizeof(union descriptor)-1),
+	.ssd_type = SDT_SYSLDT,
+	.ssd_dpl = SEL_KPL,
+	.ssd_p = 1,
+	.ssd_xx = 0, .ssd_xx1 = 0,
+	.ssd_def32 = 0, //wyc: not used by LDT
 	.ssd_gran = 0		},
 };
 

@@ -164,8 +164,8 @@ ENTRY(cpu_switch)
 
 	/* Second fire up new thread. Leave old vmspace. */
 	movl	4(%esp),%edi	//wyc: old thread
-	movl	8(%esp),%ecx			/* New thread */
-	movl	12(%esp),%esi			/* New lock */
+	movl	8(%esp),%ecx		/* New thread */
+	movl	12(%esp),%esi		/* New lock */
 #ifdef INVARIANTS
 	testl	%ecx,%ecx			/* no thread? wyc: bitwise AND, set EFLAGS */
 	jz	badsw3				/* no, panic */
@@ -203,6 +203,13 @@ ENTRY(cpu_switch)
 sw0:
 	SETOP	%esi,TD_LOCK(%edi) //wyc: oldtd->td_lock = newlock; /* Switchout td_lock */
 sw1:
+	movl	TD_PROC(%ecx), %esi	//wyc: %esi = newtd->td_proc
+	movl	P_FLAG2(%esi), %eax	//wyc: %eax = newtd->td_proc->p_flags
+	testl	$P2_SAS, %eax
+	jz	1f			//wyc: if P2_SAS not set
+	lldt	sas_ldts
+1:
+
 	/*wyc
 	    ecx: newtd
 	    edx: newpcb
@@ -295,9 +302,8 @@ sw1:
 	addl	$4,%esp
 	popl	%edx
 2:
-#endif //defined(WYC)
-	//wyc: not using user LDT. only use default LDT
 	lldt	_default_ldt
+#endif //defined(WYC)
 
 	/* This must be done after loading the user LDT. */
 	.globl	cpu_switch_load_gs
