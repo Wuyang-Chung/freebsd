@@ -319,7 +319,7 @@ cpu_startup(dummy)
 
 	printf("avail memory = %ju (%ju MB)\n",
 	    ptoa((uintmax_t)vm_cnt.v_free_count),
-	    ptoa((uintmax_t)vm_cnt.v_free_count) / 1048576);
+	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc 1048576 == 2^20
 
 	/*
 	 * Set up buffers, so they can be used to read disk labels.
@@ -1263,7 +1263,7 @@ extern  vm_offset_t	proc0kstack;
  * GUFS_SEL and GUGS_SEL must be in this order (swtch.s knows it)
  */
 struct soft_segment_descriptor gdt_segs[] = {
-/* GNULL_SEL	0 Null Descriptor */
+[GNULL_SEL] =	/* 0 Null Descriptor */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1272,16 +1272,17 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-/* GPRIV_SEL	1 SMP Per-Processor Private Data Descriptor */
+[GPRIV_SEL] =	/* 1 SMP Per-Processor Private Data Descriptor */
 {	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = sizeof(struct pcpu)-1, //wyc
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
-	.ssd_gran = 1		},
-/* GUFS_SEL	2 %fs Descriptor for user */
+	.ssd_gran = 0, //wyc
+	},
+[GUFS_SEL] =	/* 2 %fs Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1290,7 +1291,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GUGS_SEL	3 %gs Descriptor for user */
+[GUGS_SEL] =	/* 3 %gs Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1299,7 +1300,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GCODE_SEL	4 Code Descriptor for kernel */
+[GCODE_SEL] =	/* 4 Code Descriptor for kernel */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
@@ -1308,7 +1309,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GDATA_SEL	5 Data Descriptor for kernel */
+[GDATA_SEL] =	/* 5 Data Descriptor for kernel */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1317,7 +1318,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GUCODE_SEL	6 Code Descriptor for user */
+[GUCODE_SEL] =	/* 6 Code Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
@@ -1326,7 +1327,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GUDATA_SEL	7 Data Descriptor for user */
+[GUDATA_SEL] = 	/* 7 Data Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1335,7 +1336,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GBIOSLOWMEM_SEL 8 BIOS access to realmode segment 0x40, must be #8 in GDT */
+[GBIOSLOWMEM_SEL] = /* 8 BIOS access to realmode segment 0x40, must be #8 in GDT */
 {	.ssd_base = 0x400,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1344,7 +1345,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GPROC0_SEL	9 Proc 0 Tss Descriptor */
+[GPROC0_SEL] =	/* 9 Proc 0 Tss Descriptor */
 {
 	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct i386tss)-1,
@@ -1354,7 +1355,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-/* GLDT_SEL	10 LDT Descriptor */
+[GLDT_SEL] =	/* 10 LDT Descriptor */
 {	.ssd_base = (int) ldt,
 	.ssd_limit = sizeof(ldt)-1,
 	.ssd_type = SDT_SYSLDT,
@@ -1363,7 +1364,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-/* GUSERLDT_SEL	11 User LDT Descriptor per process */
+[GUSERLDT_SEL] = /* 11 User LDT Descriptor per process */
 {	.ssd_base = (int) ldt,
 	.ssd_limit = (512 * sizeof(union descriptor)-1),
 	.ssd_type = SDT_SYSLDT,
@@ -1372,7 +1373,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-/* GPANIC_SEL	12 Panic Tss Descriptor */
+[GPANIC_SEL] =	/* 12 Panic Tss Descriptor */
 {	.ssd_base = (int) &dblfault_tss,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
@@ -1381,7 +1382,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-/* GBIOSCODE32_SEL 13 BIOS 32-bit interface (32bit Code) */
+[GBIOSCODE32_SEL] = /* 13 BIOS 32-bit interface (32bit Code) */
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
@@ -1390,7 +1391,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
-/* GBIOSCODE16_SEL 14 BIOS 32-bit interface (16bit Code) */
+[GBIOSCODE16_SEL] = /* 14 BIOS 32-bit interface (16bit Code) */
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
@@ -1399,7 +1400,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
-/* GBIOSDATA_SEL 15 BIOS 32-bit interface (Data) */
+[GBIOSDATA_SEL] = /* 15 BIOS 32-bit interface (Data) */
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1408,7 +1409,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-/* GBIOSUTIL_SEL 16 BIOS 16-bit interface (Utility) */
+[GBIOSUTIL_SEL] = /* 16 BIOS 16-bit interface (Utility) */
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1417,7 +1418,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
-/* GBIOSARGS_SEL 17 BIOS 16-bit interface (Arguments) */
+[GBIOSARGS_SEL] = /* 17 BIOS 16-bit interface (Arguments) */
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
@@ -1426,7 +1427,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
-/* GNDIS_SEL	18 NDIS Descriptor */
+[GNDIS_SEL] =	/* 18 NDIS Descriptor */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1495,12 +1496,12 @@ static struct soft_segment_descriptor ldt_segs[] = {
 };
 
 void
-setidt(idx, func, typ, dpl, selec)
-	int idx;
-	inthand_t *func;
-	int typ;
-	int dpl;
-	int selec;
+setidt(
+	int idx,
+	inthand_t *func,
+	int typ,
+	int dpl,
+	int selec)
 {
 	struct gate_descriptor *ip;
 
@@ -1515,6 +1516,7 @@ setidt(idx, func, typ, dpl, selec)
 	ip->gd_hioffset = ((int)func)>>16 ;
 }
 
+#if !defined(WYC) //can not be parsed by SI, so surround it with #if
 extern inthand_t
 	IDTVEC(div), IDTVEC(dbg), IDTVEC(nmi), IDTVEC(bpt), IDTVEC(ofl),
 	IDTVEC(bnd), IDTVEC(ill), IDTVEC(dna), IDTVEC(fpusegm),
@@ -1528,6 +1530,7 @@ extern inthand_t
 	IDTVEC(xen_intr_upcall),
 #endif
 	IDTVEC(lcall_syscall), IDTVEC(int0x80_syscall);
+#endif //!defined(WYC)
 
 #ifdef DDB
 /*
@@ -1596,9 +1599,9 @@ DB_SHOW_COMMAND(dbregs, db_show_dbregs)
 #endif
 
 void
-sdtossd(sd, ssd)
-	struct segment_descriptor *sd;
-	struct soft_segment_descriptor *ssd;
+sdtossd(
+    struct segment_descriptor *sd,
+    struct soft_segment_descriptor *ssd)
 {
 	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;
@@ -2490,7 +2493,7 @@ init386(int first)
 	gdt_segs[GUGS_SEL].ssd_limit = atop(0 - 1);
 
 	pc = &__pcpu[0];
-	gdt_segs[GPRIV_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GPRIV_SEL].ssd_limit = atop(0 - 1);
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 
