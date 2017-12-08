@@ -92,12 +92,6 @@ __FBSDID("$FreeBSD$");
 long physmem;
 
 /*
- * System initialization
- */
-static void vm_mem_init(void *);
-SYSINIT(vm_mem, SI_SUB_VM, SI_ORDER_FIRST, vm_mem_init, NULL);
-
-/*
  * Import kva into the kernel arena.
  */
 static int
@@ -125,8 +119,7 @@ kva_import(void *unused, vmem_size_t size, int flags, vmem_addr_t *addrp)
  */
 /* ARGSUSED*/
 static void
-vm_mem_init(dummy)
-	void *dummy;
+vm_mem_init(void *dummy)
 {
 
 	/*
@@ -160,6 +153,7 @@ vm_mem_init(dummy)
 	pmap_init();
 	vm_pager_init();
 }
+SYSINIT(vm_mem, SI_SUB_VM, SI_ORDER_FIRST, vm_mem_init, NULL);
 
 void
 vm_ksubmap_init(struct kva_md_info *kmi)

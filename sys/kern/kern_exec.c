@@ -219,6 +219,7 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	    uap->argv, uap->envv);
 	if (error == 0)
 		error = kern_execve(td, &args, NULL);
+	//wyc will run to here even if kern_execve succeeds
 	post_execve(td, error, oldvmspace);
 	return (error);
 }
@@ -230,6 +231,7 @@ struct fexecve_args {
 	char	**envv;
 }
 #endif
+//wyc Executes a program specified by a file handle instead of a file path
 int
 sys_fexecve(struct thread *td, struct fexecve_args *uap)
 {
@@ -292,7 +294,7 @@ pre_execve(struct thread *td, struct vmspace **oldvmspace)
 	p = td->td_proc;
 	if ((p->p_flag & P_HADTHREADS) != 0) {
 		PROC_LOCK(p);
-		if (thread_single(p, SINGLE_BOUNDARY) != 0)
+		if (thread_single(p, SINGLE_BOUNDARY) != ESUCCESS)
 			error = ERESTART;
 		PROC_UNLOCK(p);
 	}
@@ -352,10 +354,10 @@ kern_execve(struct thread *td, struct image_args *args, struct mac *mac_p)
  * userspace pointers from the passed thread.
  */
 static int
-do_execve(td, args, mac_p)
-	struct thread *td;
-	struct image_args *args;
-	struct mac *mac_p;
+do_execve(
+	struct thread *td,
+	struct image_args *args,
+	struct mac *mac_p)
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -376,15 +378,19 @@ do_execve(td, args, mac_p)
 	cap_rights_t rights;
 	int credential_changing;
 	int textset;
-#ifdef MAC
+#ifdef MAC	//wyc Mandatory Access Control
 	struct label *interpvplabel = NULL;
 	int will_transition;
 #endif
 #ifdef HWPMC_HOOKS
 	struct pmckern_procexec pe;
 #endif
+	//wyc static makes it as a global variable which 
+	//     makes the initialization more efficient
 	static const char fexecv_proc_title[] = "(fexecv)";
 
+	//wyc??? why using pointer variable? 
+	//     It is not as efficient as using the structure itself.
 	imgp = &image_params;
 
 	/*
@@ -430,8 +436,9 @@ do_execve(td, args, mac_p)
 	SDT_PROBE1(proc, , , exec, args->fname);
 
 interpret:
+	//wyc get imgp->vp, newtextvp
 	if (args->fname != NULL) {
-#ifdef CAPABILITY_MODE
+#ifdef CAPABILITY_MODE //wyc Capsicum
 		/*
 		 * While capability mode can't reach this point via direct
 		 * path arguments to execve(), we also don't allow
@@ -466,12 +473,16 @@ interpret:
 	/*
 	 * Check file permissions (also 'opens' file)
 	 */
-	error = exec_check_permissions(imgp);
+	error = exec_check_permissions(imgp); //wyc get impg->attr
 	if (error)
 		goto exec_fail_dealloc;
 
 	imgp->object = imgp->vp->v_object;
-	if (imgp->object != NULL)
+
+	if (imgp->object == NULL) //wyc
+		panic("%s: imgp->object == NULL", __func__); //wyc
+
+	if (imgp->object != NULL) //wyc imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
 	/*
@@ -484,7 +495,7 @@ interpret:
 	textset = VOP_IS_TEXT(imgp->vp);
 	VOP_SET_TEXT(imgp->vp);
 
-	error = exec_map_first_page(imgp);
+	error = exec_map_first_page(imgp); //wyc get impg->image_header
 	if (error)
 		goto exec_fail_dealloc;
 
@@ -602,7 +613,12 @@ interpret:
 		    execsw[i]->ex_imgact == img_first) {
 			continue;
 		}
+#if defined(WYC)
+		error = exec_elf32_imgact(imgp);
+		error = exec_shell_imgact(imgp);
+#else
 		error = (*execsw[i]->ex_imgact)(imgp);
+#endif
 	}
 
 	if (error) {
@@ -688,7 +704,11 @@ interpret:
 	 * Else stuff argument count as first item on stack
 	 */
 	if (p->p_sysent->sv_fixup != NULL)
+#if defined(WYC)
+		elf32_freebsd_fixup(&stack_base, imgp);
+#else
 		(*p->p_sysent->sv_fixup)(&stack_base, imgp);
+#endif
 	else
 		suword(--stack_base, imgp->args->argc);
 
@@ -876,7 +896,7 @@ interpret:
 #endif
 
 	/* Set values passed into the program in registers. */
-	if (p->p_sysent->sv_setregs)
+	if (p->p_sysent->sv_setregs) //wyc ==exec_setregs
 		(*p->p_sysent->sv_setregs)(td, imgp, 
 		    (u_long)(uintptr_t)stack_base);
 	else
@@ -969,8 +989,7 @@ exec_fail:
 }
 
 int
-exec_map_first_page(imgp)
-	struct image_params *imgp;
+exec_map_first_page(struct image_params *imgp)
 {
 	int rv, i, after, initial_pagein;
 	vm_page_t ma[VM_INITIAL_PAGEIN];
@@ -980,7 +999,7 @@ exec_map_first_page(imgp)
 		exec_unmap_first_page(imgp);
 
 	object = imgp->vp->v_object;
-	if (object == NULL)
+	if (object == NULL) //wyc a executable file must have an object.
 		return (EACCES);
 	VM_OBJECT_WLOCK(object);
 #if VM_NRESERVLEVEL > 0
@@ -1041,8 +1060,7 @@ exec_map_first_page(imgp)
 }
 
 void
-exec_unmap_first_page(imgp)
-	struct image_params *imgp;
+exec_unmap_first_page(struct image_params *imgp)
 {
 	vm_page_t m;
 
@@ -1062,12 +1080,10 @@ exec_unmap_first_page(imgp)
  *	automatically on a page fault.
  */
 int
-exec_new_vmspace(imgp, sv)
-	struct image_params *imgp;
-	struct sysentvec *sv;
+exec_new_vmspace(struct image_params *imgp, struct sysentvec *sv)
 {
 	int error;
-	struct proc *p = imgp->proc;
+	struct proc *p = imgp->proc; //wyc ==curthread->td_proc
 	struct vmspace *vmspace = p->p_vmspace;
 	vm_object_t obj;
 	struct rlimit rlim_stack;
@@ -1092,7 +1108,7 @@ exec_new_vmspace(imgp, sv)
 	else
 		sv_minuser = MAX(sv->sv_minuser, PAGE_SIZE);
 	if (vmspace->vm_refcnt == 1 && vm_map_min(map) == sv_minuser &&
-	    vm_map_max(map) == sv->sv_maxuser) {
+	    vm_map_max(map) == sv->sv_maxuser) { //wyc TRUE for fork
 		shmexit(vmspace);
 		pmap_remove_pages(vmspace_pmap(vmspace));
 		vm_map_remove(map, vm_map_min(map), vm_map_max(map));
@@ -1100,7 +1116,9 @@ exec_new_vmspace(imgp, sv)
 		vm_map_lock(map);
 		vm_map_modflags(map, 0, MAP_WIREFUTURE);
 		vm_map_unlock(map);
-	} else {
+	} else { //wyc for vfork
+		//wyc the old vmspace will be released in post_execve()
+		//     the new vmspace will be stored in p->p_vmspace
 		error = vmspace_exec(p, sv_minuser, sv->sv_maxuser);
 		if (error)
 			return (error);
@@ -1109,11 +1127,24 @@ exec_new_vmspace(imgp, sv)
 	}
 
 	/* Map a shared page */
+	/*wyc
+	  a page near the top of your address space which is shared between
+	  user process and the kernel. Such as realtime timer.
+	*/
+#if defined(WYC)
+	obj = shared_page_obj;
+#else
 	obj = sv->sv_shared_page_obj;
-	if (obj != NULL) {
+#endif
+	if (obj != NULL) { //wyc TRUE
 		vm_object_reference(obj);
 		error = vm_map_fixed(map, obj, 0,
+#if defined(WYC)
+		    elf32_freebsd_sysvec.sv_shared_page_base, //wyc ==3G-4M-4K ==0xBFBF_F000
+		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc ==4K
+#else
 		    sv->sv_shared_page_base, sv->sv_shared_page_len,
+#endif
 		    VM_PROT_READ | VM_PROT_EXECUTE,
 		    VM_PROT_READ | VM_PROT_EXECUTE,
 		    MAP_INHERIT_SHARE | MAP_ACC_NO_CHARGE);
@@ -1140,6 +1171,7 @@ exec_new_vmspace(imgp, sv)
 	} else {
 		ssiz = maxssiz;
 	}
+	//wyc stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
 	stack_addr = sv->sv_usrstack - ssiz;
 	error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 	    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
@@ -1462,8 +1494,7 @@ exec_free_args(struct image_args *args)
  * as the initial stack pointer.
  */
 register_t *
-exec_copyout_strings(imgp)
-	struct image_params *imgp;
+exec_copyout_strings(struct image_params *imgp)
 {
 	int argc, envc;
 	char **vectp;
@@ -1487,9 +1518,13 @@ exec_copyout_strings(imgp)
 		execpath_len = 0;
 	p = imgp->proc;
 	szsigcode = 0;
+#if defined(WYC)
+	arginfo = (struct ps_strings *)PS_STRINGS; //wyc 3G-4M-4K-sizeof(struct ps_strings)
+#else
 	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
-	if (p->p_sysent->sv_sigcode_base == 0) {
-		if (p->p_sysent->sv_szsigcode != NULL)
+#endif
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc TRUE
+		if (p->p_sysent->sv_szsigcode != NULL) //wyc TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;
@@ -1517,6 +1552,7 @@ exec_copyout_strings(imgp)
 	 */
 	arc4rand(canary, sizeof(canary), 0);
 	destp -= sizeof(canary);
+	//wyc??? should do rounddown2(destp, ??) here.
 	imgp->canary = destp;
 	copyout(canary, (void *)destp, sizeof(canary));
 	imgp->canarylen = sizeof(canary);
@@ -1618,9 +1654,12 @@ exec_copyout_strings(imgp)
  *	Called with imgp->vp locked.
  *	Return 0 for success or error code on failure.
  */
+/*wyc
+    input impg->vp
+    output imgp->attr
+*/
 int
-exec_check_permissions(imgp)
-	struct image_params *imgp;
+exec_check_permissions(	struct image_params *imgp)
 {
 	struct vnode *vp = imgp->vp;
 	struct vattr *attr = imgp->attr;
@@ -1690,8 +1729,7 @@ exec_check_permissions(imgp)
  * Exec handler registration
  */
 int
-exec_register(execsw_arg)
-	const struct execsw *execsw_arg;
+exec_register(const struct execsw *execsw_arg)
 {
 	const struct execsw **es, **xs, **newexecsw;
 	int count = 2;	/* New slot and trailing NULL */
@@ -1713,8 +1751,7 @@ exec_register(execsw_arg)
 }
 
 int
-exec_unregister(execsw_arg)
-	const struct execsw *execsw_arg;
+exec_unregister(const struct execsw *execsw_arg)
 {
 	const struct execsw **es, **xs, **newexecsw;
 	int count = 1;
