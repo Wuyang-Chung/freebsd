@@ -46,14 +46,14 @@
  * Exception/Trap Stack Frame
  */
 
-struct trapframe {
+struct trapframe { //wyc user mode hardware execution state
 	int	tf_fs;
 	int	tf_es;
 	int	tf_ds;
 	int	tf_edi;
 	int	tf_esi;
 	int	tf_ebp;
-	int	tf_isp;
+	int	tf_isp; //wyc original ESP. the esp before pusha is executed
 	int	tf_ebx;
 	int	tf_edx;
 	int	tf_ecx;

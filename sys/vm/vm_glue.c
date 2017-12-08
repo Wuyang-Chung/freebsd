@@ -532,17 +532,21 @@ intr_prof_stack_use(struct thread *td, struct trapframe *frame)
  * to user mode to avoid stack copying and relocation problems.
  */
 int
-vm_forkproc(td, p2, td2, vm2, flags)
-	struct thread *td;
-	struct proc *p2;
-	struct thread *td2;
-	struct vmspace *vm2;
-	int flags;
+vm_forkproc(
+	struct thread *td,
+	struct proc *p2,
+	struct thread *td2,
+	struct vmspace *vm2, //wyc vm2 == NULL for vfork
+	int flags)
 {
 	struct proc *p1 = td->td_proc;
 	int error;
 
-	if ((flags & RFPROC) == 0) {
+	//wyc panic if p2 != td2->td_proc
+	if ( p2 != td2->td_proc )
+		panic("%s", __func__);
+
+	if ((flags & RFPROC) == 0) { //wyc FALSE. RFPROC is always specified.
 		/*
 		 * Divorce the memory, if it is shared, essentially
 		 * this changes shared memory amongst threads, into
@@ -559,16 +563,16 @@ vm_forkproc(td, p2, td2, vm2, flags)
 		return (0);
 	}
 
-	if (flags & RFMEM) {
+	if (flags & RFMEM) { //wyc TRUE for vfork
 		p2->p_vmspace = p1->p_vmspace;
 		atomic_add_int(&p1->p_vmspace->vm_refcnt, 1);
 	}
 
-	while (vm_page_count_severe()) {
+	while (vm_page_count_severe()) { //wyc check for severe page shortage
 		VM_WAIT;
 	}
 
-	if ((flags & RFMEM) == 0) {
+	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
 		p2->p_vmspace = vm2;
 		if (p1->p_vmspace->vm_shm)
 			shmfork(p1, p2);

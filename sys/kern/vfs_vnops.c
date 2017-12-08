@@ -2267,7 +2267,7 @@ vn_seek(struct file *fp, off_t offset, int whence, struct thread *td)
 	if (error != 0)
 		goto drop;
 	VFS_KNOTE_UNLOCKED(vp, 0);
-	td->td_uretoff.tdu_off = offset;
+	td->td_off = offset; //wyc
 drop:
 	foffset_unlock(fp, offset, error != 0 ? FOF_NOUPDATE : 0);
 	return (error);

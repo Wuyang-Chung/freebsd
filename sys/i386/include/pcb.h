@@ -48,7 +48,7 @@
  * NB: The fields marked with (*) are used by kernel debuggers.  Their
  * ABI should be preserved.
  */
-struct pcb {
+struct pcb { //wyc thread state block: kernel mode hardware execution state
 	int	pcb_edi;	/* (*) */
 	int	pcb_esi;	/* (*) */
 	int	pcb_ebp;	/* (*) */
