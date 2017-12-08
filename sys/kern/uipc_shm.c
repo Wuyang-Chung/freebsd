@@ -279,7 +279,7 @@ shm_seek(struct file *fp, off_t offset, int whence, struct thread *td)
 		if (offset < 0 || offset > shmfd->shm_size)
 			error = EINVAL;
 		else
-			td->td_uretoff.tdu_off = offset;
+			td->td_off = offset; //wyc
 	}
 	foffset_unlock(fp, offset, error != 0 ? FOF_NOUPDATE : 0);
 	return (error);

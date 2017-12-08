@@ -644,7 +644,7 @@ int uma_zone_exhausted_nolock(uma_zone_t zone);
  * Common UMA_ZONE_PCPU zones.
  */
 extern uma_zone_t pcpu_zone_64;
-extern uma_zone_t pcpu_zone_ptr;
+extern uma_zone_t pcpu_zone_ptr; //wyc seems this variable is not referenced
 
 /*
  * Exported statistics structures to be used by user space monitoring tools.
