@@ -120,13 +120,13 @@ struct vm_map_entry {
 	struct thread *wiring_thread;
 };
 
-//wyc: map entry flags
+//wyc map entry flags
 #define MAP_ENTRY_NOSYNC		0x0001
 #define MAP_ENTRY_IS_SUB_MAP		0x0002
 #define MAP_ENTRY_COW			0x0004
-#define MAP_ENTRY_NEEDS_COPY		0x0008	/*wyc: a new shadow vm_object is created if
+#define MAP_ENTRY_NEEDS_COPY		0x0008	/*wyc a new shadow vm_object is created if
 						       a page in the vm_object is modified */
-#define MAP_ENTRY_NOFAULT		0x0010	/*wyc: no page fault for this entry */
+#define MAP_ENTRY_NOFAULT		0x0010	/*wyc no page fault for this entry */
 #define MAP_ENTRY_USER_WIRED		0x0020
 
 #define MAP_ENTRY_BEHAV_NORMAL		0x0000	/* default behavior */
@@ -332,14 +332,14 @@ long vmspace_resident_count(struct vmspace *vmspace);
 /*
  * Copy-on-write flags for vm_map operations
  */
-#define COWF_INHERIT_SHARE	0x0001	/*wyc: ==MAP_SHARED */
-#define COWF_COPY_ON_WRITE	0x0002	/*wyc: ==MAP_ENTRY_COW|MAP_ENTRY_NEEDS_COPY */
-#define COWF_NOFAULT		0x0004	/*wyc: ==MAP_ENTRY_NOFAULT */
-#define COWF_PREFAULT		0x0008	/*wyc: prefault the page mappings into pmap */
-#define COWF_PREFAULT_PARTIAL	0x0010	/*wyc: prefault partial of the page mappings */
-#define COWF_DISABLE_SYNCER	0x0020	/*wyc: ==MAP_NOSYNC == MAP_ENTRY_NOSYNC */
-#define	COWF_CHECK_EXCL		0x0040	/*wyc: check exclusive */
-#define COWF_DISABLE_COREDUMP	0x0100	/*wyc: ==MAP_NOCORE == MAP_ENTRY_NOCOREDUMP */
+#define COWF_INHERIT_SHARE	0x0001	/*wyc ==MAP_SHARED */
+#define COWF_COPY_ON_WRITE	0x0002	/*wyc ==MAP_ENTRY_COW|MAP_ENTRY_NEEDS_COPY */
+#define COWF_NOFAULT		0x0004	/*wyc ==MAP_ENTRY_NOFAULT */
+#define COWF_PREFAULT		0x0008	/*wyc prefault the page mappings into pmap */
+#define COWF_PREFAULT_PARTIAL	0x0010	/*wyc prefault partial of the page mappings */
+#define COWF_DISABLE_SYNCER	0x0020	/*wyc ==MAP_NOSYNC == MAP_ENTRY_NOSYNC */
+#define	COWF_CHECK_EXCL		0x0040	/*wyc check exclusive */
+#define COWF_DISABLE_COREDUMP	0x0100	/*wyc ==MAP_NOCORE == MAP_ENTRY_NOCOREDUMP */
 #define COWF_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
 #define	COWF_VN_WRITECOUNT	0x0400
 #define	COWF_STACK_GROWS_DEC	0x1000
@@ -369,7 +369,7 @@ long vmspace_resident_count(struct vmspace *vmspace);
  * the macro argument as log base 2 of the desired alignment.
  */
 #define	VMFS_NO_SPACE		0	/* don't find; use the given range */
-#define	VMFS_FIXED		VMFS_NO_SPACE //wyc: change VMFS_NO_SPACE to VMFS_FIXED
+#define	VMFS_FIXED		VMFS_NO_SPACE //wyc change VMFS_NO_SPACE to VMFS_FIXED
 #define	VMFS_ANY_SPACE		1	/* find a range with any alignment */
 #define	VMFS_OPTIMAL_SPACE	2	/* find a range with optimal alignment*/
 #define	VMFS_SUPER_SPACE	3	/* find a superpage-aligned range */

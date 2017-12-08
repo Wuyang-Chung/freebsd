@@ -187,7 +187,7 @@ cpu_fork(
 	struct mdproc *mdp2;
 
 	p1 = td1->td_proc;
-	if ((flags & RFPROC) == 0) { //wyc: FALSE. RFPROC is always specified.
+	if ((flags & RFPROC) == 0) { //wyc FALSE. RFPROC is always specified.
 		if ((flags & RFMEM) == 0) {
 #if defined(WYC)
 			/* unshare user LDT */
@@ -214,7 +214,7 @@ cpu_fork(
 
 	/* Ensure that td1's pcb is up to date. */
 	if (td1 == curthread)
-		td1->td_pcb->pcb_gs = rgs(); //wyc: gs points to TLS
+		td1->td_pcb->pcb_gs = rgs(); //wyc gs points to TLS
 #ifdef DEV_NPX
 	critical_enter();
 	if (PCPU_GET(fpcurthread) == td1)
@@ -249,7 +249,7 @@ cpu_fork(
 
 	td2->td_frame->tf_eax = 0;		/* Child returns zero */
 	td2->td_frame->tf_eflags &= ~PSL_C;	/* success */
-	td2->td_frame->tf_edx = 1; //wyc: Why?
+	td2->td_frame->tf_edx = 1; //wyc???
 
 	/*
 	 * If the parent process has the trap bit set (i.e. a debugger had
@@ -272,7 +272,7 @@ cpu_fork(
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
 #if defined(WYC)
-	//wyc: the thread 'td2' will resume by executing fork_trampoline and
+	//wyc the thread 'td2' will resume by executing fork_trampoline and
 	//    fork_trampline() will call
 	//    fork_exit(fork_return, td2, td2->td_frame - sizeof(void *)
 	fork_exit(fork_return, td2, (int)td2->td_frame - sizeof(void *);
@@ -282,7 +282,7 @@ cpu_fork(
 	pcb2->pcb_ebp = 0;
 	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* fork_exit(,,frame)*/
 	pcb2->pcb_ebx = (int)td2;		/* fork_exit(,arg,)*/
-	pcb2->pcb_eip = (int)fork_trampoline; //wyc: the place where the child will start exection
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc the place where the child will start exection
 	pcb2->pcb_psl = PSL_KERNEL;		/* ints disabled */
 	/*-
 	 * pcb2->pcb_dr*:	cloned above.
@@ -449,7 +449,7 @@ cpu_set_syscall_retval(struct thread *td, int error)
 	case 0:
 		td->td_frame->tf_eax = td->td_retval[0];
 		td->td_frame->tf_edx = td->td_retval[1];
-		td->td_frame->tf_eflags &= ~PSL_C; //wyc: clear the carry bit in the flag
+		td->td_frame->tf_eflags &= ~PSL_C; //wyc clear the carry bit in the flag
 		break;
 
 	case ERESTART:
@@ -465,7 +465,7 @@ cpu_set_syscall_retval(struct thread *td, int error)
 
 	default:
 		td->td_frame->tf_eax = SV_ABI_ERRNO(td->td_proc, error);
-		td->td_frame->tf_eflags |= PSL_C; //wyc: set the carry bit in the flag
+		td->td_frame->tf_eflags |= PSL_C; //wyc set the carry bit in the flag
 		break;
 	}
 }
@@ -515,7 +515,7 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * return address on stack.  These are the kernel mode register values.
 	 */
 #if defined(WYC)
-	//wyc: the thread 'td' will resume by executing fork_trampoline and
+	//wyc the thread 'td' will resume by executing fork_trampoline and
 	//    fork_trampline() will call
 	//    fork_exit(fork_return, td, td->td_frame - sizeof(void *)
 	fork_exit(fork_return, td, (int)td->td_frame - sizeof(void *);
@@ -525,7 +525,7 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	pcb2->pcb_ebp = 0;
 	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* fork_exit(,,frame) */
 	pcb2->pcb_ebx = (int)td;		/* fork_exit(,arg1,) */
-	pcb2->pcb_eip = (int)fork_trampoline; //wyc: this function will call fork_exit
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc this function will call fork_exit
 	pcb2->pcb_psl &= ~(PSL_I);	/* interrupts must be disabled */
 	pcb2->pcb_gs = rgs();
 	/*
@@ -604,7 +604,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	/* set %gs */
 	td->td_pcb->pcb_gsd = sd;
 	if (td == curthread) {
-		PCPU_GET(fsgs_gdt)[0] = sd;	//wyc: 0:gs, 1: not used
+		PCPU_GET(fsgs_gdt)[0] = sd;	//wyc 0:gs, 1: not used
 		load_gs(GSEL(GUGS_SEL, SEL_UPL));
 	}
 	critical_exit();

@@ -302,12 +302,12 @@ trap(struct trapframe *frame)
 		 * we must not reenable interrupts.  This might be a
 		 * spurious page fault.
 		 */
-		eva = rcr2(); //wyc: page-fault linear address
+		eva = rcr2(); //wyc page-fault linear address
 		if (td->td_md.md_spinlock_count == 0)
 			enable_intr();
 	}
 
-        if ((ISPL(frame->tf_cs) == SEL_UPL) || //wyc: user trap
+        if ((ISPL(frame->tf_cs) == SEL_UPL) || //wyc user trap
 	    ((frame->tf_eflags & PSL_VM) && 
 		!(curpcb->pcb_flags & PCB_VM86CALL))) {
 		/* user trap */
@@ -797,7 +797,7 @@ trap_pfault(
 	struct thread *td = curthread;
 	struct proc *p = td->td_proc;
 
-	if (__predict_false((td->td_pflags & TDP_NOFAULTING) != 0)) { //wyc: TLB
+	if (__predict_false((td->td_pflags & TDP_NOFAULTING) != 0)) { //wyc TLB
 		/*
 		 * Due to both processor errata and lazy TLB invalidation when
 		 * access restrictions are removed from virtual pages, memory
@@ -1072,7 +1072,7 @@ cpu_fetch_syscall_args(struct thread *td, struct syscall_args *sa)
  	if (p->p_sysent->sv_mask)
  		sa->code &= p->p_sysent->sv_mask;
  	if (sa->code >= p->p_sysent->sv_size)
- 		sa->callp = &p->p_sysent->sv_table[0]; //wyc: nosys() returns ENOSYS
+ 		sa->callp = &p->p_sysent->sv_table[0]; //wyc nosys() returns ENOSYS
   	else
 #if defined(WYC)
 		sa->callp = &sysent[sa->code];
@@ -1091,7 +1091,7 @@ cpu_fetch_syscall_args(struct thread *td, struct syscall_args *sa)
 
 	if (error == 0) {
 		td->td_retval[0] = 0;
-		td->td_retval[1] = frame->tf_edx; //wyc: some system calls return 2 values
+		td->td_retval[1] = frame->tf_edx; //wyc some system calls return 2 values
 	}
 		
 	return (error);
@@ -1121,7 +1121,7 @@ syscall(struct trapframe *frame)
 	orig_tf_eflags = frame->tf_eflags;
 
 	td = curthread;
-	td->td_frame = frame; //wyc: trap frame
+	td->td_frame = frame; //wyc trap frame
 
 	error = syscallenter(td, &sa);
 

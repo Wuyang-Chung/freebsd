@@ -513,7 +513,7 @@ g_run_classifiers(struct bio *bp)
 }
 
 /*
-wyc: request to GEOM 
+wyc request to GEOM 
     Dispatching disk IO into disk pool
 */
 void
@@ -580,7 +580,7 @@ g_io_request(struct bio *bp, struct g_consumer *cp)
 		getbinuptime(&bp->bio_t0);
 
 #ifdef GET_STACK_USAGE
-	/*wyc:
+	/*wyc
 	    Direct dispatch: Use the current thread to calling down the GEOM stack.
 	    Check whether the underlying GEOM layer is cabaple of direct dispatch
 	*/
@@ -595,7 +595,7 @@ g_io_request(struct bio *bp, struct g_consumer *cp)
 		size_t	st, su;
 		GET_STACK_USAGE(st, su);
 		if (su * 2 > st)
-			/* wyc:
+			/* wyc
 			    There is not enough space in kernel stack.
 			    Fall back to queueing. I.e. not using direct dispatch
 			*/
@@ -645,7 +645,7 @@ g_io_request(struct bio *bp, struct g_consumer *cp)
 		g_bioq_unlock(&g_bio_run_down);
 		/* Pass it on down. */
 		if (first)
-			wakeup(&g_wait_down); //wyc: wake up the down thread
+			wakeup(&g_wait_down); //wyc wake up the down thread
 	}
 }
 

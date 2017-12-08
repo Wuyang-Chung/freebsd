@@ -89,7 +89,7 @@ fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 	sdp->sd_p = 1;
 	sdp->sd_xx = 0;
 	sdp->sd_def32 = 1;
-	sdp->sd_gran = 1;	//wyc: page gran
+	sdp->sd_gran = 1;	//wyc page gran
 }
 
 static struct soft_segment_descriptor ssd = {
@@ -104,7 +104,7 @@ static struct soft_segment_descriptor ssd = {
 static int sas_ldti = GUSERLDT0_SEL; //wyc
 SYSCTL_INT(_vm, OID_AUTO, sas_ldti, CTLFLAG_RW, &sas_ldti, 0, "sas ldt index"); //wyc
 
-int sas_ldts; //wyc: ldt selector
+int sas_ldts; //wyc ldt selector
 
 //wyc
 void
@@ -184,8 +184,8 @@ sysarch(
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
 		case I386_GET_GSBASE:
-		case I386_SET_GSBASE: //wyc: must support
-		case I386_GET_XFPUSTATE: //wyc: must support
+		case I386_SET_GSBASE: //wyc must support
+		case I386_GET_XFPUSTATE: //wyc must support
 			break;
 
 		case I386_SET_IOPERM:
@@ -216,7 +216,7 @@ sysarch(
 			return (error);
 		break;
 #endif
-	case I386_GET_XFPUSTATE: //wyc: must support
+	case I386_GET_XFPUSTATE: //wyc must support
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
 			return (error);
@@ -306,7 +306,7 @@ sysarch(
 		error = copyout(&base, uap->parms, sizeof(base));
 	    #endif
 		break;
-	case I386_SET_GSBASE: //wyc: must support
+	case I386_SET_GSBASE: //wyc must support
 		//panic("I386_SET_GSBASE");
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
@@ -318,12 +318,12 @@ sysarch(
 			fill_based_sd(&sd, base);
 			critical_enter();
 			td->td_pcb->pcb_gsd = sd;
-			PCPU_GET(fsgs_gdt)[0] = sd; //wyc: 0: gs, 1: not defined.
+			PCPU_GET(fsgs_gdt)[0] = sd; //wyc 0: gs, 1: not defined.
 			critical_exit();
 			load_gs(GSEL(GUGS_SEL, SEL_UPL));
 		}
 		break;
-	case I386_GET_XFPUSTATE: //wyc: must support
+	case I386_GET_XFPUSTATE: //wyc must support
 		//panic("I386_GET_XFPUSTATE");
 		if (kargs.xfpu.len > cpu_max_ext_state_size -
 		    sizeof(union savefpu))

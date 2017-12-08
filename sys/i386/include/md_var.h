@@ -70,8 +70,8 @@ void	init_AMD_Elan_sc520(void);
 vm_paddr_t kvtop(void *addr);
 void	ppro_reenable_apic(void);
 void	setidt(int idx, alias_for_inthand_t *func, int typ, int dpl, int selec);
-union savefpu *get_pcb_user_save_td(struct thread *td); //wyc: refed by outside module. Don't change it.
+union savefpu *get_pcb_user_save_td(struct thread *td); //wyc refed by outside module. Don't change it.
 union savefpu *get_pcb_user_save_pcb(struct pcb *pcb);
-struct pcb *td_get_tcb(struct thread *td); //wyc: ori get_pcb_td()
+struct pcb *td_get_tcb(struct thread *td); //wyc ori get_pcb_td()
 
 #endif /* !_MACHINE_MD_VAR_H_ */

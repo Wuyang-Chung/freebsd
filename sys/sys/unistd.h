@@ -185,7 +185,7 @@
 #define	RFTSIGMASK	0xFF
 #define	RFTSIGNUM(flags)	(((flags) >> RFTSIGSHIFT) & RFTSIGMASK)
 #define	RFTSIGFLAGS(signum)	((signum) << RFTSIGSHIFT)
-#define	RFPROCDESC	(1<<28)	/* return a process descriptor */ //wyc: for Capsicum
+#define	RFPROCDESC	(1<<28)	/* return a process descriptor */ //wyc for Capsicum
 #define	RFPPWAIT	(1<<31)	/* parent sleeps until child exits (vfork) */
 #define	RFFLAGS		(RFFDG | RFPROC | RFMEM | RFNOWAIT | RFCFDG | \
     RFTHREAD | RFSIGSHARE | RFLINUXTHPN | RFSTOPPED | RFHIGHPID | RFTSIGZMB | \

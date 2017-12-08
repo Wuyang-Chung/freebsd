@@ -136,7 +136,7 @@ SYSCTL_INT(_kern, OID_AUTO, disallow_high_osrel, CTLFLAG_RW,
     &disallow_high_osrel, 0,
     "Disallow execution of binaries built for higher version of the world");
 
-static int map_at_zero = 1;	//wyc: enable map at zero
+static int map_at_zero = 1;	//wyc enable map at zero
 SYSCTL_INT(_security_bsd, OID_AUTO, map_at_zero, CTLFLAG_RWTUN, &map_at_zero, 0,
     "Permit processes to map an object at virtual address 0.");
 
@@ -213,10 +213,10 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	if (error != 0)
 		return (error);
 	error = exec_copyin_args(&args, uap->fname, UIO_USERSPACE,
-	    uap->argv, uap->envv); //wyc: the size of args is 1KiB+256KiB
+	    uap->argv, uap->envv); //wyc the size of args is 1KiB+256KiB
 	if (error == 0)
 		error = kern_execve(td, &args, NULL);
-	//wyc: will run to here even if kern_execve succeeds
+	//wyc will run to here even if kern_execve succeeds
 	post_execve(td, error, oldvmspace);
 	return (error);
 }
@@ -228,7 +228,7 @@ struct fexecve_args {
 	char	**envv;
 }
 #endif
-//wyc: Executes a program specified by a file handle instead of a file path
+//wyc Executes a program specified by a file handle instead of a file path
 int
 sys_fexecve(struct thread *td, struct fexecve_args *uap)
 {
@@ -350,7 +350,7 @@ kern_execve(struct thread *td, struct image_args *args, struct mac *mac_p)
  * In-kernel implementation of execve().  All arguments are assumed to be
  * userspace pointers from the passed thread.
  */
-//wyc: mac_p is usually NULL
+//wyc mac_p is usually NULL
 static int
 do_execve(
     struct thread *td,
@@ -377,18 +377,18 @@ __attribute__((optnone)) //wyc
 	cap_rights_t rights;
 	int credential_changing;
 	int textset;
-#ifdef MAC	//wyc: Mandatory Access Control
+#ifdef MAC	//wyc Mandatory Access Control
 	struct label *interpvplabel = NULL;
 	int will_transition;
 #endif
 #ifdef HWPMC_HOOKS
 	struct pmckern_procexec pe;
 #endif
-	//wyc: static makes it as a global variable which 
+	//wyc static makes it as a global variable which 
 	//     makes the initialization more efficient
 	static const char fexecv_proc_title[] = "(fexecv)";
 
-	//wyc???: why using pointer variable? 
+	//wyc??? why using pointer variable? 
 	//     It is not as efficient as using the structure itself.
 	imgp = &image_params;
 
@@ -435,9 +435,9 @@ __attribute__((optnone)) //wyc
 	SDT_PROBE1(proc, , , exec, args->fname);
 
 interpret:
-	//wyc: get imgp->vp, newtextvp
+	//wyc get imgp->vp, newtextvp
 	if (args->fname != NULL) {
-#ifdef CAPABILITY_MODE //wyc: Capsicum
+#ifdef CAPABILITY_MODE //wyc Capsicum
 		/*
 		 * While capability mode can't reach this point via direct
 		 * path arguments to execve(), we also don't allow
@@ -472,7 +472,7 @@ interpret:
 	/*
 	 * Check file permissions (also 'opens' file)
 	 */
-	error = exec_check_permissions(imgp); //wyc: get impg->attr
+	error = exec_check_permissions(imgp); //wyc get impg->attr
 	if (error)
 		goto exec_fail_dealloc;
 
@@ -481,7 +481,7 @@ interpret:
 	if (imgp->object == NULL) //wyc
 		panic("%s: imgp->object == NULL", __func__); //wyc
 
-	if (imgp->object != NULL) //wyc: imgp->object should never be NULL
+	if (imgp->object != NULL) //wyc imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
 	/*
@@ -494,7 +494,7 @@ interpret:
 	textset = VOP_IS_TEXT(imgp->vp);
 	VOP_SET_TEXT(imgp->vp);
 
-	error = exec_map_first_page(imgp); //wyc: get impg->image_header
+	error = exec_map_first_page(imgp); //wyc get impg->image_header
 	if (error)
 		goto exec_fail_dealloc;
 
@@ -583,7 +583,7 @@ interpret:
 	/*
 	 * Do the best to calculate the full path to the image file.
 	 */
-	//wyc: get imgp->execpath
+	//wyc get imgp->execpath
 	if (args->fname != NULL && args->fname[0] == '/')
 		imgp->execpath = args->fname;
 	else {
@@ -600,7 +600,7 @@ interpret:
 	 *	scripts differently.
 	 */
 	error = -1;
-	if ((img_first = imgp->proc->p_sysent->sv_imgact_try) != NULL) //wyc: FALSE
+	if ((img_first = imgp->proc->p_sysent->sv_imgact_try) != NULL) //wyc FALSE
 		error = img_first(imgp);
 
 	/*
@@ -693,7 +693,7 @@ interpret:
 	/*
 	 * Copy out strings (args and env) and initialize stack base
 	 */
-	if (p->p_sysent->sv_copyout_strings) //wyc: == exec_copyout_strings()
+	if (p->p_sysent->sv_copyout_strings) //wyc == exec_copyout_strings()
 		stack_base = (*p->p_sysent->sv_copyout_strings)(imgp);
 	else
 		stack_base = exec_copyout_strings(imgp);
@@ -896,7 +896,7 @@ interpret:
 #endif
 
 	/* Set values passed into the program in registers. */
-	if (p->p_sysent->sv_setregs) //wyc: ==exec_setregs
+	if (p->p_sysent->sv_setregs) //wyc ==exec_setregs
 		(*p->p_sysent->sv_setregs)(td, imgp,
 		    (u_long)(uintptr_t)stack_base);
 	else
@@ -999,7 +999,7 @@ exec_map_first_page(
 		exec_unmap_first_page(imgp);
 
 	object = imgp->vp->v_object;
-	if (object == NULL) //wyc: a executable file must have an object.
+	if (object == NULL) //wyc a executable file must have an object.
 		return (EACCES);
 	VM_OBJECT_WLOCK(object);
 #if VM_NRESERVLEVEL > 0
@@ -1088,7 +1088,7 @@ exec_new_vmspace(
 __attribute__((optnone)) //wyc
 {
 	int error;
-	struct proc *p = imgp->proc; //wyc: ==curthread->td_proc
+	struct proc *p = imgp->proc; //wyc ==curthread->td_proc
 	struct vmspace *vmspace = p->p_vmspace;
 	vm_object_t obj;
 	struct rlimit rlim_stack;
@@ -1113,13 +1113,13 @@ __attribute__((optnone)) //wyc
 	else
 		sv_minuser = MAX(sv->sv_minuser, PAGE_SIZE);
 
-	if (vmspace->vm_refcnt == 1 && //wyc???: no lock before accessing vm_refcnt.
+	if (vmspace->vm_refcnt == 1 && //wyc??? no lock before accessing vm_refcnt.
 	    vm_map_min(map) == sv_minuser &&
-	    vm_map_max(map) == sv->sv_maxuser) { //wyc: TRUE for fork
+	    vm_map_max(map) == sv->sv_maxuser) { //wyc TRUE for fork
 		if (!imgp->sas || saspace == NULL) {
 			shmexit(vmspace);
 			pmap_remove_pages(vmspace_pmap(vmspace));
-			vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc: (map, 0, 3G-4M)
+			vm_map_remove(map, vm_map_min(map), vm_map_max(map)); //wyc (map, 0, 3G-4M)
 		}
 		if (imgp->sas) {
 			if (saspace == NULL) {
@@ -1133,8 +1133,8 @@ __attribute__((optnone)) //wyc
 				map = &vmspace->vm_map;
 			}
 		}
-	} else { //wyc: for vfork
-		//wyc: the old vmspace will be released in post_execve()
+	} else { //wyc for vfork
+		//wyc the old vmspace will be released in post_execve()
 		//     the new vmspace will be stored in p->p_vmspace
 		error = vmspace_exec(p, sv_minuser, sv->sv_maxuser);
 		if (error)
@@ -1144,22 +1144,22 @@ __attribute__((optnone)) //wyc
 	}
 
 	/* Map a shared page */
-	/*wyc:
+	/*wyc
 	  a page near the top of your address space which is shared between
 	  user process and the kernel. Such as realtime timer.
 	*/
 	if (!imgp->sas || (curthread->td_pflags & TDP_EXECVMSPC)==0) {
 #if defined(WYC)
-		obj = shared_page_obj; //wyc: sv->sv_shared_page_obj == shared_page_obj
+		obj = shared_page_obj; //wyc sv->sv_shared_page_obj == shared_page_obj
 #else
 		obj = sv->sv_shared_page_obj;
 #endif
-		if (obj != NULL) {	//wyc: TRUE
+		if (obj != NULL) {	//wyc TRUE
 			vm_object_reference(obj);
 			error = vm_map_fixed(map, obj, 0,
 #if defined(WYC)
-			    elf32_freebsd_sysvec.sv_shared_page_base, //wyc: ==3G-4M-4K ==0xBFBF_F000
-			    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc: ==4K
+			    elf32_freebsd_sysvec.sv_shared_page_base, //wyc ==3G-4M-4K ==0xBFBF_F000
+			    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc ==4K
 #else
 			    sv->sv_shared_page_base, sv->sv_shared_page_len,
 #endif
@@ -1175,7 +1175,7 @@ __attribute__((optnone)) //wyc
 
 	if (!imgp->sas) {
 		/* Allocate a new stack */
-		if (imgp->stack_sz != 0) { //wyc: false
+		if (imgp->stack_sz != 0) { //wyc false
 			ssiz = trunc_page(imgp->stack_sz);
 			PROC_LOCK(p);
 			lim_rlimit_proc(p, RLIMIT_STACK, &rlim_stack);
@@ -1186,12 +1186,12 @@ __attribute__((optnone)) //wyc
 				rlim_stack.rlim_cur = ssiz;
 				kern_setrlimit(curthread, RLIMIT_STACK, &rlim_stack);
 			}
-		} else if (sv->sv_maxssiz != NULL) { //wyc: false
+		} else if (sv->sv_maxssiz != NULL) { //wyc false
 			ssiz = *sv->sv_maxssiz;
 		} else {
-			ssiz = maxssiz; //wyc: ssiz == maxssiz
+			ssiz = maxssiz; //wyc ssiz == maxssiz
 		}
-		//wyc: stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
+		//wyc stack_addr==0xBBBF_F000 sv_usrstack==3G-4M-4K(USRSTACK) ssiz==400_0000
 		stack_addr = sv->sv_usrstack - ssiz;
 		error = vm_map_stack(map, stack_addr, (vm_size_t)ssiz,
 		    obj != NULL && imgp->stack_prot != 0 ? imgp->stack_prot :
@@ -1208,7 +1208,7 @@ __attribute__((optnone)) //wyc
 		vmspace->vm_maxsaddr = (char *)stack_addr;
 	}
 	else { //imgp->sas
-		//wyc: allocate stack segment
+		//wyc allocate stack segment
 		imgp->stack_base = 0;
 		imgp->stack_size = maxssiz;
 		error = vm_map_find(map, NULL, 0, &imgp->stack_base, maxssiz, 0,
@@ -1449,7 +1449,7 @@ exec_copyout_strings(
 	p = imgp->proc;
 	szsigcode = 0;
 #if defined(WYC)
-	arginfo = (struct ps_strings *)PS_STRINGS; //wyc: 3G-4M-4K-sizeof(struct ps_strings)
+	arginfo = (struct ps_strings *)PS_STRINGS; //wyc 3G-4M-4K-sizeof(struct ps_strings)
 #else
 	if (!imgp->sas)
 		arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
@@ -1457,8 +1457,8 @@ exec_copyout_strings(
 		arginfo = (struct ps_strings *)
 		    (imgp->stack_base + imgp->stack_size - sizeof(struct ps_strings));
 #endif
-	if (p->p_sysent->sv_sigcode_base == 0) { //wyc: TRUE
-		if (p->p_sysent->sv_szsigcode != NULL) //wyc: TRUE
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc TRUE
+		if (p->p_sysent->sv_szsigcode != NULL) //wyc TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;
@@ -1486,7 +1486,7 @@ exec_copyout_strings(
 	 */
 	arc4rand(canary, sizeof(canary), 0);
 	destp -= sizeof(canary);
-	//wyc???: should do rounddown2(destp, ??) here.
+	//wyc??? should do rounddown2(destp, ??) here.
 	imgp->canary = destp;
 	copyout(canary, (void *)destp, sizeof(canary));
 	imgp->canarylen = sizeof(canary);
@@ -1588,7 +1588,7 @@ exec_copyout_strings(
  *	Called with imgp->vp locked.
  *	Return 0 for success or error code on failure.
  */
-/*wyc:
+/*wyc
     input impg->vp
     output imgp->attr
 */

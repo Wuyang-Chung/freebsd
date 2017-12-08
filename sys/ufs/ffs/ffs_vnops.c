@@ -142,7 +142,7 @@ struct vop_vector ffs_fifoops1 = {
 };
 
 /* Global vfs data structures for ufs. */
-struct vop_vector ffs_vnodeops2 = { //wyc: version 2 of the ffs
+struct vop_vector ffs_vnodeops2 = { //wyc version 2 of the ffs
 	.vop_default =		&ufs_vnodeops,
 	.vop_fsync =		ffs_fsync,
 	.vop_getpages =		vnode_pager_local_getpages,
@@ -720,7 +720,7 @@ ffs_write(
 		flags = seqcount << BA_SEQSHIFT;
 	if ((ioflag & IO_SYNC) && !DOINGASYNC(vp))
 		flags |= IO_SYNC;
-	flags |= BA_UNMAPPED; //wyc: don't need to map it into the kernel
+	flags |= BA_UNMAPPED; //wyc don't need to map it into the kernel
 
 	for (error = 0; uio->uio_resid > 0;) {
 		lbn = lblkno(fs, uio->uio_offset);
@@ -728,8 +728,8 @@ ffs_write(
 		xfersize = fs->fs_bsize - blkoffset;
 		if (uio->uio_resid < xfersize)
 			xfersize = uio->uio_resid;
-		if (uio->uio_offset + xfersize > ip->i_size) //wyc: larger than the file size
-			vnode_pager_setsize(vp, uio->uio_offset + xfersize); //wyc: notify vm the file size changed
+		if (uio->uio_offset + xfersize > ip->i_size) //wyc larger than the file size
+			vnode_pager_setsize(vp, uio->uio_offset + xfersize); //wyc notify vm the file size changed
 
 		/*
 		 * We must perform a read-before-write if the transfer size
@@ -740,10 +740,10 @@ ffs_write(
 		else
 			flags &= ~BA_CLRBUF;
 /* XXX is uio->uio_offset the right thing here? */
-		error = UFS_BALLOC(vp, uio->uio_offset, xfersize, //wyc: ffs_balloc_ufs2()
+		error = UFS_BALLOC(vp, uio->uio_offset, xfersize, //wyc ffs_balloc_ufs2()
 		    ap->a_cred, flags, &bp);
 		if (error != 0) {
-			vnode_pager_setsize(vp, ip->i_size); //wyc: notify vm that it will not expand the file
+			vnode_pager_setsize(vp, ip->i_size); //wyc notify vm that it will not expand the file
 			break;
 		}
 		if (ioflag & IO_DIRECT)

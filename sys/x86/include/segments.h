@@ -141,7 +141,7 @@ union descriptor {
 };
 #endif
 
-/*wyc:
+/*wyc
     (r) referenced by the source code
 */
 	/* system segments and gate types */
@@ -167,7 +167,7 @@ union descriptor {
 #define	SDT_SYS386TGT	15	/* (r) system 386 trap gate */
 #define	SDT_SYSTGT	15	/* system 64 bit trap gate */
 
-/*wyc:
+/*wyc
     (r) referenced by the source code
 */
 	/* memory segment types */
@@ -255,15 +255,15 @@ enum {
 /*
  * Entries in the Local Descriptor Table (LDT)
  */
-#define	LSYS5CALLS_SEL	0	/* wyc: disabled. forced by intel BCS */
+#define	LSYS5CALLS_SEL	0	/*wyc disabled. forced by intel BCS */
 #define	LSYS5SIGR_SEL	1
 #define	L43BSDCALLS_SEL	2	/* notyet */
 #define	LUCODE_SEL	3
-#define	LSOL26CALLS_SEL	4	/* wyc: disabled. Solaris >= 2.6 system call gate */
+#define	LSOL26CALLS_SEL	4	/*wyc disabled. Solaris >= 2.6 system call gate */
 #define	LUDATA_SEL	5
 /* separate stack, es,fs,gs sels ? */
 /* #define	LPOSIXCALLS_SEL	5*/	/* notyet */
-#define	LBSDICALLS_SEL	16	/* wyc: disabled. BSDI system call gate */
+#define	LBSDICALLS_SEL	16	/*wyc disabled. BSDI system call gate */
 #define	NLDT		(LBSDICALLS_SEL + 1)
 
 #else /* !__i386__ */

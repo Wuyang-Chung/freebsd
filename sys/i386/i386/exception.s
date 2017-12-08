@@ -124,21 +124,21 @@ IDTVEC(fpusegm)
 	pushl $0; TRAP(T_FPOPFLT)
 IDTVEC(tss)
 	TRAP(T_TSSFLT)
-IDTVEC(missing)	//wyc: IDT_NP, #NP: Segment Not Present
+IDTVEC(missing)	//wyc IDT_NP, #NP: Segment Not Present
 	TRAP(T_SEGNPFLT)
-IDTVEC(stk)	//wyc: IDT_SS, #SS: Stack Segment Fault
+IDTVEC(stk)	//wyc IDT_SS, #SS: Stack Segment Fault
 	TRAP(T_STKFLT)
-IDTVEC(prot)	//wyc: IDT_GP, 
+IDTVEC(prot)	//wyc IDT_GP, 
 	TRAP(T_PROTFLT)
-IDTVEC(page)	//wyc: IDT_PF
+IDTVEC(page)	//wyc IDT_PF
 	TRAP(T_PAGEFLT)
-IDTVEC(mchk)	//wyc: IDT_MC
+IDTVEC(mchk)	//wyc IDT_MC
 	pushl $0; TRAP(T_MCHK)
 IDTVEC(rsvd)
 	pushl $0; TRAP(T_RESERVED)
 IDTVEC(fpu)
 	pushl $0; TRAP(T_ARITHTRAP)
-IDTVEC(align)	//wyc: IDT_AC
+IDTVEC(align)	//wyc IDT_AC
 	TRAP(T_ALIGNFLT)
 IDTVEC(xmm)
 	pushl $0; TRAP(T_XMMFLT)
@@ -229,7 +229,7 @@ norm_ill:
  * temporarily altered for the pushfl - an interrupt might come in
  * and clobber the saved cs/eip.
 
-wyc:
+wyc
     Will not call to this function because the call to this function
     has been replaced with call to rsvd
  */
@@ -270,12 +270,12 @@ IDTVEC(int0x80_syscall)
 	pushl	$0			/* tf_trapno */
 	pushal
 	pushl	$0
-	movw	%ds,(%esp)	//wyc: 16-bit
+	movw	%ds,(%esp)	//wyc 16-bit
 	pushl	$0
 	movw	%es,(%esp)
 	pushl	$0
 	movw	%fs,(%esp)
-	SET_KERNEL_SREGS	//wyc: Setup the kernel segment registers
+	SET_KERNEL_SREGS	//wyc Setup the kernel segment registers
 	cld
 	FAKE_MCOUNT(TF_EIP(%esp))
 	pushl	%esp
@@ -284,7 +284,7 @@ IDTVEC(int0x80_syscall)
 	MEXITCOUNT
 	jmp	doreti
 
-/*wyc:
+/*wyc
     input:
 	%esi: function
 	%ebx: arg1 of the above function
@@ -294,7 +294,7 @@ ENTRY(fork_trampoline)
 	pushl	%esp			/* trapframe pointer */
 	pushl	%ebx			/* arg1 */
 	pushl	%esi			/* function */
-	call	fork_exit //wyc: fork_exit(function, arg1, frame)
+	call	fork_exit //wyc fork_exit(function, arg1, frame)
 	addl	$12,%esp
 	/* cut from syscall */
 

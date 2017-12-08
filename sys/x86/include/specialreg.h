@@ -114,14 +114,14 @@
  * CPUID instruction features register
  */
 #define	CPUID_FPU	0x00000001
-#define	CPUID_VME	0x00000002 //wyc: Virtual 8086 mode extensions
+#define	CPUID_VME	0x00000002 //wyc Virtual 8086 mode extensions
 #define	CPUID_DE	0x00000004
 #define	CPUID_PSE	0x00000008
 #define	CPUID_TSC	0x00000010
 #define	CPUID_MSR	0x00000020
 #define	CPUID_PAE	0x00000040
 #define	CPUID_MCE	0x00000080
-#define	CPUID_CX8	0x00000100 //wyc: The compare-and-exchange 8 bytes (64 bits) instruction is supported
+#define	CPUID_CX8	0x00000100 //wyc The compare-and-exchange 8 bytes (64 bits) instruction is supported
 #define	CPUID_APIC	0x00000200
 #define	CPUID_B10	0x00000400
 #define	CPUID_SEP	0x00000800
@@ -557,7 +557,7 @@
 /*
  * PAT modes.
  */
-//wyc: Page Attribute Table
+//wyc Page Attribute Table
 #define	PAT_UNCACHEABLE		0x00
 #define	PAT_WRITE_COMBINING	0x01
 #define	PAT_WRITE_THROUGH	0x04
@@ -570,7 +570,7 @@
 /*
  * Constants related to MTRRs
  */
-//wyc: Memory Type Range Registers
+//wyc Memory Type Range Registers
 #define	MTRR_UNCACHEABLE	0x00
 #define	MTRR_WRITE_COMBINING	0x01
 #define	MTRR_WRITE_THROUGH	0x04

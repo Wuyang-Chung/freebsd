@@ -151,7 +151,7 @@ const int thread_off_td_oncpu = offsetof(struct thread, td_oncpu);
 const int thread_off_td_pcb = offsetof(struct thread, td_pcb);
 const int thread_off_td_plist = offsetof(struct thread, td_plist);
 
-int kstack_pages = KSTACK_PAGES;	//wyc: == 2
+int kstack_pages = KSTACK_PAGES;	//wyc == 2
 SYSCTL_INT(_kern, OID_AUTO, kstack_pages, CTLFLAG_RD, &kstack_pages, 0,
     "Kernel stack size in pages");
 static int vmmap_skip_res_cnt = 0;
@@ -2218,7 +2218,7 @@ sysctl_kern_proc_ovmmap(SYSCTL_HANDLER_ARGS)
 			break;
 		if (last_timestamp != map->timestamp) {
 			vm_map_lookup_entry(map, addr - 1, &tmp_entry);
-			entry = tmp_entry; //wyc: note entry changed
+			entry = tmp_entry; //wyc note entry changed
 		}
 	}
 	vm_map_unlock_read(map);
@@ -2479,8 +2479,8 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 			break;
 		if (last_timestamp != map->timestamp) {
 			vm_map_lookup_entry(map, addr - 1, &tmp_entry);
-			//wyc: should check the return value here
-			entry = tmp_entry; //wyc: note entry changed
+			//wyc should check the return value here
+			entry = tmp_entry; //wyc note entry changed
 		}
 	}
 	vm_map_unlock_read(map);

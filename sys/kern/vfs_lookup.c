@@ -122,7 +122,7 @@ namei_handle_root(struct nameidata *ndp, struct vnode **dpp)
 #endif
 		return (ENOTCAPABLE);
 	}
-	while (*(cnp->cn_nameptr) == '/') { //wyc: trim off any excess '/'
+	while (*(cnp->cn_nameptr) == '/') { //wyc trim off any excess '/'
 		cnp->cn_nameptr++;
 		ndp->ni_pathlen--;
 	}
@@ -302,7 +302,7 @@ namei(struct nameidata *ndp)
 	SDT_PROBE3(vfs, namei, lookup, entry, dp, cnp->cn_pnbuf,
 	    cnp->cn_flags);
 	for (;;) {
-		ndp->ni_startdir = dp; //wyc: startdir is the vnode of the last directory looked up
+		ndp->ni_startdir = dp; //wyc startdir is the vnode of the last directory looked up
 		error = lookup(ndp);
 		if (error != 0) {
 			vrele(ndp->ni_rootdir);
@@ -315,12 +315,12 @@ namei(struct nameidata *ndp)
 		 */
 		if ((cnp->cn_flags & ISSYMLINK) == 0) {
 			vrele(ndp->ni_rootdir);
-			//wyc: SAVENAME is for create(). Save the name of the file you want to create
+			//wyc SAVENAME is for create(). Save the name of the file you want to create
 			if ((cnp->cn_flags & (SAVENAME | SAVESTART)) == 0) {
 				namei_cleanup_cnp(cnp);
 			} else
 				cnp->cn_flags |= HASBUF;
-			/*wyc: HASBUF means
+			/*wyc HASBUF means
 			   1. The buffer is already there, don't need to copy it.
 			   2. Somebody will have to clean the buffer later.
 			*/
@@ -343,7 +343,7 @@ namei(struct nameidata *ndp)
 		if (ndp->ni_pathlen > 1)
 			cp = uma_zalloc(namei_zone, M_WAITOK);
 		else
-			cp = cnp->cn_pnbuf; //wyc: symbolic link is the last component in the path
+			cp = cnp->cn_pnbuf; //wyc symbolic link is the last component in the path
 		aiov.iov_base = cp;
 		aiov.iov_len = MAXPATHLEN;
 		auio.uio_iov = &aiov;
@@ -395,7 +395,7 @@ namei(struct nameidata *ndp)
 			}
 		}
 	}
-	//wyc: there is an error. Do clean up
+	//wyc there is an error. Do clean up
 	vrele(ndp->ni_rootdir);
 	namei_cleanup_cnp(cnp);
 	vput(ndp->ni_vp);
@@ -525,7 +525,7 @@ lookup(struct nameidata *ndp)
 	 * We use shared locks until we hit the parent of the last cn then
 	 * we adjust based on the requesting flags.
 	 */
-	if (lookup_shared) //wyc: systemwide setting
+	if (lookup_shared) //wyc systemwide setting
 		cnp->cn_lkflags = LK_SHARED;
 	else
 		cnp->cn_lkflags = LK_EXCLUSIVE;
@@ -533,7 +533,7 @@ lookup(struct nameidata *ndp)
 	ndp->ni_startdir = NULLVP;
 	vn_lock(dp,
 	    compute_cn_lkflags(dp->v_mount, cnp->cn_lkflags | LK_RETRY,
-	    cnp->cn_flags)); //wyc: compute_cn_lkflags: file system specific setting
+	    cnp->cn_flags)); //wyc compute_cn_lkflags: file system specific setting
 
 dirloop:
 	/*
@@ -803,7 +803,7 @@ good:
 	 * if so find the root of the mounted filesystem.
 	 */
 	while (dp->v_type == VDIR && (mp = dp->v_mountedhere) &&
-	       (cnp->cn_flags & NOCROSSMOUNT) == 0) { //wyc: why while here. It might be mounted several times
+	       (cnp->cn_flags & NOCROSSMOUNT) == 0) { //wyc why while here. It might be mounted several times
 		if (vfs_busy(mp, 0))
 			continue;
 		vput(dp);
@@ -811,7 +811,7 @@ good:
 			vput(ndp->ni_dvp);
 		else
 			vrele(ndp->ni_dvp);
-		vref(vp_crossmp); //wyc: to prevent the lock from rippling up to the root directory
+		vref(vp_crossmp); //wyc to prevent the lock from rippling up to the root directory
 		ndp->ni_dvp = vp_crossmp;
 		error = VFS_ROOT(mp, compute_cn_lkflags(mp, cnp->cn_lkflags,
 		    cnp->cn_flags), &tdp);

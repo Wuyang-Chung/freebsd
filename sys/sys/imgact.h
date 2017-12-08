@@ -77,7 +77,7 @@ struct image_params {
 	size_t auxarg_size;
 	struct image_args *args;	/* system call arguments */
 	struct sysentvec *sysent;	/* system entry vector */
-	char *execpath;		//wyc: full path to the image file
+	char *execpath;		//wyc full path to the image file
 	unsigned long execpathp;
 	char *freepath;
 	unsigned long canary;

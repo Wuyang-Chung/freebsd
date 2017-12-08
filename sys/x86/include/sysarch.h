@@ -36,7 +36,7 @@
 #define _MACHINE_SYSARCH_H_
 
 #include <sys/cdefs.h>
-/*wyc:
+/*wyc
     (m) can not remove from sysarch()
 */
 #define I386_GET_LDT	0
@@ -50,8 +50,8 @@
 #define	I386_GET_FSBASE		7
 #define	I386_SET_FSBASE		8
 #define	I386_GET_GSBASE		9
-#define	I386_SET_GSBASE		10 //wyc: (m) called by pid 1 tid 100002
-#define	I386_GET_XFPUSTATE	11 //wyc: (m) called by pid 660 tid 100065. pid 635 tid 100064
+#define	I386_SET_GSBASE		10 //wyc (m) called by pid 1 tid 100002
+#define	I386_GET_XFPUSTATE	11 //wyc (m) called by pid 660 tid 100065. pid 635 tid 100064
 
 /* Leave space for 0-127 to avoid translating syscalls */
 #define	AMD64_GET_FSBASE	128

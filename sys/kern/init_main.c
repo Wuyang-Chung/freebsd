@@ -98,11 +98,11 @@ void mi_startup(void);				/* Should be elsewhere */
 /* Components of the first process -- never freed. */
 static struct session session0;
 static struct pgrp pgrp0;
-struct proc proc0;		//wyc: proc 0 swapper process
+struct proc proc0;		//wyc proc 0 swapper process
 struct thread0_storage thread0_st __aligned(16);
-struct vmspace vmspace0;	//wyc: vmspace for swapper
-struct vmspace *saspace;	//wyc: single address space
-struct proc *initproc;		//wyc: proc 1 init process
+struct vmspace vmspace0;	//wyc vmspace for swapper
+struct vmspace *saspace;	//wyc single address space
+struct proc *initproc;		//wyc proc 1 init process
 
 #ifndef BOOTHOWTO
 #define	BOOTHOWTO	0
@@ -221,7 +221,7 @@ mi_startup(void)
 
 restart:
 #if 1
-	/* wyc: change to selection sort
+	/* wyc change to selection sort
 	 * Perform a selection sort of the system initialization objects by
 	 * their subsystem (primary key) and order (secondary key).
 	 */
@@ -602,7 +602,7 @@ proc0_init(void *dummy __unused)
 	vm_map_init(&vmspace0.vm_map, vmspace_pmap(&vmspace0),
 #if defined(WYC)
 	    null_sysvec.sv_minuser, null_sysvec.sv_maxuser,
-	    VM_MIN_ADDRESS, VM_MAXUSER_ADDRESS); //wyc: 0, 3G-4M
+	    VM_MIN_ADDRESS, VM_MAXUSER_ADDRESS); //wyc 0, 3G-4M
 #else
 	    p->p_sysent->sv_minuser, p->p_sysent->sv_maxuser);
 #endif
@@ -723,7 +723,7 @@ SYSCTL_INT(_kern, OID_AUTO, init_shutdown_timeout,
 
 /*
  * Start the initial user process; try exec'ing each pathname in init_path.
- * wyc: The program is invoked with no argument
+ * wyc The program is invoked with no argument
  */
 static void
 start_init(void *dummy)

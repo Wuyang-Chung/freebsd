@@ -129,7 +129,7 @@ userret(struct thread *td, struct trapframe *frame)
 	KTRUSERRET(td);
 #endif
 	if (softdep_ast_cleanup != NULL) {
-		//wyc: written by softdep_initialize() in sys/ufs/ffs/ffs_softdep.c:2410
+		//wyc written by softdep_initialize() in sys/ufs/ffs/ffs_softdep.c:2410
 		softdep_ast_cleanup();
 	}
 
@@ -204,7 +204,7 @@ userret(struct thread *td, struct trapframe *frame)
  * This is relatively easy.
  * This function will return with preemption disabled.
  */
-//wyc: called by doreti
+//wyc called by doreti
 void
 ast(struct trapframe *framep)
 {

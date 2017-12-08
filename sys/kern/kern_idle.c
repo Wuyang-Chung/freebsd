@@ -65,7 +65,7 @@ idle_setup(void *dummy)
 #ifdef SMP
 		error = kproc_kthread_add(sched_idletd, NULL, &p, &td,
 		    RFSTOPPED | RFHIGHPID, 0, "idle", "idle: cpu%d", pc->pc_cpuid);
-		pc->pc_idlethread = td;	//wyc: pc means per CPU
+		pc->pc_idlethread = td;	//wyc pc means per CPU
 #else
 		error = kproc_kthread_add(sched_idletd, NULL, &p, &td,
 		    RFSTOPPED | RFHIGHPID, 0, "idle", "idle");

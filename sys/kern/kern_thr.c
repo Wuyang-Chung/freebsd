@@ -139,7 +139,7 @@ struct thr_new_args {
 };
 #endif
 
-//wyc: pthread_create() calls this syscall
+//wyc pthread_create() calls this syscall
 int
 sys_thr_new(struct thread *td, struct thr_new_args *uap)
 __attribute__((optnone)) //wyc
@@ -256,8 +256,8 @@ __attribute__((optnone)) //wyc
 	thread_cow_get(newtd, td);
 
 #if defined(WYC)
-	error = thr_new_initthr(newtd, thunk);    //wyc: when called by kern_thr_new
-	error = thr_create_initthr(newtd, thunk); //wyc: when called by sys_thr_create
+	error = thr_new_initthr(newtd, thunk);    //wyc when called by kern_thr_new
+	error = thr_create_initthr(newtd, thunk); //wyc when called by sys_thr_create
 #else
 	error = initialize_thread(newtd, thunk);
 #endif

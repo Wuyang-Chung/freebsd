@@ -891,7 +891,7 @@ ufs_direnter(
 	dp = VTOI(dvp);
 	newentrysize = DIRSIZ(OFSFMT(dvp), dirp);
 
-	if (dp->i_count == 0) { //wyc: No space available. Allocate new block for the directory
+	if (dp->i_count == 0) { //wyc No space available. Allocate new block for the directory
 		/*
 		 * If dp->i_count is 0, then namei could find no
 		 * space in the directory. Here, dp->i_offset will
@@ -951,7 +951,7 @@ ufs_direnter(
 			    dirp->d_ino, newdirbp, 1))
 				dp->i_flag |= IN_NEEDSYNC;
 			if (newdirbp)
-				bdwrite(newdirbp); //wyc: delay write of the buffer
+				bdwrite(newdirbp); //wyc delay write of the buffer
 			bdwrite(bp);
 			if ((dp->i_flag & IN_NEEDSYNC) == 0)
 				return (UFS_UPDATE(dvp, 0));
@@ -981,13 +981,13 @@ ufs_direnter(
 			bdwrite(bp);
 			return (UFS_UPDATE(dvp, 0));
 		}
-		error = bwrite(bp); //wyc: synchronous update
-		ret = UFS_UPDATE(dvp, 1); //wyc: synchronous update
+		error = bwrite(bp); //wyc synchronous update
+		ret = UFS_UPDATE(dvp, 1); //wyc synchronous update
 		if (error == 0)
 			return (ret);
 		return (error);
 	}
-	//wyc: put it into existing block
+	//wyc put it into existing block
 	/*
 	 * If dp->i_count is non-zero, then namei found space for the new
 	 * entry in the range dp->i_offset to dp->i_offset + dp->i_count
@@ -1026,7 +1026,7 @@ ufs_direnter(
 	ep = (struct direct *)dirbuf;
 	dsize = ep->d_ino ? DIRSIZ(OFSFMT(dvp), ep) : 0;
 	spacefree = ep->d_reclen - dsize;
-	for (loc = ep->d_reclen; loc < dp->i_count; ) { //wyc: doing compaction
+	for (loc = ep->d_reclen; loc < dp->i_count; ) { //wyc doing compaction
 		nep = (struct direct *)(dirbuf + loc);
 
 		/* Trim the existing slot (NB: dsize may be zero). */

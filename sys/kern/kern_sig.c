@@ -1755,12 +1755,12 @@ sys_kill(struct thread *td, struct kill_args *uap)
 	if (uap->pid > 0) {
 		/* kill single process */
 		if ((p = pfind(uap->pid)) == NULL) {
-			if ((p = zpfind(uap->pid)) == NULL) //wyc: zombie proc
+			if ((p = zpfind(uap->pid)) == NULL) //wyc zombie proc
 				return (ESRCH);
 		}
 		AUDIT_ARG_PROCESS(p);
 		error = p_cansignal(td, p, uap->signum);
-		//wyc: kill with signal 0 means checking whether one proc can
+		//wyc kill with signal 0 means checking whether one proc can
 		//     send a signal to another proc without sending any signal
 		if (error == 0 && uap->signum)
 			pksignal(p, uap->signum, &ksi);
@@ -2438,7 +2438,7 @@ tdsigwakeup(struct thread *td, int sig, sig_t action, int intrval)
 		if (td->td_priority > PUSER && !TD_IS_IDLETHREAD(td))
 			sched_prio(td, PUSER);
 
-		//wyc: wakeup_swapper: if swapper is needed to wake up this thread
+		//wyc wakeup_swapper: if swapper is needed to wake up this thread
 		wakeup_swapper = sleepq_abort(td, intrval);
 	} else {
 		/*
@@ -2455,7 +2455,7 @@ out:
 	PROC_SUNLOCK(p);
 	thread_unlock(td);
 	if (wakeup_swapper)
-		kick_proc0(); //wyc: proc 0 is the swapper process
+		kick_proc0(); //wyc proc 0 is the swapper process
 }
 
 static int

@@ -110,9 +110,9 @@
  *	the implementation of read-modify-write operations on the
  *	field is encapsulated in vm_page_clear_dirty_mask().
  */
-//wyc: one bit for 512 bytes
+//wyc one bit for 512 bytes
 #if PAGE_SIZE == 4096
-#define VM_PAGE_BITS_ALL 0xffu	//wyc: 1 bit for 512 bytes so 8 bits for 4K size page
+#define VM_PAGE_BITS_ALL 0xffu	//wyc 1 bit for 512 bytes so 8 bits for 4K size page
 typedef uint8_t vm_page_bits_t;
 #elif PAGE_SIZE == 8192
 #define VM_PAGE_BITS_ALL 0xffffu

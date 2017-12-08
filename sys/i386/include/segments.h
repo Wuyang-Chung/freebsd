@@ -84,7 +84,7 @@ struct region_descriptor {
 extern int	_default_ldt;
 extern int	sas_ldts;
 extern union descriptor gdt[];
-extern union descriptor ldt[]; //wyc: remove the array size "NLDT" since it is declared in variable definition
+extern union descriptor ldt[]; //wyc remove the array size "NLDT" since it is declared in variable definition
 extern struct soft_segment_descriptor gdt_segs[];
 extern struct gate_descriptor *idt;
 extern struct region_descriptor r_gdt, r_idt;

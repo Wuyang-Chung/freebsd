@@ -38,7 +38,7 @@
 
 /*
  * Intel 386 Context Data Type
- wyc:
+wyc:
     (x) not referenced
     (d) referenced by dblfault_tss
  */

@@ -58,7 +58,7 @@ struct mdproc {
 #if defined(WYC)
 	struct proc_ldt *md_ldt;	/* (t) per-process ldt */
 #endif
-	struct segment_descriptor p_ldt[3]; //wyc: 0->c, 1->d, 2->s
+	struct segment_descriptor p_ldt[3]; //wyc 0->c, 1->d, 2->s
 };
 
 #define	KINFO_PROC_SIZE 768

@@ -909,7 +909,7 @@ fasttrap_do_seg(fasttrap_tracepoint_t *tp, struct reg *rp, uintptr_t *addr)
 	 * descriptor table.
 	 */
 #if 0
-	/*wyc:
+	/*wyc
 	    md_ldt is not an array pointer, so it cannot be used
 	    as an array. md_ldt[ndx] is incorrect.
 	*/

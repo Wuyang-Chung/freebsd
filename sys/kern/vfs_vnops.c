@@ -217,24 +217,24 @@ restart:
 			ndp->ni_cnd.cn_flags |= AUDITVNODE1;
 		if (vn_open_flags & VN_OPEN_NOCAPCHECK)
 			ndp->ni_cnd.cn_flags |= NOCAPCHECK;
-		bwillwrite(); //wyc: do throttling (slow down) on write operation
+		bwillwrite(); //wyc do throttling (slow down) on write operation
 		if ((error = namei(ndp)) != 0)
 			return (error);
-		if (ndp->ni_vp == NULL) { //wyc: the last name component does not exist
+		if (ndp->ni_vp == NULL) { //wyc the last name component does not exist
 			VATTR_NULL(vap);
 			vap->va_type = VREG;
 			vap->va_mode = cmode;
 			if (fmode & O_EXCL)
 				vap->va_vaflags |= VA_EXCLUSIVE;
 			if (vn_start_write(ndp->ni_dvp, &mp, V_NOWAIT) != 0) {
-				/*wyc:
+				/*wyc
 				    If the vnode is locked, V_NOWAIT must be specified.
 				    start write failed, will need to restart the op
 				*/
 				NDFREE(ndp, NDF_ONLY_PNBUF);
 				vput(ndp->ni_dvp);
 				if ((error = vn_start_write(NULL, &mp,
-				    V_XSLEEP | PCATCH)) != 0) //wyc: just return after sleep
+				    V_XSLEEP | PCATCH)) != 0) //wyc just return after sleep
 					return (error);
 				goto restart;
 			}
@@ -246,17 +246,17 @@ restart:
 			if (error == 0)
 #endif
 				error = VOP_CREATE(ndp->ni_dvp, &ndp->ni_vp,
-						   &ndp->ni_cnd, vap); //wyc: ufs_create()
+						   &ndp->ni_cnd, vap); //wyc ufs_create()
 			vput(ndp->ni_dvp);
 			vn_finished_write(mp);
 			if (error) {
 				NDFREE(ndp, NDF_ONLY_PNBUF);
 				return (error);
 			}
-			fmode &= ~O_TRUNC; //wyc: O_TRUNC is not needed since we just created it
+			fmode &= ~O_TRUNC; //wyc O_TRUNC is not needed since we just created it
 			vp = ndp->ni_vp;
 		} else {
-			if (ndp->ni_dvp == ndp->ni_vp) //wyc: ni_vp == '.'
+			if (ndp->ni_dvp == ndp->ni_vp) //wyc ni_vp == '.'
 				vrele(ndp->ni_dvp);
 			else
 				vput(ndp->ni_dvp);
@@ -442,7 +442,7 @@ vn_close(vp, flags, file_cred, td)
 	else
 		lock_flags = LK_EXCLUSIVE;
 
-	vn_start_write(vp, &mp, V_WAIT); //wyc: VOP_CLOSE() below might write data to file system
+	vn_start_write(vp, &mp, V_WAIT); //wyc VOP_CLOSE() below might write data to file system
 	vn_lock(vp, lock_flags | LK_RETRY);
 	AUDIT_ARG_VNODE1(vp);
 	if ((flags & (FWRITE | FOPENFAILED)) == FWRITE) {
@@ -884,7 +884,7 @@ vn_write(
 	error = mac_vnode_check_write(active_cred, fp->f_cred, vp);
 	if (error == 0)
 #endif
-		error = VOP_WRITE(vp, uio, ioflag, fp->f_cred); //wyc: ffs_write()
+		error = VOP_WRITE(vp, uio, ioflag, fp->f_cred); //wyc ffs_write()
 	fp->f_nextoff = uio->uio_offset;
 	VOP_UNLOCK(vp, 0);
 	if (vp->v_type != VCHR)
@@ -896,7 +896,7 @@ vn_write(
 		 * for the backing file after a POSIX_FADV_NOREUSE
 		 * write(2).
 		 */
-		error = VOP_ADVISE(vp, orig_offset, uio->uio_offset - 1, //wyc: vop_stdadvise()
+		error = VOP_ADVISE(vp, orig_offset, uio->uio_offset - 1, //wyc vop_stdadvise()
 		    POSIX_FADV_DONTNEED);
 unlock:
 	return (error);
@@ -2450,7 +2450,7 @@ vn_mmap(struct file *fp, vm_map_t map, vm_offset_t *addr, vm_size_t size,
 
 	writecounted = FALSE;
 	error = vm_mmap_vnode(td, size, prot, &maxprot, &flags, vp,
-	    &foff, &object, &writecounted); //wyc: vp -> object
+	    &foff, &object, &writecounted); //wyc vp -> object
 	if (error != 0)
 		return (error);
 	error = vm_mmap_object(map, addr, size, prot, maxprot, flags, object,

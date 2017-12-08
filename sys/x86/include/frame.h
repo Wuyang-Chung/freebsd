@@ -53,7 +53,7 @@ struct trapframe {
 	int	tf_edi;
 	int	tf_esi;
 	int	tf_ebp;
-	int	tf_isp; //wyc: original ESP. the esp before pusha is executed
+	int	tf_isp; //wyc original ESP. the esp before pusha is executed
 	int	tf_ebx;
 	int	tf_edx;
 	int	tf_ecx;

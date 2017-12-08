@@ -810,7 +810,7 @@ ffs_balloc_ufs2(struct vnode *vp, off_t startoffset, int size,
 	if (nb == 0) {
 		UFS_LOCK(ump);
 		pref = ffs_blkpref_ufs2(ip, lbn, -indirs[0].in_off - 1,
-		    (ufs2_daddr_t *)0); //wyc: strategy. Choose a preference location.
+		    (ufs2_daddr_t *)0); //wyc strategy. Choose a preference location.
 		if ((error = ffs_alloc(ip, lbn, pref, (int)fs->fs_bsize,
 		    flags, cred, &newb)) != 0) {
 			curthread_pflags_restore(saved_inbdflush);
@@ -823,7 +823,7 @@ ffs_balloc_ufs2(struct vnode *vp, off_t startoffset, int size,
 		bp = getblk(vp, indirs[1].in_lbn, fs->fs_bsize, 0, 0,
 		    GB_UNMAPPED);
 		bp->b_blkno = fsbtodb(fs, nb);
-		vfs_bio_clrbuf(bp); //wyc: indirect block must be cleared.
+		vfs_bio_clrbuf(bp); //wyc indirect block must be cleared.
 		if (DOINGSOFTDEP(vp)) {
 			softdep_setup_allocdirect(ip, NDADDR + indirs[0].in_off,
 			    newb, 0, fs->fs_bsize, 0, bp);

@@ -48,7 +48,7 @@
 
 extern struct pcpu __pcpu[MAXCPU];
 
-//wyc: bug
+//wyc bug
 static inline void
 counter_64_inc_8b(uint64_t *p, int64_t inc)
 {
@@ -160,7 +160,7 @@ counter_u64_zero_inline(counter_u64_t c)
 		CRITICAL_ASSERT(curthread);		\
 		*(uint64_t *)zpcpu_get(c) += (inc);	\
 	} else						\
-		counter_64_inc_8b(zpcpu_get(c), (inc));	/*wyc: bug*/	\
+		counter_64_inc_8b(zpcpu_get(c), (inc));	/*wyc bug*/	\
 } while (0)
 
 static inline void
@@ -172,7 +172,7 @@ counter_u64_add(counter_u64_t c, int64_t inc)
 		*(uint64_t *)zpcpu_get(c) += inc;
 		critical_exit();
 	} else {
-		counter_64_inc_8b(zpcpu_get(c), inc); //wyc: bug
+		counter_64_inc_8b(zpcpu_get(c), inc); //wyc bug
 	}
 }
 

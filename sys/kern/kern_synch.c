@@ -392,7 +392,7 @@ kdb_switch(void)
 /*
  * The machine independent parts of context switching.
  */
-//wyc: parameter 'newtd' is NULL
+//wyc parameter 'newtd' is NULL
 void
 mi_switch(int flags, struct thread *newtd)
 {

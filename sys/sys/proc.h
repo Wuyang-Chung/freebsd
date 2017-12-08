@@ -716,7 +716,7 @@ struct proc {
 #define	P2_NOTRACE_EXEC      0x00000004	/* Keep P2_NOPTRACE on exec(2). */
 #define	P2_AST_SU	     0x00000008	/* Handles SU ast for kthreads. */
 #define	P2_LWP_EVENTS	     0x00000010	/* Report LWP events via ptrace(2). */
-#define	P2_SAS		     0x00000020 //wyc: single address space
+#define	P2_SAS		     0x00000020 //wyc single address space
 
 /* Flags protected by proctree_lock, kept in p_treeflags. */
 #define	P_TREE_ORPHANED		0x00000001	/* Reparented, on orphan list */
@@ -925,7 +925,7 @@ extern struct proc proc0;		/* Process slot for swapper. */
 extern struct thread0_storage thread0_st;	/* Primary thread in proc0. */
 #define	thread0 (thread0_st.t0st_thread)
 extern struct vmspace vmspace0;		/* VM space for proc0. */
-extern struct vmspace *saspace; //wyc: single address space
+extern struct vmspace *saspace; //wyc single address space
 extern int hogticks;			/* Limit on kernel cpu hogs. */
 extern int lastpid;
 extern int nprocs, maxproc;		/* Current and max number of procs. */
@@ -948,8 +948,8 @@ struct	proc *zpfind(pid_t);		/* Find zombie process by id. */
 
 struct	fork_req {
 	int		fr_flags;
-	int		fr_pages;	//wyc: page count for kernel stack 
-	int 		*fr_pidp;	//wyc: pointer to process ID
+	int		fr_pages;	//wyc page count for kernel stack 
+	int 		*fr_pidp;	//wyc pointer to process ID
 	struct proc 	**fr_procp;
 	int 		*fr_pd_fd;
 	int 		fr_pd_flags;

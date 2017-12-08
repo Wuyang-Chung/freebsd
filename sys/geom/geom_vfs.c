@@ -186,7 +186,7 @@ g_vfs_strategy(struct bufobj *bo, struct buf *bp)
 	bip->bio_offset = bp->b_iooffset;
 	bip->bio_length = bp->b_bcount;
 	bdata2bio(bp, bip);
-	if ((bp->b_flags & B_BARRIER) != 0) {	//wyc: barrier write
+	if ((bp->b_flags & B_BARRIER) != 0) {	//wyc barrier write
 		bip->bio_flags |= BIO_ORDERED;	// this write must occur after all the
 		bp->b_flags &= ~B_BARRIER;	// previous writes. All writes after
 	}					// this one can't start until this one is done.

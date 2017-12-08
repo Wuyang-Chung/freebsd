@@ -109,7 +109,7 @@ __FBSDID("$FreeBSD$");
 static uma_zone_t cpuset_zone;
 static struct mtx cpuset_lock;
 static struct setlist cpuset_ids;
-static struct unrhdr *cpuset_unr;	//wyc: unrhdr: unit number header
+static struct unrhdr *cpuset_unr;	//wyc unrhdr: unit number header
 static struct cpuset *cpuset_zero, *cpuset_default;
 
 /* Return the size of cpuset_t at the kernel level */

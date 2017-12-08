@@ -1779,7 +1779,7 @@ pmc_log_process_mappings(struct pmc_owner *po, struct proc *p)
 		 * vm_map_lookup_entry to return.
 		 */
 		if (map->timestamp != last_timestamp)
-			vm_map_lookup_entry(map, last_end - 1, &entry); //wyc: note entry changed
+			vm_map_lookup_entry(map, last_end - 1, &entry); //wyc note entry changed
 	}
 
 	vm_map_unlock_read(map);

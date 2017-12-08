@@ -83,7 +83,7 @@ static int thread_unsuspend_one(struct thread *td, struct proc *p,
 #define TID_BUFFER_SIZE	1024
 
 struct mtx tid_lock;
-static struct unrhdr *tid_unrhdr;	//wyc: unrhdr: unit number header
+static struct unrhdr *tid_unrhdr;	//wyc unrhdr: unit number header
 static lwpid_t tid_buffer[TID_BUFFER_SIZE];
 static int tid_head, tid_tail;
 static MALLOC_DEFINE(M_TIDHASH, "tidhash", "thread hash");
@@ -277,7 +277,7 @@ threadinit(void)
 	 * pid_max cannot be greater than PID_MAX.
 	 * leave one number for thread0.
 	 */
-	tid_unrhdr = new_unrhdr(PID_MAX + 2, INT_MAX, &tid_lock); //wyc: unit number header
+	tid_unrhdr = new_unrhdr(PID_MAX + 2, INT_MAX, &tid_lock); //wyc unit number header
 
 	thread_zone = uma_zcreate("THREAD", sched_sizeof_thread(),
 	    thread_ctor, thread_dtor, thread_init, thread_fini,
@@ -351,7 +351,7 @@ thread_alloc(int pages)
 		uma_zfree(thread_zone, td);
 		return (NULL);
 	}
-	cpu_thread_alloc(td); //wyc: init td_pcb and td_frame
+	cpu_thread_alloc(td); //wyc init td_pcb and td_frame
 	vm_domain_policy_init(&td->td_vm_dom_policy);
 	return (td);
 }
@@ -362,9 +362,9 @@ thread_alloc_stack(struct thread *td, int pages)
 
 	KASSERT(td->td_kstack == 0,
 	    ("thread_alloc_stack called on a thread with kstack"));
-	if (!vm_thread_new(td, pages)) //wyc: create thread kernel stack
+	if (!vm_thread_new(td, pages)) //wyc create thread kernel stack
 		return FALSE;
-	cpu_thread_alloc(td); //wyc: init td_pcb and td_frame
+	cpu_thread_alloc(td); //wyc init td_pcb and td_frame
 	return TRUE;
 }
 
@@ -378,7 +378,7 @@ thread_free(struct thread *td)
 	lock_profile_thread_exit(td);
 	if (td->td_cpuset) {
 		cpuset_rel(td->td_cpuset);
-		td->td_cpuset = NULL; //wyc: move this statement within the if statement
+		td->td_cpuset = NULL; //wyc move this statement within the if statement
 	}
 	cpu_thread_free(td);
 	if (td->td_kstack != 0)
@@ -738,11 +738,11 @@ thread_single(struct proc *p, int mode)
 	PROC_LOCK_ASSERT(p, MA_OWNED);
 
 	if ((p->p_flag & P_HADTHREADS) == 0 && mode != SINGLE_ALLPROC)
-		return ESUCCESS; //wyc: success
+		return ESUCCESS; //wyc success
 
 	/* Is someone already single threading? */
 	if (p->p_singlethread != NULL && p->p_singlethread != td)
-		return (1); //wyc: fail
+		return (1); //wyc fail
 
 	if (mode == SINGLE_EXIT) {
 		p->p_flag |= P_SINGLE_EXIT;

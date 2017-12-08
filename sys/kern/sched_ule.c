@@ -1595,8 +1595,8 @@ sched_interact_update(struct thread *td)
 		ts->ts_slptime /= 2;
 		return;
 	}
-	ts->ts_runtime = (ts->ts_runtime / 5) * 4; //wyc: decay function. Throw away
-	ts->ts_slptime = (ts->ts_slptime / 5) * 4; //wyc: 20% of run time and sleep time
+	ts->ts_runtime = (ts->ts_runtime / 5) * 4; //wyc decay function. Throw away
+	ts->ts_slptime = (ts->ts_slptime / 5) * 4; //wyc 20% of run time and sleep time
 }
 
 /*
@@ -1878,7 +1878,7 @@ thread_unblock_switch(struct thread *td, struct mtx *mtx)
  * migrating a thread from one queue to another as running threads may
  * be assigned elsewhere via binding.
  */
-//wyc: the parameter 'newtd' is NULL
+//wyc the parameter 'newtd' is NULL
 void
 sched_switch(struct thread *td, struct thread *newtd, int flags)
 {
@@ -1892,7 +1892,7 @@ sched_switch(struct thread *td, struct thread *newtd, int flags)
 	KASSERT(newtd == NULL, ("%s: Unsupported newtd argument", __func__));
 
 	cpuid = PCPU_GET(cpuid);
-	tdq = TDQ_CPU(cpuid);	//wyc: the thread queue for processor 'cpuid'
+	tdq = TDQ_CPU(cpuid);	//wyc the thread queue for processor 'cpuid'
 	ts = td_get_sched(td);
 	mtx = td->td_lock;
 	sched_pctcpu_update(ts, 1);
@@ -1965,7 +1965,7 @@ sched_switch(struct thread *td, struct thread *newtd, int flags)
 			(*dtrace_vtime_switch_func)(newtd);
 #endif
 
-		cpu_switch(td, newtd, mtx); //wyc: in swtch.s. run in new thread
+		cpu_switch(td, newtd, mtx); //wyc in swtch.s. run in new thread
 		/*
 		 * We may return from cpu_switch on a different cpu.  However,
 		 * we always return with td_lock pointing to the current cpu's
@@ -2053,8 +2053,8 @@ sched_wakeup(struct thread *td)
 	td->td_slptick = 0;
 	if (slptick && slptick != ticks) {
 		ts->ts_slptime += (ticks - slptick) << SCHED_TICK_SHIFT;
-		sched_interact_update(td); //wyc: collecting statistics
-		sched_pctcpu_update(ts, 0); //wyc: update the percentage of cpu time
+		sched_interact_update(td); //wyc collecting statistics
+		sched_pctcpu_update(ts, 0); //wyc update the percentage of cpu time
 	}
 	/*
 	 * Reset the slice value since we slept and advanced the round-robin.

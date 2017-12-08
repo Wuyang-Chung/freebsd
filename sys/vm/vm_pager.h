@@ -66,7 +66,7 @@ struct pagerops {
 	pgo_getpages_async_t	*pgo_getpages_async;	/* Get page asyncly. */
 	pgo_putpages_t		*pgo_putpages;		/* Put (write) page. */
 	pgo_haspage_t		*pgo_haspage;		/* Query page. */
-	pgo_pageunswapped_t	*pgo_pageunswapped; //wyc: called if the copy on the swap area is stale
+	pgo_pageunswapped_t	*pgo_pageunswapped; //wyc called if the copy on the swap area is stale
 };
 
 extern struct pagerops defaultpagerops;

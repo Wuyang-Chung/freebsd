@@ -233,10 +233,10 @@ vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
 	pgo_alloc = pagertab[type]->pgo_alloc;
 	if (pgo_alloc)
 #if defined(WYC)
-		ret = vnode_pager_alloc(handle, size, prot, off, cred); //wyc: for vnode pager
-		ret = phys_pager_alloc(handle, size, prot, off, cred); //wyc: for phys pager
+		ret = vnode_pager_alloc(handle, size, prot, off, cred); //wyc for vnode pager
+		ret = phys_pager_alloc(handle, size, prot, off, cred); //wyc for phys pager
 #else
-		ret = (*pgo_alloc) (handle, size, prot, off, cred); //wyc: vnode_pager_alloc()
+		ret = (*pgo_alloc) (handle, size, prot, off, cred); //wyc vnode_pager_alloc()
 #endif
 	else
 		ret = NULL;
@@ -295,7 +295,7 @@ vm_pager_get_pages(vm_object_t object, vm_page_t *m, int count, int *rbehind,
 	vm_pager_assert_in(object, m, count);
 
 	r = (*pagertab[object->type]->pgo_getpages)(object, m, count, rbehind,
-	    rahead); //wyc: vn_pager_getpages()
+	    rahead); //wyc vn_pager_getpages()
 	if (r != VM_PAGER_OK)
 		return (r);
 

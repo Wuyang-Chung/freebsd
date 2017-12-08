@@ -46,13 +46,13 @@
 #define	CPU_ISSET(n, p)			BIT_ISSET(CPU_SETSIZE, n, p)
 #define	CPU_SET(n, p)			BIT_SET(CPU_SETSIZE, n, p)
 #define	CPU_ZERO(p) 			BIT_ZERO(CPU_SETSIZE, p)
-#define	CPU_FILL(p) 			BIT_FILL(CPU_SETSIZE, p) //wyc: set all bits to 1
+#define	CPU_FILL(p) 			BIT_FILL(CPU_SETSIZE, p) //wyc set all bits to 1
 #define	CPU_SETOF(n, p)			BIT_SETOF(CPU_SETSIZE, n, p)
 #define	CPU_EMPTY(p)			BIT_EMPTY(CPU_SETSIZE, p)
 #define	CPU_ISFULLSET(p)		BIT_ISFULLSET(CPU_SETSIZE, p)
 #define	CPU_SUBSET(p, c)		BIT_SUBSET(CPU_SETSIZE, p, c)
 #define	CPU_OVERLAP(p, c)		BIT_OVERLAP(CPU_SETSIZE, p, c)
-#define	CPU_CMP(p, c)			BIT_CMP(CPU_SETSIZE, p, c) //wyc: return 0 if equal
+#define	CPU_CMP(p, c)			BIT_CMP(CPU_SETSIZE, p, c) //wyc return 0 if equal
 #define	CPU_OR(d, s)			BIT_OR(CPU_SETSIZE, d, s)
 #define	CPU_AND(d, s)			BIT_AND(CPU_SETSIZE, d, s)
 #define	CPU_NAND(d, s)			BIT_NAND(CPU_SETSIZE, d, s)

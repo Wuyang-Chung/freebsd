@@ -295,7 +295,7 @@ cpu_startup(void *dummy __unused)
 	}
 	if (memsize < ptoa((uintmax_t)vm_cnt.v_free_count))
 		memsize = ptoa((uintmax_t)Maxmem);
-	printf("real memory  = %ju (%ju MiB)\n", memsize, memsize >> 20); //wyc: MB -> MiB
+	printf("real memory  = %ju (%ju MiB)\n", memsize, memsize >> 20); //wyc MB -> MiB
 	realmem = atop(memsize);
 
 	/*
@@ -319,9 +319,9 @@ cpu_startup(void *dummy __unused)
 
 	vm_ksubmap_init(&kmi);
 
-	printf("avail memory = %ju (%ju MiB)\n", //wyc: MB -> MiB
+	printf("avail memory = %ju (%ju MiB)\n", //wyc MB -> MiB
 	    ptoa((uintmax_t)vm_cnt.v_free_count),
-	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc: 1048576 == 2^20
+	    ptoa((uintmax_t)vm_cnt.v_free_count) >> 20/*/ 1048576*/); //wyc 1048576 == 2^20
 
 	/*
 	 * Set up buffers, so they can be used to read disk labels.
@@ -1159,7 +1159,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 #endif
 
 	bzero((char *)regs, sizeof(struct trapframe));
-	regs->tf_eip = imgp->entry_addr; //wyc: start address
+	regs->tf_eip = imgp->entry_addr; //wyc start address
 	regs->tf_esp = stack;
 	regs->tf_eflags = PSL_USER; //wyc??? | (regs->tf_eflags & PSL_T);
 	if (!imgp->sas) {
@@ -1177,7 +1177,7 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	}
 
 	/* PS_STRINGS value for BSD/OS binaries.  It is 0 for non-BSD/OS. */
-	regs->tf_ebx = imgp->ps_strings; //wyc: ==0
+	regs->tf_ebx = imgp->ps_strings; //wyc ==0
 
         /*
          * Reset the hardware debug registers if they were in use.
@@ -1281,8 +1281,8 @@ extern  vm_offset_t	proc0kstack;
  *
  * GCODE_SEL(4) through GUDATA_SEL(7) must be in this order for syscall/sysret
  * GUFS_SEL(2) and GUGS_SEL(3) must be in this order (swtch.s knows it)
-
-wyc: use "[] =" to specify which array element to initialize
+wyc:
+  use "[] =" to specify which array element to initialize
  */
 struct soft_segment_descriptor gdt_segs[NGDT] = {
 [GNULL_SEL] = { //Null Descriptor
@@ -1378,28 +1378,28 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_gran = 0		},
 [GLDT_SEL] = { //LDT Descriptor
 	.ssd_base = (int) ldt,
-	.ssd_limit = sizeof(ldt[0])-1, //wyc: 
+	.ssd_limit = sizeof(ldt[0])-1, //wyc
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_UPL,
-	.ssd_p = 1, //wyc: CANNOT set to 0
+	.ssd_p = 1, //wyc CANNOT set to 0
 	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 0, //wyc: not used by LDT
+	.ssd_def32 = 0, //wyc not used by LDT
 	.ssd_gran = 0		},
 [GUSERLDT_SEL] = { //User LDT Descriptor per process
 	.ssd_base = (int) ldt,
-	.ssd_limit = (512 * sizeof(union descriptor)-1), //wyc: there are only 17 local segment descriptors
+	.ssd_limit = (512 * sizeof(union descriptor)-1), //wyc there are only 17 local segment descriptors
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 0, //wyc: not used by LDT
+	.ssd_def32 = 0, //wyc not used by LDT
 	.ssd_gran = 0		},
 [_GBIOSLOWMEM_SEL] = { //BIOS access to realmode segment 0x40, must be #8 in GDT
 	.ssd_base = 0x400,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: this descriptor is not used
+	.ssd_p = 1, //wyc this descriptor is not used
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
@@ -1408,7 +1408,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1417,7 +1417,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1426,7 +1426,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
@@ -1435,7 +1435,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1444,7 +1444,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 1, //wyc: can be disabled
+	.ssd_p = 1, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 1		},
@@ -1453,7 +1453,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
 	.ssd_dpl = SEL_KPL,
-	.ssd_p = 0, //wyc: can be disabled
+	.ssd_p = 0, //wyc can be disabled
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
@@ -1464,7 +1464,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 0, //wyc: not used by LDT
+	.ssd_def32 = 0, //wyc not used by LDT
 	.ssd_gran = 0		},
 [GUSERLDT1_SEL] = { //User LDT Descriptor per process
 	.ssd_base = 0,
@@ -1473,7 +1473,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
-	.ssd_def32 = 0, //wyc: not used by LDT
+	.ssd_def32 = 0, //wyc not used by LDT
 	.ssd_gran = 0		},
 };
 
@@ -1487,7 +1487,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[LSYS5SIGR_SEL] = { //wyc: not referencd. Null Descriptor - overwritten by call gate
+[LSYS5SIGR_SEL] = { //wyc not referencd. Null Descriptor - overwritten by call gate
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1496,7 +1496,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[L43BSDCALLS_SEL] = { //wyc: not referenced. Null Descriptor - overwritten by call gate
+[L43BSDCALLS_SEL] = { //wyc not referenced. Null Descriptor - overwritten by call gate
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1505,7 +1505,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[LUCODE_SEL] = { //wyc: Not used.
+[LUCODE_SEL] = { //wyc Not used.
 // Null Descriptor 
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
@@ -1534,7 +1534,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[LUDATA_SEL] = { //wyc: Not used.
+[LUDATA_SEL] = { //wyc Not used.
 // Null Descriptor 
 	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
@@ -2677,7 +2677,7 @@ init386(int first)
 	initializecpucache();
 
 	/* pointer to selector slot for %fs/%gs */
-	PCPU_SET(fsgs_gdt, &gdt[GUGS_SEL].sd); //wyc: GUFS_SEL -> GUGS_SEL
+	PCPU_SET(fsgs_gdt, &gdt[GUGS_SEL].sd); //wyc GUFS_SEL -> GUGS_SEL
 
 	dblfault_tss.tss_esp = dblfault_tss.tss_esp0 = dblfault_tss.tss_esp1 =
 	    dblfault_tss.tss_esp2 = (int)&dblfault_stack[sizeof(dblfault_stack)];
@@ -2775,7 +2775,7 @@ init386(int first)
 	gdp = &ldt[LSYS5CALLS_SEL].gd;
 
 	//x = (int) &IDTVEC(lcall_syscall);
-	x = (int) &IDTVEC(rsvd); //wyc: replace lcall_syscall with rsvd
+	x = (int) &IDTVEC(rsvd); //wyc replace lcall_syscall with rsvd
 	gdp->gd_looffset = x;
 	gdp->gd_selector = GSEL(GCODE_SEL,SEL_KPL);
 	gdp->gd_stkcpy = 1;

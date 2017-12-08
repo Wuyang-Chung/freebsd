@@ -51,7 +51,7 @@ __FBSDID("$FreeBSD$");
 #endif
 #include <security/audit/audit.h>
 
-static /*inline*/ int //wyc???: why inline
+static /*inline*/ int //wyc??? why inline
 syscallenter(struct thread *td, struct syscall_args *sa)
 {
 	struct proc *p;
@@ -72,7 +72,7 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 		PROC_UNLOCK(p);
 	}
 #if defined(WYC)
-	error = cpu_fetch_syscall_args(td, sa); //wyc: out: sa
+	error = cpu_fetch_syscall_args(td, sa); //wyc out: sa
 #else
 	error = (p->p_sysent->sv_fetch_syscall_args)(td, sa);
 #endif
@@ -164,12 +164,12 @@ syscallenter(struct thread *td, struct syscall_args *sa)
 #if defined(WYC)
 	cpu_set_syscall_retval(td, error);
 #else
-	(p->p_sysent->sv_set_syscall_retval)(td, error); //wyc: cpu_set_syscall_retval
+	(p->p_sysent->sv_set_syscall_retval)(td, error); //wyc cpu_set_syscall_retval
 #endif
 	return (error);
 }
 
-static /*inline*/ void //wyc???: why inline
+static /*inline*/ void //wyc??? why inline
 syscallret(struct thread *td, int error, struct syscall_args *sa)
 {
 	struct proc *p, *p2;
@@ -222,7 +222,7 @@ syscallret(struct thread *td, int error, struct syscall_args *sa)
 		PROC_UNLOCK(p);
 	}
 
-	if (td->td_pflags & TDP_RFPPWAIT) { //wyc: TRUE for vfork
+	if (td->td_pflags & TDP_RFPPWAIT) { //wyc TRUE for vfork
 		/*
 		 * Preserve synchronization semantics of vfork.  If
 		 * waiting for child to exec or exit, fork set

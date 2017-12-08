@@ -37,7 +37,7 @@
 
 #include <machine/asmacros.h>
 
-#include "assym.s" //wyc: in /usr/obj/nfs/vm.FreeBSD/sys/WYCVM
+#include "assym.s" //wyc in /usr/obj/nfs/vm.FreeBSD/sys/WYCVM
 
 #if defined(SMP) && defined(SCHED_ULE)
 #define	SETOP		xchgl
@@ -83,21 +83,21 @@ ENTRY(cpu_throw)
 #ifdef SMP
 	lock
 #endif
-	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old */ //wyc: bit test and reset
+	btrl	%esi, PM_ACTIVE(%ebx)		/* clear old */ //wyc bit test and reset
 1:
 	movl	8(%esp),%ecx			/* New thread */
 	movl	TD_PCB(%ecx),%edx
 	movl	PCB_CR3(%edx),%eax
-	movl	%eax,%cr3		//wyc: %cr3 = newtd->td_pcb->pcb_cr3
+	movl	%eax,%cr3		//wyc %cr3 = newtd->td_pcb->pcb_cr3
 	/* set bit in new pm_active */
 	movl	TD_PROC(%ecx),%eax
 	movl	P_VMSPACE(%eax), %ebx
-	addl	$VM_PMAP, %ebx		//wyc: %ebx = &newtd->td_proc->p_vmspace.vm_pmap
+	addl	$VM_PMAP, %ebx		//wyc %ebx = &newtd->td_proc->p_vmspace.vm_pmap
 	movl	%ebx, PCPU(CURPMAP)
 #ifdef SMP
 	lock
 #endif
-	btsl	%esi, PM_ACTIVE(%ebx)		/* set new */ //wyc: bit test and set
+	btsl	%esi, PM_ACTIVE(%ebx)		/* set new */ //wyc bit test and set
 	jmp	sw1
 END(cpu_throw)
 
@@ -114,17 +114,17 @@ END(cpu_throw)
 ENTRY(cpu_switch)
 
 	/* First, save old thread context. */
-	movl	4(%esp),%ecx	//wyc: oldtd
+	movl	4(%esp),%ecx	//wyc oldtd
 
 #ifdef INVARIANTS
 	testl	%ecx,%ecx			/* no thread? */
 	jz	badsw2				/* no, panic */
 #endif
 
-	movl	TD_PCB(%ecx),%edx	//wyc: %edx = oldtd->td_pcb
+	movl	TD_PCB(%ecx),%edx	//wyc %edx = oldtd->td_pcb
 
 	movl	(%esp),%eax			/* Hardware registers */
-	movl	%eax,PCB_EIP(%edx) //wyc: store this function`s return address to oldtd`s %EIP
+	movl	%eax,PCB_EIP(%edx) //wyc store this function`s return address to oldtd`s %EIP
 	movl	%ebx,PCB_EBX(%edx)
 	movl	%esp,PCB_ESP(%edx)
 	movl	%ebp,PCB_EBP(%edx)
@@ -134,7 +134,7 @@ ENTRY(cpu_switch)
 	pushfl					/* PSL */
 	popl	PCB_PSL(%edx)
 	/* Test if debug registers should be saved. */
-	testl	$PCB_DBREGS,PCB_FLAGS(%edx)	/* wyc: bitwise AND, set EFLAGS */
+	testl	$PCB_DBREGS,PCB_FLAGS(%edx)	/*wyc bitwise AND, set EFLAGS */
 	jz      1f                              /* no, skip over */
 	movl    %dr7,%eax                       /* yes, do the save */
 	movl    %eax,PCB_DR7(%edx)
@@ -163,14 +163,14 @@ ENTRY(cpu_switch)
 #endif
 
 	/* Second fire up new thread. Leave old vmspace. */
-	movl	4(%esp),%edi	//wyc: old thread
+	movl	4(%esp),%edi	//wyc old thread
 	movl	8(%esp),%ecx		/* New thread */
 	movl	12(%esp),%esi		/* New lock */
 #ifdef INVARIANTS
 	testl	%ecx,%ecx			/* no thread? wyc: bitwise AND, set EFLAGS */
 	jz	badsw3				/* no, panic */
 #endif
-	movl	TD_PCB(%ecx),%edx	//wyc: %edx = newtd->td_pcb
+	movl	TD_PCB(%ecx),%edx	//wyc %edx = newtd->td_pcb
 
 	/* switch address space */
 	movl	PCB_CR3(%edx),%eax
@@ -180,7 +180,7 @@ ENTRY(cpu_switch)
 	movl	%eax,%cr3			/* new address space */
 	movl	%esi,%eax
 	movl	PCPU(CPUID),%esi
-	SETOP	%eax,TD_LOCK(%edi) //wyc: oldtd->td_lock = newlock; /* Switchout td_lock */
+	SETOP	%eax,TD_LOCK(%edi) //wyc oldtd->td_lock = newlock; /* Switchout td_lock */
 
 	/* Release bit from old pmap->pm_active */
 	movl	PCPU(CURPMAP), %ebx
@@ -192,7 +192,7 @@ ENTRY(cpu_switch)
 	/* Set bit in new pmap->pm_active */
 	movl	TD_PROC(%ecx),%eax		/* newproc */
 	movl	P_VMSPACE(%eax), %ebx
-	addl	$VM_PMAP, %ebx		//wyc: %ebx = &newtd->td_proc->p_vmspace.vm_pmap;
+	addl	$VM_PMAP, %ebx		//wyc %ebx = &newtd->td_proc->p_vmspace.vm_pmap;
 	movl	%ebx, PCPU(CURPMAP)
 #ifdef SMP
 	lock
@@ -201,12 +201,12 @@ ENTRY(cpu_switch)
 	jmp	sw1
 
 sw0:
-	SETOP	%esi,TD_LOCK(%edi) //wyc: oldtd->td_lock = newlock; /* Switchout td_lock */
+	SETOP	%esi,TD_LOCK(%edi) //wyc oldtd->td_lock = newlock; /* Switchout td_lock */
 sw1:
-	movl	TD_PROC(%ecx), %esi	//wyc: %esi = newtd->td_proc
-	movl	P_FLAG2(%esi), %eax	//wyc: %eax = newtd->td_proc->p_flags
+	movl	TD_PROC(%ecx), %esi	//wyc %esi = newtd->td_proc
+	movl	P_FLAG2(%esi), %eax	//wyc %eax = newtd->td_proc->p_flags
 	testl	$P2_SAS, %eax
-	jz	1f			//wyc: if P2_SAS not set
+	jz	1f			//wyc if P2_SAS not set
 	lldt	sas_ldts
 1:
 
@@ -240,7 +240,7 @@ sw1:
 	cmpl	$0, PCPU(PRIVATE_TSS)		/* Already using the common? */
 	je	3f				/* if so, skip reloading */
 	movl	$0, PCPU(PRIVATE_TSS)
-	PCPU_ADDR(COMMON_TSSD, %edi)	//wyc: %edi = &COMMON_TSSD
+	PCPU_ADDR(COMMON_TSSD, %edi)	//wyc %edi = &COMMON_TSSD
 2:
 	/* Move correct tss descriptor into GDT slot, then reload tr. */
 	movl	PCPU(TSS_GDT), %ebx		/* entry in GDT */
@@ -248,11 +248,11 @@ sw1:
 	movl	4(%edi), %esi
 	movl	%eax, 0(%ebx)
 	movl	%esi, 4(%ebx)
-	movl	$GPROC0_SEL*8, %esi	//wyc: Proc 0 Tss Descriptor
-	ltr	%si			//wyc: load task register
+	movl	$GPROC0_SEL*8, %esi	//wyc Proc 0 Tss Descriptor
+	ltr	%si			//wyc load task register
 3:
 	/* Copy the %fs and %gs selectors into this pcpu gdt */
-	leal	PCB_GSD(%edx), %esi	//wyc: PCB_FSD -> PCB_GSD
+	leal	PCB_GSD(%edx), %esi	//wyc PCB_FSD -> PCB_GSD
 	movl	PCPU(FSGS_GDT), %edi
 	movl	0(%esi), %eax		/* %gs selector */
 	movl	4(%esi), %ebx
@@ -271,12 +271,12 @@ sw1:
 	movl	PCB_ESI(%edx),%esi
 	movl	PCB_EDI(%edx),%edi
 	movl	PCB_EIP(%edx),%eax
-	movl	%eax,(%esp)	//wyc: store newtd`s %EIP to function`s return address 
+	movl	%eax,(%esp)	//wyc store newtd`s %EIP to function`s return address 
 	pushl	PCB_PSL(%edx)
 	popfl
 
 	movl	%edx, PCPU(CURPCB)
-	//movl	TD_TID(%ecx),%eax	/* wyc???: TD_TID is not used after loaded to eax */
+	//movl	TD_TID(%ecx),%eax	/*wyc??? TD_TID is not used after loaded to eax */
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
 #if defined(WYC)
@@ -284,7 +284,7 @@ sw1:
 	 * Determine the LDT to use and load it if the default one
 	 * is not the current one.
 	 */
-	movl	TD_PROC(%ecx),%eax	//wyc: %eax = newproc
+	movl	TD_PROC(%ecx),%eax	//wyc %eax = newproc
 	cmpl    $0,P_MD+MD_LDT(%eax)
 	jnz	1f
 	movl	_default_ldt,%eax
@@ -420,8 +420,8 @@ END(savectx)
 /*
  * resumectx(pcb) __fastcall
  * Resuming processor state from pcb.
- * wyc:
- * ecx = pcb
+wyc
+  ecx = pcb
  */
 ENTRY(resumectx)
 	/* Restore GDT. */

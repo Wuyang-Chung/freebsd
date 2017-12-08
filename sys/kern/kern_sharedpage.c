@@ -112,7 +112,7 @@ shared_page_init(void *dummy __unused)
 
 	sx_init(&shared_page_alloc_sx, "shpsx");
 	shared_page_obj = vm_pager_allocate(OBJT_PHYS, 0, PAGE_SIZE,
-	    VM_PROT_DEFAULT, 0, NULL); //wyc: phys_pager_alloc
+	    VM_PROT_DEFAULT, 0, NULL); //wyc phys_pager_alloc
 	VM_OBJECT_WLOCK(shared_page_obj);
 	m = vm_page_grab(shared_page_obj, 0, VM_ALLOC_NOBUSY | VM_ALLOC_ZERO);
 	m->valid = VM_PAGE_BITS_ALL;
@@ -255,7 +255,7 @@ alloc_sv_tk_compat32(void)
 }
 #endif
 
-//wyc: 'param' is always &elf32_freebsd_sysvec
+//wyc 'param' is always &elf32_freebsd_sysvec
 void
 exec_sysvec_init(void *param)
 {
@@ -267,14 +267,14 @@ exec_sysvec_init(void *param)
 	sv = (struct sysentvec *)param;
 #endif
 
-	if ((sv->sv_flags & SV_SHP) == 0) //wyc: FALSE
+	if ((sv->sv_flags & SV_SHP) == 0) //wyc FALSE
 		return;
 	sv->sv_shared_page_obj = shared_page_obj;
 	sv->sv_sigcode_base = sv->sv_shared_page_base +
 	    shared_page_fill(*(sv->sv_szsigcode), 16, sv->sv_sigcode);
-	if ((sv->sv_flags & SV_ABI_MASK) != SV_ABI_FREEBSD) //wyc: FALSE
+	if ((sv->sv_flags & SV_ABI_MASK) != SV_ABI_FREEBSD) //wyc FALSE
 		return;
-	if ((sv->sv_flags & SV_TIMEKEEP) != 0) { //wyc: TRUE
+	if ((sv->sv_flags & SV_TIMEKEEP) != 0) { //wyc TRUE
 #ifdef COMPAT_FREEBSD32
 		if ((sv->sv_flags & SV_ILP32) != 0) {
 			KASSERT(compat32_svtk == NULL,

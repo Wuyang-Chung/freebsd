@@ -237,7 +237,7 @@ init_secondary(void)
 
 	/* prime data page for it to use */
 	pcpu_init(pc, myid, sizeof(struct pcpu));
-	dpcpu_init(dpcpu, myid);	//wyc: dpcup allocated by start_all_aps()
+	dpcpu_init(dpcpu, myid);	//wyc dpcpu allocated by start_all_aps()
 	pc->pc_apic_id = cpu_apic_ids[myid];
 	pc->pc_prvspace = pc;
 	pc->pc_curthread = 0;
@@ -266,13 +266,13 @@ init_secondary(void)
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
 	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
 	PCPU_SET(tss_gdt, &gdt[myid * NGDT + GPROC0_SEL].sd);
-	//if (pc->pc_tss_gdt != &gdt[myid * NGDT + GPROC0_SEL].sd) //wyc: verified
+	//if (pc->pc_tss_gdt != &gdt[myid * NGDT + GPROC0_SEL].sd) //wyc verified
 	//	panic("%s %d", __func__, __LINE__);
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
 	ltr(gsel_tss);
 
-	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUGS_SEL].sd); //wyc: GUFS_SEL -> GUGS_SEL
-	//if (pc->pc_fsgs_gdt != &gdt[myid*NGDT+GUGS_SEL].sd) //wyc: verified
+	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUGS_SEL].sd); //wyc GUFS_SEL -> GUGS_SEL
+	//if (pc->pc_fsgs_gdt != &gdt[myid*NGDT+GUGS_SEL].sd) //wyc verified
 	//	panic("%s %d", __func__, __LINE__);
 
 	/*
@@ -346,7 +346,7 @@ start_all_aps(void)
 		    (char *)kmem_malloc(kernel_arena, kstack_pages * PAGE_SIZE,
 		    M_WAITOK | M_ZERO);
 		dpcpu = (void *)kmem_malloc(kernel_arena, DPCPU_SIZE,
-		    M_WAITOK | M_ZERO);	//wyc: init_secondary() will store dpcpu to pc_dynamic
+		    M_WAITOK | M_ZERO);	//wyc init_secondary() will store dpcpu to pc_dynamic
 		/* setup a vector to our boot code */
 		*((volatile u_short *) WARMBOOT_OFF) = WARMBOOT_TARGET;
 		*((volatile u_short *) WARMBOOT_SEG) = (boot_address >> 4);

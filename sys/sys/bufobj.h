@@ -83,7 +83,7 @@ struct buf_ops {
 	b_bdflush_t	*bop_bdflush;
 };
 
-#define BO_STRATEGY(bo, bp)	((bo)->bo_ops->bop_strategy((bo), (bp))) //wyc: bufstrategy()
+#define BO_STRATEGY(bo, bp)	((bo)->bo_ops->bop_strategy((bo), (bp))) //wyc bufstrategy()
 #define BO_SYNC(bo, w)		((bo)->bo_ops->bop_sync((bo), (w)))
 #define BO_WRITE(bo, bp)	((bo)->bo_ops->bop_write((bp)))
 #define BO_BDFLUSH(bo, bp)	((bo)->bo_ops->bop_bdflush((bo), (bp)))

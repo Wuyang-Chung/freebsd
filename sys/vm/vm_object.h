@@ -119,7 +119,7 @@ struct vm_object {
 	TAILQ_ENTRY(vm_object) pager_object_list; /* list of all objects of this pager type */
 	LIST_HEAD(, vm_reserv) rvq;	/* list of reservations wyc: superpage */
 	struct vm_radix cache;		/* (o + f) root of the cache page radix trie */
-	void *handle; /*wyc:
+	void *handle; /*wyc
 		OBJT_DEFAULT:
 		OBJT_SWAP:
 		OBJT_VNODE:	vnode *
@@ -182,7 +182,7 @@ struct vm_object {
 		} swp;
 	} un_pager;
 	struct ucred *cred;
-	vm_ooffset_t charge; //wyc: how much vm is charged to this object
+	vm_ooffset_t charge; //wyc how much vm is charged to this object
 	void *umtx_data;
 };
 

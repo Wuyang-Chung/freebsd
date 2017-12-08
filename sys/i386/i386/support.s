@@ -502,20 +502,20 @@ fusufault:
 /*
  * Store a 32-bit word, a 16-bit word, or an 8-bit byte to user memory.
  * All these functions are MPSAFE.
-
-wyc: int suword32(volatile void *base, int32_t word);
+wyc
+  int suword32(volatile void *base, int32_t word);
  */
 
 ALTENTRY(suword32)
 ENTRY(suword)
 	movl	PCPU(CURPCB),%ecx
 	movl	$fusufault,PCB_ONFAULT(%ecx)
-	movl	4(%esp),%edx	/*wyc: base */
+	movl	4(%esp),%edx	/*wyc base */
 
 	cmpl	$VM_MAXUSER_ADDRESS-4,%edx	/* verify address validity */
 	ja	fusufault
 
-	movl	8(%esp),%eax	/*wyc: word */
+	movl	8(%esp),%eax	/*wyc word */
 	movl	%eax,(%edx)
 	xorl	%eax,%eax
 	movl	PCPU(CURPCB),%ecx
@@ -711,18 +711,18 @@ ENTRY(lgdt)
 	nop
 1:
 	/* reload "stale" selectors */
-	movl	$KDSEL,%eax	/*wyc: KDSEL==GSEL(GDATA_SEL, SEL_KPL) */
+	movl	$KDSEL,%eax	/*wyc KDSEL==GSEL(GDATA_SEL, SEL_KPL) */
 	movl	%eax,%ds
 	movl	%eax,%es
 	movl	%eax,%gs
 	movl	%eax,%ss
-	movl	$KPSEL,%eax	/*wyc: KPSEL==GSEL(GPRIV_SEL, SEL_KPL) */
+	movl	$KPSEL,%eax	/*wyc KPSEL==GSEL(GPRIV_SEL, SEL_KPL) */
 	movl	%eax,%fs
 
 	/* reload code selector by turning return into intersegmental return */
 	movl	(%esp),%eax
 	pushl	%eax
-	movl	$KCSEL,4(%esp)	/*wyc: KCSEL==GSEL(GCODE_SEL, SEL_KPL) */
+	movl	$KCSEL,4(%esp)	/*wyc KCSEL==GSEL(GCODE_SEL, SEL_KPL) */
 	MEXITCOUNT
 	lret
 END(lgdt)

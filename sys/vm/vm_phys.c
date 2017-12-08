@@ -117,7 +117,7 @@ CTASSERT(VM_FREELIST_DEFAULT == 0);
 #ifdef VM_FREELIST_ISADMA
 #define	VM_ISADMA_BOUNDARY	16777216
 #endif
-#ifdef VM_FREELIST_DMA32 //wyc: for amd64
+#ifdef VM_FREELIST_DMA32 //wyc for amd64
 #define	VM_DMA32_BOUNDARY	((vm_paddr_t)1 << 32)
 #endif
 
@@ -574,13 +574,13 @@ vm_phys_add_seg(vm_paddr_t start, vm_paddr_t end)
 		paddr = VM_ISADMA_BOUNDARY;
 	}
 #endif
-#ifdef	VM_FREELIST_LOWMEM //wyc: for mips
+#ifdef	VM_FREELIST_LOWMEM //wyc for mips
 	if (paddr < VM_LOWMEM_BOUNDARY && end > VM_LOWMEM_BOUNDARY) {
 		vm_phys_create_seg(paddr, VM_LOWMEM_BOUNDARY);
 		paddr = VM_LOWMEM_BOUNDARY;
 	}
 #endif
-#ifdef	VM_FREELIST_DMA32 //wyc: for amd64
+#ifdef	VM_FREELIST_DMA32 //wyc for amd64
 	if (paddr < VM_DMA32_BOUNDARY && end > VM_DMA32_BOUNDARY) {
 		vm_phys_create_seg(paddr, VM_DMA32_BOUNDARY);
 		paddr = VM_DMA32_BOUNDARY;
@@ -617,12 +617,12 @@ vm_phys_init(void)
 			vm_freelist_to_flind[VM_FREELIST_ISADMA] = 1;
 		else
 #endif
-#ifdef	VM_FREELIST_LOWMEM //wyc: for mips
+#ifdef	VM_FREELIST_LOWMEM //wyc for mips
 		if (seg->end <= VM_LOWMEM_BOUNDARY)
 			vm_freelist_to_flind[VM_FREELIST_LOWMEM] = 1;
 		else
 #endif
-#ifdef	VM_FREELIST_DMA32 //wyc: for amd64
+#ifdef	VM_FREELIST_DMA32 //wyc for amd64
 		if (
 #ifdef	VM_DMA32_NPAGES_THRESHOLD
 		    /*
@@ -674,14 +674,14 @@ vm_phys_init(void)
 			    ("vm_phys_init: ISADMA flind < 0"));
 		} else
 #endif
-#ifdef	VM_FREELIST_LOWMEM //wyc: for mips
+#ifdef	VM_FREELIST_LOWMEM //wyc for mips
 		if (seg->end <= VM_LOWMEM_BOUNDARY) {
 			flind = vm_freelist_to_flind[VM_FREELIST_LOWMEM];
 			KASSERT(flind >= 0,
 			    ("vm_phys_init: LOWMEM flind < 0"));
 		} else
 #endif
-#ifdef	VM_FREELIST_DMA32 //wyc: for amd64
+#ifdef	VM_FREELIST_DMA32 //wyc for amd64
 		if (seg->end <= VM_DMA32_BOUNDARY) {
 			flind = vm_freelist_to_flind[VM_FREELIST_DMA32];
 			KASSERT(flind >= 0,

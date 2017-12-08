@@ -79,10 +79,10 @@ __FBSDID("$FreeBSD$");
 #define	VM_RADIX_WIDTH	3
 #endif
 
-#define	VM_RADIX_COUNT	(1 << VM_RADIX_WIDTH)	//wyc: 8
-#define	VM_RADIX_MASK	(VM_RADIX_COUNT - 1)	//wyc: 0x7
+#define	VM_RADIX_COUNT	(1 << VM_RADIX_WIDTH)	//wyc 8
+#define	VM_RADIX_MASK	(VM_RADIX_COUNT - 1)	//wyc 0x7
 #define	VM_RADIX_LIMIT							\
-	(howmany(sizeof(vm_pindex_t) * NBBY, VM_RADIX_WIDTH) - 1) //wyc: 22
+	(howmany(sizeof(vm_pindex_t) * NBBY, VM_RADIX_WIDTH) - 1) //wyc 22
 
 /* Flag bits stored in node pointers. */
 #define	VM_RADIX_ISLEAF	0x1

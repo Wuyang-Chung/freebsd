@@ -350,7 +350,7 @@ sys_mmap(
 		}
 		if (prot & PROT_EXEC)
 			cap_rights_set(&rights, CAP_MMAP_X);
-		error = fget_mmap(td, uap->fd, &rights, &cap_maxprot, &fp); //wyc: fd -> fp
+		error = fget_mmap(td, uap->fd, &rights, &cap_maxprot, &fp); //wyc fd -> fp
 		if (error != 0)
 			goto done;
 		if ((flags & (MAP_SHARED | MAP_PRIVATE)) == 0 &&
@@ -361,11 +361,11 @@ sys_mmap(
 
 #if defined(WYC)
 		error = vn_mmap(fp, &vms->vm_map, &addr, size, prot,
-		    cap_maxprot, flags, pos, td); //wyc: in: fp, in/out:addr
+		    cap_maxprot, flags, pos, td); //wyc in: fp, in/out:addr
 #else
 		/* This relies on VM_PROT_* matching PROT_*. */
 		error = fo_mmap(fp, &vms->vm_map, &addr, size, prot,
-		    cap_maxprot, flags, pos, td); //wyc: in: fp, in/out:addr
+		    cap_maxprot, flags, pos, td); //wyc in: fp, in/out:addr
 #endif
 	}
 
@@ -1233,7 +1233,7 @@ sys_munlock(
  * Helper function for vm_mmap.  Perform sanity check specific for mmap
  * operations on vnodes.
  */
-//wyc: vp -> *objp
+//wyc vp -> *objp
 int
 vm_mmap_vnode(struct thread *td, vm_size_t objsize,
     vm_prot_t prot, vm_prot_t *maxprotp, int *flagsp,
@@ -1251,20 +1251,20 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 		locktype = LK_EXCLUSIVE;
 	else
 		locktype = LK_SHARED;
-	if ((error = vget(vp, locktype, td)) != 0) //wyc: get reference on the vnode
+	if ((error = vget(vp, locktype, td)) != 0) //wyc get reference on the vnode
 		return (error);
 	foff = *foffp;
 	flags = *flagsp;
 	obj = vp->v_object;
-	if (vp->v_type == VREG) { //wyc: it is a regular file
+	if (vp->v_type == VREG) { //wyc it is a regular file
 		/*
 		 * Get the proper underlying object
 		 */
-		if (obj == NULL) { //wyc: sanity check. vnode must have a object
+		if (obj == NULL) { //wyc sanity check. vnode must have a object
 			error = EINVAL;
 			goto done;
 		}
-		if (obj->type == OBJT_VNODE && obj->handle != vp) { //wyc: something related with bypass???
+		if (obj->type == OBJT_VNODE && obj->handle != vp) { //wyc something related with bypass???
 			vput(vp);
 			vp = (struct vnode *)obj->handle;
 			/*
@@ -1306,7 +1306,7 @@ vm_mmap_vnode(struct thread *td, vm_size_t objsize,
 	 * Adjust object size to be the size of actual file.
 	 */
 	objsize = round_page(va.va_size);
-	if (va.va_nlink == 0) //wyc: the file has been unlinked. Don't need long-term persistence
+	if (va.va_nlink == 0) //wyc the file has been unlinked. Don't need long-term persistence
 		flags |= MAP_NOSYNC;
 	if (obj->type == OBJT_VNODE) {
 		obj = vm_pager_allocate(OBJT_VNODE, vp, objsize, prot, foff,
@@ -1335,7 +1335,7 @@ done:
 		*writecounted = FALSE;
 		vnode_pager_update_writecount(obj, objsize, 0);
 	}
-	vput(vp); //wyc: unreference the vnode
+	vput(vp); //wyc unreference the vnode
 	return (error);
 }
 
@@ -1530,13 +1530,13 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		return (EINVAL);
 
 	if ((flags & MAP_FIXED) == 0) {
-		//fitit = TRUE; //wyc: find space for it
+		//fitit = TRUE; //wyc find space for it
 		*addr = round_page(*addr);
 	} else {
 		//if (*addr != trunc_page(*addr))
-		if (*addr & PAGE_MASK) //wyc: not page aligned
+		if (*addr & PAGE_MASK) //wyc not page aligned
 			return (EINVAL);
-		//fitit = FALSE; //wyc: it has to go in a fixed address
+		//fitit = FALSE; //wyc it has to go in a fixed address
 	}
 
 	if (flags & MAP_ANON) {
@@ -1568,7 +1568,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		docow |= COWF_CHECK_EXCL;
 
 	//if (fitit) {
-	if ((flags & MAP_FIXED) == 0) { //wyc: find space for it.
+	if ((flags & MAP_FIXED) == 0) { //wyc find space for it.
 		if ((flags & MAP_ALIGNMENT_MASK) == MAP_ALIGNED_SUPER)
 			findspace = VMFS_SUPER_SPACE;
 		else if ((flags & MAP_ALIGNMENT_MASK) != 0)
@@ -1581,7 +1581,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		    flags & MAP_32BIT ? MAP_32BIT_MAX_ADDR :
 #endif
 		    0, findspace, prot, maxprot, docow);
-	} else { //wyc: put it at this (*addr) location
+	} else { //wyc put it at this (*addr) location
 		rv = vm_map_fixed(map, object, foff, *addr, size,
 		    prot, maxprot, docow);
 	}

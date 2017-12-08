@@ -116,7 +116,7 @@ SYSCTL_INT(_debug, OID_AUTO, __elfN(legacy_coredump), CTLFLAG_RW,
     &elf_legacy_coredump, 0,
     "include all and only RW pages in core dumps");
 
-int __elfN(nxstack) =	//wyc: non-executable stack. ==0 for i386
+int __elfN(nxstack) =	//wyc non-executable stack. ==0 for i386
 #if defined(__amd64__) || defined(__powerpc64__) /* both 64 and 32 bit */ || \
     (defined(__arm__) && __ARM_ARCH >= 7) || defined(__aarch64__)
 	1;
@@ -437,7 +437,7 @@ __elfN(map_insert)(
     vm_map_t map, vm_object_t object,
     vm_ooffset_t offset,
     vm_offset_t start,
-    vm_offset_t end, //wyc: it's actually end address + 1
+    vm_offset_t end, //wyc it's actually end address + 1
     vm_prot_t prot, int cow) __attribute__((optnone)) //wyc
 {
 #if 0
@@ -449,7 +449,7 @@ __elfN(map_insert)(
 	int rv;
 
 #if 0
-	if (start != trunc_page(start)) { //wyc: false
+	if (start != trunc_page(start)) { //wyc false
 #if defined(WYC)
 		rv = elf32_map_partial(
 #else
@@ -461,7 +461,7 @@ __elfN(map_insert)(
 		offset += round_page(start) - start;
 		start = round_page(start);
 	}
-	if (end != round_page(end)) { //wyc: false
+	if (end != round_page(end)) { //wyc false
 #if defined(WYC)
 		rv = elf32_map_partial(
 #else
@@ -473,8 +473,8 @@ __elfN(map_insert)(
 			return (rv);
 		end = trunc_page(end);
 	}
-	if (end > start) { //wyc: true
-		if (offset & PAGE_MASK) { //wyc: false
+	if (end > start) { //wyc true
+		if (offset & PAGE_MASK) { //wyc false
 			panic("%s: offset", __func__); //wyc
 			/*
 			 * The mapping is not page aligned. This means we have
@@ -534,10 +534,10 @@ elf32_load_section(
 __elfN(load_section)(
 #endif
     struct image_params *imgp, 
-    vm_offset_t offset,	//wyc: offset in file
-    caddr_t vmaddr, 	//wyc: offset in virtual address
-    size_t memsz, 	//wyc: object size in memory
-    size_t filsz, 	//wyc: object size in file
+    vm_offset_t offset,	//wyc offset in file
+    caddr_t vmaddr, 	//wyc offset in virtual address
+    size_t memsz, 	//wyc object size in memory
+    size_t filsz, 	//wyc object size in file
     vm_prot_t prot,
     size_t pagesize)
 __attribute__((optnone)) //wyc
@@ -578,9 +578,9 @@ __attribute__((optnone)) //wyc
 	 * early and copy the initialized data into that first page.  We
 	 * choose the second..
 	 */
-	if (memsz > filsz) //wyc: data
+	if (memsz > filsz) //wyc data
 		map_len = trunc_page_ps(offset + filsz, pagesize) - file_addr;
-	else //wyc: code
+	else //wyc code
 		map_len = round_page_ps(offset + filsz, pagesize) - file_addr;
 
 	if (map_len != 0) {
@@ -871,7 +871,7 @@ __attribute__((optnone)) //wyc
 		return (ENOEXEC);
 	}
 
-	imgp->sas = hdr->e_flags; //wyc: sas flag is stored in e_flags
+	imgp->sas = hdr->e_flags; //wyc sas flag is stored in e_flags
 	if (hdr->e_flags) //wyc
 		imgp->proc->p_flag2 |= P2_SAS;
 	n = error = 0;
@@ -895,7 +895,7 @@ __attribute__((optnone)) //wyc
 			n++;
 			break;
 		case PT_INTERP:
-			//wyc: OUT interp
+			//wyc OUT interp
 			/* Path to interpreter */
 			if (phdr[i].p_filesz > MAXPATHLEN) {
 				uprintf("Invalid PT_INTERP\n");
@@ -931,7 +931,7 @@ __attribute__((optnone)) //wyc
 			break;
 		case PT_GNU_STACK:
 #if defined(WYC)
-			if (elf32_nxstack)	//wyc: ==0 for i386
+			if (elf32_nxstack)	//wyc ==0 for i386
 				imgp->stack_prot =
 				    elf32_trans_prot(phdr[i].p_flags);
 #else
@@ -945,7 +945,7 @@ __attribute__((optnone)) //wyc
 	}
 
 #if defined(WYC)
-	brand_info = &freebsd_brand_info; //wyc: brand_info == freebsd_brand_info
+	brand_info = &freebsd_brand_info; //wyc brand_info == freebsd_brand_info
 	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
 #else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
@@ -957,7 +957,7 @@ __attribute__((optnone)) //wyc
 		error = ENOEXEC;
 		goto ret;
 	}
-	if (hdr->e_type == ET_DYN) { //wyc: FALSE
+	if (hdr->e_type == ET_DYN) { //wyc FALSE
 		if ((brand_info->flags & BI_CAN_EXEC_DYN) == 0) {
 			uprintf("Cannot execute shared object\n");
 			error = ENOEXEC;
@@ -974,7 +974,7 @@ __attribute__((optnone)) //wyc
 	} else
 		et_dyn_addr = 0;
 #if defined(WYC)
-	sv = &elf32_freebsd_sysvec; //wyc: brand_info->sysvec == &elf32_freebsd_sysvec
+	sv = &elf32_freebsd_sysvec; //wyc brand_info->sysvec == &elf32_freebsd_sysvec
 #else
 	sv = brand_info->sysvec;
 #endif
@@ -994,7 +994,7 @@ __attribute__((optnone)) //wyc
 	 */
 	VOP_UNLOCK(imgp->vp, 0);
 
-	error = exec_new_vmspace(imgp, sv); //wyc: destroy old address and allocate a new user stack
+	error = exec_new_vmspace(imgp, sv); //wyc destroy old address and allocate a new user stack
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
@@ -1005,7 +1005,7 @@ __attribute__((optnone)) //wyc
 	if (imgp->sas) {
 		struct vm_map	*map;
 
-		//wyc: allocate code and data segment
+		//wyc allocate code and data segment
 		map = &imgp->proc->p_vmspace->vm_map;
 		vm_map_lock(map);
 		error = vm_map_findspace(map, 0, cdseg_size, &cdseg_base);
@@ -1031,7 +1031,7 @@ __attribute__((optnone)) //wyc
 			error = __elfN(load_section)(
 #endif
 			    imgp, phdr[i].p_offset,
-			    (caddr_t)cdseg_base + phdr[i].p_vaddr + et_dyn_addr, //wyc: et_dyn_addr==0
+			    (caddr_t)cdseg_base + phdr[i].p_vaddr + et_dyn_addr, //wyc et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
 			if (error != 0)
@@ -1047,7 +1047,7 @@ __attribute__((optnone)) //wyc
 			    hdr->e_phoff + hdr->e_phnum * hdr->e_phentsize
 			    <= phdr[i].p_filesz)
 				proghdr = phdr[i].p_vaddr + hdr->e_phoff +
-				    et_dyn_addr; //wyc: et_dyn_addr==0
+				    et_dyn_addr; //wyc et_dyn_addr==0
 
 			seg_addr = trunc_page(phdr[i].p_vaddr + et_dyn_addr);
 			seg_size = round_page(phdr[i].p_memsz +
@@ -1074,7 +1074,7 @@ __attribute__((optnone)) //wyc
 			total_size += seg_size;
 			break;
 		case PT_PHDR: 	/* Program header table info */
-			proghdr = phdr[i].p_vaddr + et_dyn_addr; //wyc: et_dny_addr==0
+			proghdr = phdr[i].p_vaddr + et_dyn_addr; //wyc et_dny_addr==0
 			break;
 		default:
 			break;
@@ -1182,7 +1182,7 @@ __attribute__((optnone)) //wyc
 	/*
 	 * Construct auxargs table (used by the fixup routine)
 	 */
-	//wyc: for dynamic loader
+	//wyc for dynamic loader
 	elf_auxargs = malloc(sizeof(Elf_Auxargs), M_TEMP, M_WAITOK);
 	elf_auxargs->execfd = -1;
 	elf_auxargs->phdr = proghdr;
@@ -2432,11 +2432,11 @@ __elfN(check_note)(struct image_params *imgp, Elf_Brandnote *checknote,
 /*
  * Tell kern_execve.c about it, with a little help from the linker.
  */
-static struct execsw __elfN(execsw) = { //wyc: elf32_execsw
-	__CONCAT(exec_, __elfN(imgact)), //wyc: exec_elf32_imgact
-	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE)) //wyc: "ELF32"
+static struct execsw __elfN(execsw) = { //wyc elf32_execsw
+	__CONCAT(exec_, __elfN(imgact)), //wyc exec_elf32_imgact
+	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE)) //wyc "ELF32"
 };
-EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw)); //wyc: elf32_execsw
+EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw)); //wyc elf32_execsw
 
 static vm_prot_t
 __elfN(trans_prot)(Elf_Word flags)

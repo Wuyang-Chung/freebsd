@@ -116,7 +116,7 @@ __FBSDID("$FreeBSD$");
 struct faultstate {
 	vm_page_t m;
 	vm_object_t object;
-	vm_pindex_t pindex;	//wyc: offset within object
+	vm_pindex_t pindex;	//wyc offset within object
 	vm_page_t first_m;
 	vm_object_t first_object;
 	vm_pindex_t first_pindex;
@@ -366,7 +366,7 @@ RetryFault:;
 	 * object suffices, allowing multiple page faults of a similar type to
 	 * run in parallel on the same top-level object.
 	 */
-	//wyc: fast fault code
+	//wyc fast fault code
 	if (fs.vp == NULL /* avoid locked vnode leak */ &&
 	    (fault_flags & (VM_FAULT_WIRE | VM_FAULT_DIRTY)) == 0 &&
 	    /* avoid calling vm_object_set_writeable_dirty() */
@@ -435,7 +435,7 @@ fast_failed:
 	 * Search for the page at object/offset.
 	 */
 	fs.object = fs.first_object;
-	fs.pindex = fs.first_pindex; //wyc: page index within object
+	fs.pindex = fs.first_pindex; //wyc page index within object
 	while (TRUE) {
 		/*
 		 * If the object is marked for imminent termination,
@@ -577,10 +577,10 @@ readrest:
 		if (fs.object->type != OBJT_DEFAULT && nera == -1 &&
 		    !P_KILLED(curproc)) {
 			KASSERT(fs.lookup_still_valid, ("map unlocked"));
-			era = fs.entry->read_ahead; //wyc: expected read ahead
+			era = fs.entry->read_ahead; //wyc expected read ahead
 			behavior = vm_map_entry_behavior(fs.entry);
 			if (behavior == MAP_ENTRY_BEHAV_RANDOM) {
-				nera = 0; //wyc: new expected read ahead
+				nera = 0; //wyc new expected read ahead
 			} else if (behavior == MAP_ENTRY_BEHAV_SEQUENTIAL) {
 				nera = VM_FAULT_READ_AHEAD_MAX;
 				if (vaddr == fs.entry->next_read)
@@ -642,7 +642,7 @@ readrest:
 			unlock_map(&fs);
 
 			if (fs.object->type == OBJT_VNODE) {
-				/*wyc:
+				/*wyc
 				    It is possible to have multiple vnode object
 				    along the road. For example if a regular file
 				    is used as a swap space.
@@ -716,7 +716,7 @@ vnode_locked:
 			    &behind, &ahead);
 			if (rv == VM_PAGER_OK) {
 				faultcount = behind + 1 + ahead;
-				hardfault++; //wyc: we actuall did IO
+				hardfault++; //wyc we actuall did IO
 				break; /* break to PAGE HAS BEEN FOUND */
 			}
 			if (rv == VM_PAGER_ERROR)
@@ -801,7 +801,7 @@ vnode_locked:
 			KASSERT(fs.object != next_object,
 			    ("object loop %p", next_object));
 			VM_OBJECT_WLOCK(next_object);
-			vm_object_pip_add(next_object, 1); //wyc: pip: paging in progress
+			vm_object_pip_add(next_object, 1); //wyc pip: paging in progress
 			if (fs.object != fs.first_object)
 				vm_object_pip_wakeup(fs.object);
 			fs.pindex +=
@@ -810,7 +810,7 @@ vnode_locked:
 			fs.object = next_object;
 		}
 	}
-//wyc: page has been found
+//wyc page has been found
 	vm_page_assert_xbusied(fs.m);
 
 	/*
@@ -990,7 +990,7 @@ vnode_locked:
 	 * map entry.  A read lock on the map suffices to update this address
 	 * safely.
 	 */
-	if (hardfault) //wyc: actually did IO
+	if (hardfault) //wyc actually did IO
 		fs.entry->next_read = vaddr + ptoa(ahead) + PAGE_SIZE;
 
 	vm_fault_dirty(fs.entry, fs.m, prot, fault_type, fault_flags, TRUE);

@@ -186,14 +186,14 @@ __FBSDID("$FreeBSD$");
 #define pdir_pde(m, v) (m[(vm_offset_t)(v) >> PDR_SHIFT])
 
 #define pmap_pde_v(pte)		((*(int *)pte & PG_V) != 0)
-//#define pmap_pte_w(pte)		((*(int *)pte & PG_WIRED) != 0) //wyc: not referenced
-//#define pmap_pte_m(pte)		((*(int *)pte & PG_M) != 0) //wyc: not referenced
-//#define pmap_pte_u(pte)		((*(int *)pte & PG_A) != 0) //wyc: not referenced
+//#define pmap_pte_w(pte)		((*(int *)pte & PG_WIRED) != 0) //wyc not referenced
+//#define pmap_pte_m(pte)		((*(int *)pte & PG_M) != 0) //wyc not referenced
+//#define pmap_pte_u(pte)		((*(int *)pte & PG_A) != 0) //wyc not referenced
 #define pmap_pte_v(pte)		((*(int *)pte & PG_V) != 0)
 
 //#define pmap_pte_set_w(pte, v)	((v) ? atomic_set_int((u_int *)(pte), PG_WIRED) : \
-//    atomic_clear_int((u_int *)(pte), PG_WIRED)) //wyc: not referenced
-//#define pmap_pte_set_prot(pte, v) ((*(int *)pte &= ~PG_PROT), (*(int *)pte |= (v))) //wyc: not referenced
+//    atomic_clear_int((u_int *)(pte), PG_WIRED)) //wyc not referenced
+//#define pmap_pte_set_prot(pte, v) ((*(int *)pte &= ~PG_PROT), (*(int *)pte |= (v))) //wyc not referenced
 
 struct pmap kernel_pmap_store;
 LIST_HEAD(pmaplist, pmap);
@@ -202,13 +202,13 @@ static struct mtx allpmaps_lock;
 
 vm_offset_t virtual_avail;	/* VA of first avail page (after kernel bss) */
 vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
-int pgeflag = 0;		/* PG_G or-in.  wyc: == PG_G if hw supports global page */
-int pseflag = 0;		/* PG_PS or-in. wyc: == PG_PS if hw supports superpage */
+int pgeflag = 0;		/* PG_G or-in.  wyc == PG_G if hw supports global page */
+int pseflag = 0;		/* PG_PS or-in. wyc == PG_PS if hw supports superpage */
 
-static int nkpt = NKPT;		//wyc: ==30 number of kernel page table pages
+static int nkpt = NKPT;		//wyc ==30 number of kernel page table pages
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * PDR_SIZE;
-extern u_int32_t KERNend;	//wyc: phys addr end of kernel (just after bss)
-extern u_int32_t KPTphys;	//wyc: kernel page table physical address (0x0140_0000)
+extern u_int32_t KERNend;	//wyc phys addr end of kernel (just after bss)
+extern u_int32_t KPTphys;	//wyc kernel page table physical address (0x0140_0000)
 
 #if defined(PAE) || defined(PAE_TABLES)
 pt_entry_t pg_nx;
@@ -221,7 +221,7 @@ static int pat_works = 1;
 SYSCTL_INT(_vm_pmap, OID_AUTO, pat_works, CTLFLAG_RD, &pat_works, 1,
     "Is page attribute table fully functional?");
 
-static int pg_ps_enabled = 1;	//wyc: superpage enabled? Will be set to 0 if hw does not support it.
+static int pg_ps_enabled = 1;	//wyc superpage enabled? Will be set to 0 if hw does not support it.
 SYSCTL_INT(_vm_pmap, OID_AUTO, pg_ps_enabled, CTLFLAG_RDTUN | CTLFLAG_NOFETCH,
     &pg_ps_enabled, 0, "Are large page mappings enabled?");
 
@@ -248,7 +248,7 @@ static struct rwlock_padalign pvh_global_lock;
 static TAILQ_HEAD(pch, pv_chunk) pv_chunks = TAILQ_HEAD_INITIALIZER(pv_chunks);
 static int pv_entry_count = 0, pv_entry_max = 0, pv_entry_high_water = 0;
 static struct md_page *pv_table;
-static int shpgperproc = PMAP_SHPGPERPROC;	//wyc: share pages per proc I presume.
+static int shpgperproc = PMAP_SHPGPERPROC;	//wyc share pages per proc I presume.
 
 struct pv_chunk *pv_chunkbase;		/* KVA block for pv_chunks */
 int pv_maxchunks;			/* How many chunks we have KVA for */
@@ -271,7 +271,7 @@ struct sysmaps {
 static struct sysmaps sysmaps_pcpu[MAXCPU];
 pt_entry_t *CMAP3;
 caddr_t CADDR3;
-static pd_entry_t *KPTD;	//wyc: ==0xBFF0_4648. kernel PTD in kernel pte
+static pd_entry_t *KPTD;	//wyc ==0xBFF0_4648. kernel PTD in kernel pte
 caddr_t ptvmmap = 0;
 struct msgbuf *msgbufp = NULL;
 
@@ -488,7 +488,7 @@ pmap_bootstrap(vm_paddr_t firstaddr)
 	 * KPTmap can only support NKPT page table pages.  Here, a larger
 	 * KPTmap is created that can support KVA_PAGES page table pages.
 	 */
-	SYSMAP(pt_entry_t *, KPTD, KPTmap, KVA_PAGES)	//wyc: KVA_PAGES==256
+	SYSMAP(pt_entry_t *, KPTD, KPTmap, KVA_PAGES)	//wyc KVA_PAGES==256
 
 	for (i = 0; i < NKPT; i++)
 		KPTD[i] = (KPTphys + (i << PAGE_SHIFT)) | pgeflag | PG_RW | PG_V;
@@ -540,7 +540,7 @@ pmap_init_qpages(void)
 
 	CPU_FOREACH(i) {
 		pc = pcpu_find(i);
-		pc->pc_qmap_addr = kva_alloc(PAGE_SIZE); //wyc: pc_qmap_addr: KVA for temporary mappings
+		pc->pc_qmap_addr = kva_alloc(PAGE_SIZE); //wyc pc_qmap_addr: KVA for temporary mappings
 		if (pc->pc_qmap_addr == 0)
 			panic("%s: unable to allocate KVA", __func__);
 	}
@@ -986,7 +986,7 @@ pmap_update_pde_invalidate(vm_offset_t va, pd_entry_t newpde)
 	}
 }
 
-/*wyc: invalidate TLB entries with global PG_G bit set */
+/*wyc invalidate TLB entries with global PG_G bit set */
 void
 invltlb_glob(void)
 {
@@ -996,7 +996,7 @@ invltlb_glob(void)
 		invltlb();
 	} else {
 		cr4 = rcr4();
-		load_cr4(cr4 & ~CR4_PGE); //wyc: clear CR4_PGE will invalide all TLB entries
+		load_cr4(cr4 & ~CR4_PGE); //wyc clear CR4_PGE will invalide all TLB entries
 		load_cr4(cr4 | CR4_PGE);
 	}
 }
@@ -1035,10 +1035,10 @@ pmap_invalidate_page(pmap_t pmap, vm_offset_t va)
 	} else {
 		cpuid = PCPU_GET(cpuid);
 		other_cpus = all_cpus;
-		CPU_CLR(cpuid, &other_cpus); //wyc: other_cpus = all_cpus & ~cpuid;
+		CPU_CLR(cpuid, &other_cpus); //wyc other_cpus = all_cpus & ~cpuid;
 		if (CPU_ISSET(cpuid, &pmap->pm_active))
 			invlpg(va);
-		CPU_AND(&other_cpus, &pmap->pm_active); //wyc: other_cpus &= pmap->pm_active;
+		CPU_AND(&other_cpus, &pmap->pm_active); //wyc other_cpus &= pmap->pm_active;
 		mask = &other_cpus;
 	}
 	smp_masked_invlpg(*mask, va);
@@ -1072,7 +1072,7 @@ pmap_invalidate_range(pmap_t pmap, vm_offset_t sva, vm_offset_t eva)
 		if (CPU_ISSET(cpuid, &pmap->pm_active))
 			for (addr = sva; addr < eva; addr += PAGE_SIZE)
 				invlpg(addr);
-		CPU_AND(&other_cpus, &pmap->pm_active); //wyc: other_cpus &= pmap->pm_active
+		CPU_AND(&other_cpus, &pmap->pm_active); //wyc other_cpus &= pmap->pm_active
 		mask = &other_cpus;
 	}
 	smp_masked_invlpg_range(*mask, sva, eva);
@@ -1124,7 +1124,7 @@ struct pde_action {
 };
 
 #if !defined(WYC)	// Don't parse it in SI
-/*wyc:
+/*wyc
   These functions will only be called when (workaround_erratum383 == 1)
   workaround_erratum383 is a workaround for AMD CPU
 */
@@ -1541,7 +1541,7 @@ retry:
  ***************************************************/
 
 /*
- * Add a wired page to the kva. wyc???: why PG_WIRED is not specified?
+ * Add a wired page to the kva. wyc??? why PG_WIRED is not specified?
  * Note: not SMP coherent.
  *
  * This function may be used before pmap_bootstrap() is called.
@@ -1962,7 +1962,7 @@ _pmap_allocpte(pmap_t pmap, u_int ptepindex, u_int flags)
 	pmap->pm_stats.resident_count++;
 
 	ptepa = VM_PAGE_TO_PHYS(m);
-	//wyc:
+	//wyc
 	//  If PG_U==0, the system cannot boot.
 	//  PG_U==0 means that the 4M virtual address cannot be accessed by user level process
 	//  PG_U of PDE is not important but PG_U of PTE is.
@@ -3465,7 +3465,7 @@ setpte:
  */
 int
 pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
-    u_int flags, int8_t psind)	//wyc: psind(page size index). Always 0
+    u_int flags, int8_t psind)	//wyc psind(page size index). Always 0
 {
 	pd_entry_t *pde;
 	pt_entry_t *pte;
@@ -3475,15 +3475,15 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 	vm_page_t mpte, om;
 	boolean_t invlva, wired;
 
-	//wyc: tested. psind is always 0
+	//wyc tested. psind is always 0
 	//if (psind != 0)
-	//	panic("wyc: psind is not 0");
+	//	panic("%s: psind is not 0", __func__);
 	va = trunc_page(va);
 	mpte = NULL;
 	wired = (flags & PMAP_ENTER_WIRED) != 0;
 
 	KASSERT(va <= VM_MAX_KERNEL_ADDRESS, ("%s: toobig", __func__));
-	//wyc???: should it be (va < 3G-4M)?
+	//wyc??? should it be (va < 3G-4M)?
 	KASSERT(va < UPT_MIN_ADDRESS || va >= UPT_MAX_ADDRESS,
 	    ("%s: invalid to pmap_enter page table pages (va: 0x%x), __func__",
 	    va));
@@ -3758,12 +3758,12 @@ pmap_enter_object(pmap_t pmap, vm_offset_t start, vm_offset_t end,
 	PMAP_LOCK(pmap);
 	while (m != NULL && (diff = m->pindex - m_start->pindex) < psize) {
 		va = start + ptoa(diff);
-		if ((va & PDR_MASK) == 0 && 	//wyc: aligned on superpage
-		    va + PDR_SIZE <= end &&	//wyc: less than 1 superpage
-		    m->psind == 1 && 		//wyc: it is a superpage
-		    pg_ps_enabled &&		//wyc: superpage enabled
+		if ((va & PDR_MASK) == 0 && 	//wyc aligned on superpage
+		    va + PDR_SIZE <= end &&	//wyc less than 1 superpage
+		    m->psind == 1 && 		//wyc it is a superpage
+		    pg_ps_enabled &&		//wyc superpage enabled
 		    pmap_enter_pde(pmap, va, m, prot))
-			m = &m[PDR_SIZE / PAGE_SIZE - 1];	//wyc: == 1023
+			m = &m[PDR_SIZE / PAGE_SIZE - 1];	//wyc == 1023
 		else
 			mpte = pmap_enter_quick_locked(pmap, va, m, prot,
 			    mpte);
@@ -5490,7 +5490,7 @@ __attribute__((optnone)) //wyc
 	critical_enter();
 	pmap = vmspace_pmap(td->td_proc->p_vmspace);
 	oldpmap = PCPU_GET(curpmap);
-	//wyc: Most of the time pmap == oldpmap. But on very few occasion, it is not
+	//wyc Most of the time pmap == oldpmap. But on very few occasion, it is not
 	//if (pmap == oldpmap) {
 	//	{void kdb_enter(const char *, const char *);kdb_enter("wyc", __func__);}
 	//	goto exit;
@@ -5534,7 +5534,7 @@ pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
 {
 	vm_offset_t superpage_offset;
 
-	if (size < PDR_SIZE) //wyc: 4M
+	if (size < PDR_SIZE) //wyc 4M
 		return;
 	if (object != NULL && (object->flags & OBJ_COLORED) != 0)
 		offset += ptoa(object->pg_color);

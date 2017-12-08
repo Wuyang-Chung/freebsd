@@ -307,7 +307,7 @@ static __inline int
 fo_write(struct file *fp, struct uio *uio, struct ucred *active_cred,
     int flags, struct thread *td)
 {
-	//wyc: fo_write==vn_io_fault()
+	//wyc fo_write==vn_io_fault()
 	return ((*fp->f_ops->fo_write)(fp, uio, active_cred, flags, td));
 }
 
@@ -406,7 +406,7 @@ fo_mmap(struct file *fp, vm_map_t map, vm_offset_t *addr, vm_size_t size,
 	if (fp->f_ops->fo_mmap == NULL)
 		return (ENODEV);
 	return ((*fp->f_ops->fo_mmap)(fp, map, addr, size, prot, cap_maxprot,
-	    flags, foff, td)); //wyc: vn_mmap()
+	    flags, foff, td)); //wyc vn_mmap()
 }
 
 static __inline int

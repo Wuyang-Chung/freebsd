@@ -143,7 +143,7 @@ SDT_PROBE_DEFINE(vm, , , vm__lowmem_scan);
 
 #if !defined(NO_SWAPPING)
 /* the kernel process "vm_daemon"*/
-static void vm_daemon(void);	//wyc: swap out daemon
+static void vm_daemon(void);	//wyc swap out daemon
 static struct	proc *vmproc;
 
 static struct kproc_desc vm_kp = {
@@ -1596,7 +1596,7 @@ vm_pageout_worker(void *arg)
 			 */
 			if (mtx_sleep(&vm_pageout_wanted,
 			    &vm_page_queue_free_mtx, PDROP | PVM, "psleep",
-			    hz) == 0) { //wyc: hz==1 second
+			    hz) == 0) { //wyc hz==1 second
 				PCPU_INC(cnt.v_pdwakeups);
 				domain->vmd_pass = 1;
 			} else

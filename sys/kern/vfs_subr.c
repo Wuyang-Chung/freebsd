@@ -1062,7 +1062,7 @@ vnlru_proc(void)
 
 	force = 0;
 	for (;;) {
-		kproc_suspend_check(vnlruproc); //wyc: check for stop signal
+		kproc_suspend_check(vnlruproc); //wyc check for stop signal
 		mtx_lock(&vnode_free_list_mtx);
 		/*
 		 * If numvnodes is too large (due to desiredvnodes being
@@ -1118,7 +1118,7 @@ vnlru_proc(void)
 		trigger = vm_cnt.v_page_count * 2 / usevnodes;
 		if (force < 2)
 			trigger = vsmalltrigger;
-		reclaim_nc_src = force >= 3; //wyc: also reclaim directory
+		reclaim_nc_src = force >= 3; //wyc also reclaim directory
 		mtx_lock(&mountlist_mtx);
 		for (mp = TAILQ_FIRST(&mountlist); mp != NULL; mp = nmp) {
 			if (vfs_busy(mp, MBF_NOWAIT | MBF_MNTLSTLOCK)) {
@@ -1927,7 +1927,7 @@ gbincore(struct bufobj *bo, daddr_t lblkno)
 	struct buf *bp;
 
 	ASSERT_BO_LOCKED(bo);
-	bp = BUF_PCTRIE_LOOKUP(&bo->bo_clean.bv_root, lblkno); //wyc: PCTRIE_DEFINE
+	bp = BUF_PCTRIE_LOOKUP(&bo->bo_clean.bv_root, lblkno); //wyc PCTRIE_DEFINE
 	if (bp != NULL)
 		return (bp);
 	return BUF_PCTRIE_LOOKUP(&bo->bo_dirty.bv_root, lblkno);
@@ -2520,7 +2520,7 @@ vget(struct vnode *vp, int flags, struct thread *td)
 	if ((flags & LK_VNHELD) == 0)
 		_vhold(vp, (flags & LK_INTERLOCK) != 0);
 
-	if ((error = vn_lock(vp, flags)) != 0) { //wyc: vp marked doomed so the lock failed
+	if ((error = vn_lock(vp, flags)) != 0) { //wyc vp marked doomed so the lock failed
 		vdrop(vp);
 		CTR2(KTR_VFS, "%s: impossible to lock vnode %p", __func__,
 		    vp);
@@ -2922,7 +2922,7 @@ vinactive(struct vnode *vp, struct thread *td)
 		vm_object_page_clean(obj, 0, 0, OBJPC_NOSYNC);
 		VM_OBJECT_WUNLOCK(obj);
 	}
-	VOP_INACTIVE(vp, td); //wyc: ufs_inactive()
+	VOP_INACTIVE(vp, td); //wyc ufs_inactive()
 	VI_LOCK(vp);
 	VNASSERT(vp->v_iflag & VI_DOINGINACT, vp,
 	    ("vinactive: lost VI_DOINGINACT"));

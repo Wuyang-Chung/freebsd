@@ -282,7 +282,7 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 	if (pinit == NULL)
 		pinit = &pmap_pinit;
 	else {
-		//wyc: 'pinit' is always NULL in i386.
+		//wyc 'pinit' is always NULL in i386.
 		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
 		panic("%s: pinit not NULL", __func__);	
 	}
@@ -322,7 +322,7 @@ vmspace_container_reset(struct proc *p)
 static inline void
 vmspace_dofree(struct vmspace *vm)
 {
-	//wyc: tested. vm->vm_map.pmap == &vm->vm_pmap
+	//wyc tested. vm->vm_map.pmap == &vm->vm_pmap
 	//if (vm->vm_map.pmap != &vm->vm_pmap)
 	//	panic("vmspace_dofree: &vm_pmap != vm_map.pmap");
 	CTR1(KTR_VM, "vmspace_free: %p", vm);
@@ -342,7 +342,7 @@ vmspace_dofree(struct vmspace *vm)
 	    vm->vm_map.max_offset);
 
 	pmap_release(vmspace_pmap(vm));
-	vm->vm_map.pmap = NULL; //wyc: When vm is freed, vm_map is also freed. So there is no need to set pmap to NULL
+	vm->vm_map.pmap = NULL; //wyc When vm is freed, vm_map is also freed. So there is no need to set pmap to NULL
 	uma_zfree(vmspace_zone, vm);
 }
 
@@ -1024,7 +1024,7 @@ vm_map_entry_link(vm_map_t map,
 		after_where->right = NULL;
 		after_where->adj_free = entry->start - after_where->end;
 		vm_map_entry_set_max_free(after_where);
-	} else { //wyc: insert to the head
+	} else { //wyc insert to the head
 		entry->right = map->root;
 		entry->left = NULL;
 	}
@@ -1435,7 +1435,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
 		//return (1);
-		return (KERN_NO_SPACE); //wyc: KERN_NO_SPACE???
+		return (KERN_NO_SPACE); //wyc KERN_NO_SPACE???
 
 	/*
 	 * Search the right subtree in the order: left subtree, root,
@@ -1475,9 +1475,9 @@ __attribute__((optnone)) //wyc
 	    ("vm_map_fixed: non-NULL backing object for stack"));
 	vm_map_lock(map);
 	VM_MAP_RANGE_CHECK(map, start, end);
-	if ((cow & COWF_CHECK_EXCL) == 0) //wyc: TRUE
+	if ((cow & COWF_CHECK_EXCL) == 0) //wyc TRUE
 		vm_map_delete(map, start, end);
-	if ((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) != 0) { //wyc: FALSE
+	if ((cow & (COWF_STACK_GROWS_DEC | COWF_STACK_GROWS_INC)) != 0) { //wyc FALSE
 		result = vm_map_stack_locked(map, start, length, sgrowsiz,
 		    prot, max, cow);
 	} else {
@@ -3042,7 +3042,7 @@ vm_map_delete(vm_map_t map, vm_offset_t start, vm_offset_t end)
 			last_timestamp = map->timestamp;
 			(void) vm_map_unlock_and_wait(map, 0);
 			vm_map_lock(map);
-			if (last_timestamp + 1 != map->timestamp) { //wyc: i.e. generation
+			if (last_timestamp + 1 != map->timestamp) { //wyc i.e. generation
 				/*
 				 * Look again for the entry because the map was
 				 * modified while it was unlocked.
@@ -3262,7 +3262,7 @@ vm_map_copy_entry(
 			}
 		}
 
-		//wyc: panic if "start" and "end" not equal
+		//wyc panic if "start" and "end" not equal
 		if (src_entry->start != dst_entry->start )
 			panic("%s: src start != dst start", __func__);
 		if (src_entry->end != dst_entry->end)
@@ -3270,7 +3270,7 @@ vm_map_copy_entry(
 		pmap_copy(dst_map->pmap, 
 		    src_map->pmap, 
 		    dst_entry->start,
-		    src_entry->end - src_entry->start,	//wyc: replace dst with src
+		    src_entry->end - src_entry->start,	//wyc replace dst with src
 		    src_entry->start);
 	} else {
 		/*
@@ -3299,12 +3299,12 @@ vmspace_map_entry_forked(const struct vmspace *vm1, struct vmspace *vm2,
 	entrysize = entry->end - entry->start;
 	vm2->vm_map.size += entrysize;
 	if (entry->eflags & (MAP_ENTRY_GROWS_DOWN | MAP_ENTRY_GROWS_UP)) {
-		vm2->vm_ssize += btoc(entrysize); //wyc: ==howmany(entrysize,PAGE_SIZE)
+		vm2->vm_ssize += btoc(entrysize); //wyc ==howmany(entrysize,PAGE_SIZE)
 	} else if (entry->start >= (vm_offset_t)vm1->vm_daddr &&
 	    entry->start < (vm_offset_t)vm1->vm_daddr + ctob(vm1->vm_dsize)) {
 		newend = MIN(entry->end,
 		    (vm_offset_t)vm1->vm_daddr + ctob(vm1->vm_dsize));
-		vm2->vm_dsize += btoc(newend - entry->start); //wyc: ==howmany(,PAGE_SIZE)
+		vm2->vm_dsize += btoc(newend - entry->start); //wyc ==howmany(,PAGE_SIZE)
 	} else if (entry->start >= (vm_offset_t)vm1->vm_taddr &&
 	    entry->start < (vm_offset_t)vm1->vm_taddr + ctob(vm1->vm_tsize)) {
 		newend = MIN(entry->end,
@@ -3348,7 +3348,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	locked = vm_map_trylock(map2); /* trylock to silence WITNESS */
 	KASSERT(locked, ("vmspace_fork: lock failed"));
 
-	//entry1 = map1->header.next;	//wyc: change while to for loop
+	//entry1 = map1->header.next;	//wyc change while to for loop
 
 	MAP_ENTRY_FOREACH(entry1, map1) {
 		if (entry1->eflags & MAP_ENTRY_IS_SUB_MAP)
@@ -3444,7 +3444,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			 */
 			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2),
 			    entry2);
-			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc: for accounting
+			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc for accounting
 
 			/*
 			 * Update the physical map
@@ -3456,7 +3456,7 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			    entry1->start);
 			break;
 
-		case VM_INHERIT_COPY: //wyc: COW
+		case VM_INHERIT_COPY: //wyc COW
 			/*
 			 * Clone the entry and link into the map.
 			 */
@@ -3472,11 +3472,11 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 			entry2->object.vm_object = NULL;
 			entry2->cred = NULL;
 			vm_map_entry_link(map2, MAP_ENTRY_LAST(map2), entry2);
-			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc: update vm2's statistics
+			vmspace_map_entry_forked(vm1, vm2, entry2); //wyc update vm2's statistics
 			vm_map_copy_entry(map1, map2, entry1, entry2, fork_charge);
 			break;
 		}
-		//entry1 = entry1->next;	//wyc: change while to for loop
+		//entry1 = entry1->next;	//wyc change while to for loop
 	}
 	/*
 	 * Use inlined vm_map_unlock() to postpone handling the deferred
@@ -3490,14 +3490,14 @@ vmspace_fork(struct vmspace *vm1, vm_ooffset_t *fork_charge)
 	return (vm2);
 }
 
-/*wyc: addrbos means bottom of stack */
+/*wyc addrbos means bottom of stack */
 int
 vm_map_stack(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
     vm_prot_t prot, vm_prot_t max, int cow)
 {
 	vm_size_t growsize, init_ssize;
 	rlim_t lmemlim, vmemlim;
-	int rv;	//wyc: return value
+	int rv;	//wyc return value
 
 	growsize = sgrowsiz;
 	init_ssize = (max_ssize < growsize) ? max_ssize : growsize;
@@ -3522,7 +3522,7 @@ out:
 	return (rv);
 }
 
-/*wyc: addrbos means bottom of stack */
+/*wyc addrbos means bottom of stack */
 static int
 vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
     vm_size_t growsize, vm_prot_t prot, vm_prot_t max_prot, int cow)
@@ -3626,7 +3626,7 @@ vm_map_growstack(struct proc *p, vm_offset_t addr)
 	vm_size_t growsize;
 	size_t grow_amount, max_grow;
 	rlim_t lmemlim, stacklim, vmemlim;
-	int is_procstack; //wyc: is this the main process stack
+	int is_procstack; //wyc is this the main process stack
 	int rv;
 	struct ucred *cred;
 #ifdef notyet
@@ -3648,7 +3648,7 @@ Retry:
 		vm_map_unlock_read(map);
 		return (KERN_SUCCESS);
 	}
-	/*wyc:
+	/*wyc
 		what if prev_entry == MAP_ENTRY_SENTINEL(map) ???
 	*/
 	next_entry = prev_entry->next;
@@ -3727,7 +3727,7 @@ Retry:
 	}
 
 	is_procstack = (addr >= (vm_offset_t)vm->vm_maxsaddr &&
-	    addr < (vm_offset_t)p->p_sysent->sv_usrstack) ? 1 : 0; //wyc: compile-time error at p_sysent if moved to vm_fault.c
+	    addr < (vm_offset_t)p->p_sysent->sv_usrstack) ? 1 : 0; //wyc compile-time error at p_sysent if moved to vm_fault.c
 
 	/*
 	 * If this is the main process stack, see if we're over the stack
@@ -3876,7 +3876,7 @@ Retry:
 			/* Update the current entry. */
 			stack_entry->end = addr;
 			stack_entry->avail_ssize -= grow_amount;
-			vm_map_entry_resize_free(map, stack_entry); //wyc: compile-time error at vm_map_entry_resize_free() if moved to vm_fault.c
+			vm_map_entry_resize_free(map, stack_entry); //wyc compile-time error at vm_map_entry_resize_free() if moved to vm_fault.c
 			rv = KERN_SUCCESS;
 		} else
 			rv = KERN_FAILURE;
@@ -3934,7 +3934,7 @@ vmspace_exec(struct proc *p, vm_offset_t minuser, vm_offset_t maxuser)
 	newvmspace = vmspace_alloc(minuser, maxuser, NULL);
 	if (newvmspace == NULL)
 		return (ENOMEM);
-	newvmspace->vm_swrss = oldvmspace->vm_swrss; //wyc: resident set size before last swap
+	newvmspace->vm_swrss = oldvmspace->vm_swrss; //wyc resident set size before last swap
 	/*
 	 * This code is written like this for prototype purposes.  The
 	 * goal is to avoid running down the vmspace here, but let the
@@ -4079,7 +4079,7 @@ RetryLookup:;
 	/*
 	 * If the entry was copy-on-write, we either ...
 	 */
-	if (entry->eflags & MAP_ENTRY_NEEDS_COPY) { //wyc: private mapping
+	if (entry->eflags & MAP_ENTRY_NEEDS_COPY) { //wyc private mapping
 		/*
 		 * If we want to write the page, we may as well handle that
 		 * now since we've got the map locked.
@@ -4088,7 +4088,7 @@ RetryLookup:;
 		 * permissions allowed.
 		 */
 		if ((fault_type & VM_PROT_WRITE) != 0 ||
-		    (fault_typea & VM_PROT_COPY) != 0) { //wyc: create shadow object
+		    (fault_typea & VM_PROT_COPY) != 0) { //wyc create shadow object
 			/*
 			 * Make a new object, and place it in the object
 			 * chain.  Note that no new references have appeared

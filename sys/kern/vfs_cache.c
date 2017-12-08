@@ -1074,14 +1074,14 @@ vfs_cache_lookup(struct vop_lookup_args *ap)
 	    (cnp->cn_nameiop == DELETE || cnp->cn_nameiop == RENAME))
 		return (EROFS);
 
-	error = VOP_ACCESS(dvp, VEXEC, cred, td); //wyc: vop_stdaccess
+	error = VOP_ACCESS(dvp, VEXEC, cred, td); //wyc vop_stdaccess
 	if (error)
 		return (error);
 
 	error = cache_lookup(dvp, vpp, cnp, NULL, NULL);
-	if (error == 0) //wyc: cache miss
-		return (VOP_CACHEDLOOKUP(dvp, vpp, cnp)); //wyc: ufs_lookup()
-	if (error == -1) //wyc: cache hit
+	if (error == 0) //wyc cache miss
+		return (VOP_CACHEDLOOKUP(dvp, vpp, cnp)); //wyc ufs_lookup()
+	if (error == -1) //wyc cache hit
 		return (0);
 	return (error);
 }
@@ -1305,7 +1305,7 @@ vn_fullpath1(struct thread *td, struct vnode *vp, struct vnode *rdir,
 	slash_prefixed = 0;
 
 	SDT_PROBE1(vfs, namecache, fullpath, entry, vp);
-	counter_u64_add(numfullpathcalls, 1); //wyc: bug
+	counter_u64_add(numfullpathcalls, 1); //wyc bug
 	vref(vp);
 	CACHE_RLOCK();
 	if (vp->v_type != VDIR) {
@@ -1374,7 +1374,7 @@ vn_fullpath1(struct thread *td, struct vnode *vp, struct vnode *rdir,
 		}
 		buf[--buflen] = '/';
 	}
-	counter_u64_add(numfullpathfound, 1); //wyc: bug
+	counter_u64_add(numfullpathfound, 1); //wyc bug
 	CACHE_RUNLOCK();
 	vrele(vp);
 
