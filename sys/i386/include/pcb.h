@@ -66,14 +66,15 @@ struct pcb {
 	struct segment_descriptor pcb_fsd;	//wyc user fs descriptor
 #endif
 	struct segment_descriptor pcb_gsd;	//wyc user gs descriptor
-	int	pcb_cs;	//wyc???: why no cs?
-	int	pcb_ds;
-	int	pcb_es;
-	int	pcb_fs;
-	int	pcb_gs;
-	int	pcb_ss;
-	//int	pcb_cr0; //wyc system control flags
-	//int	pcb_cr2; //wyc the page-fault linear address
+	int	pcb_cs;	//wyc??? why no cs?
+	int	pcb_ds; //wyc: PCB_DS refed in savectx() and resumectx()
+	int	pcb_es; //wyc: PCB_ES refed in savectx() and resumectx()
+	int	pcb_fs; //wyc: PCB_FS refed in savectx() and resumectx()
+	int	pcb_gs; //wyc: refed in a lot of places
+	int	pcb_ss; //wyc: PCB_SS refed in savectx() and resumectx()
+	int	pcb_cr0; //wyc system control flags
+	//wyc there is no cr1 in x86
+	int	pcb_cr2; //wyc the page-fault linear address
 	int	pcb_cr3; //wyc the base address of page table
 	int	pcb_cr4; //wyc group of flags that enable several architectureal extensions
 			 //wyc refed by acpi_wakeup.c:234
@@ -99,7 +100,7 @@ struct pcb {
 	u_long	pcb_vm86[2];	/* vm86bios scratch space */
 	union	savefpu *pcb_save;
 
-	uint32_t pcb_pad[10+3];	//wyc pad pcb_fsd(2 words) here
+	uint32_t pcb_pad[10+1];	//wyc 
 };
 
 /* Per-CPU state saved during suspend and resume. */

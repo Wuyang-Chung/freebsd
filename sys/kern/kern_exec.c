@@ -209,15 +209,15 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	struct vmspace *oldvmspace;
 	int error;
 
-	error = pre_execve(td, &oldvmspace);
-	if (error != 0)
+	error = pre_execve(td, &oldvmspace); //wyc enforce single threading
+	if (error != ESUCCESS)
 		return (error);
 	error = exec_copyin_args(&args, uap->fname, UIO_USERSPACE,
 	    uap->argv, uap->envv); //wyc the size of args is 1KiB+256KiB
-	if (error == 0)
+	if (error == ESUCCESS)
 		error = kern_execve(td, &args, NULL);
 	//wyc will run to here even if kern_execve succeeds
-	post_execve(td, error, oldvmspace);
+	post_execve(td, error, oldvmspace); //wyc force other threads to suicide
 	return (error);
 }
 
@@ -314,7 +314,7 @@ post_execve(struct thread *td, int error, struct vmspace *oldvmspace)
 		 * If success, we upgrade to SINGLE_EXIT state to
 		 * force other threads to suicide.
 		 */
-		if (error == 0)
+		if (error == ESUCCESS)
 			thread_single(p, SINGLE_EXIT);
 		else
 			thread_single_end(p, SINGLE_BOUNDARY);
@@ -1228,6 +1228,10 @@ __attribute__((optnone)) //wyc
  * Copy out argument and environment strings from the old process address
  * space into the temporary string buffer.
  */
+/*wyc
+  args: OUT
+  fname, argv, envv: IN
+*/
 int
 exec_copyin_args(struct image_args *args, char *fname,
     enum uio_seg segflg, char **argv, char **envv)
@@ -1245,7 +1249,7 @@ exec_copyin_args(struct image_args *args, char *fname,
 	 * environment strings.
 	 */
 	error = exec_alloc_args(args);
-	if (error != 0)
+	if (error != ESUCCESS)
 		return (error);
 
 	/*
@@ -1397,7 +1401,7 @@ exec_alloc_args(struct image_args *args)
 {
 
 	args->buf = (char *)kmap_alloc_wait(exec_map, PATH_MAX + ARG_MAX);
-	return (args->buf != NULL ? 0 : ENOMEM);
+	return (args->buf != NULL ? ESUCCESS : ENOMEM);
 }
 
 void

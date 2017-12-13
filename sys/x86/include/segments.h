@@ -247,8 +247,8 @@ enum {
 	GBIOSUTIL_SEL,	/* 16 BIOS interface (Utility) */
 	GBIOSARGS_SEL,	/* 17 BIOS interface (Arguments) */
 	GNDIS_SEL,	/* 18 For the NDIS layer */
-	GUSERLDT0_SEL,	//wyc
-	GUSERLDT1_SEL,	//wyc
+	GUSERLDT0_SEL,	//wyc sas program 0 (echo server)
+	GUSERLDT1_SEL,	//wyc sas program 1 (client)
 	NGDT
 };
 

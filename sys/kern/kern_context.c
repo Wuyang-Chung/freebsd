@@ -50,13 +50,6 @@ __FBSDID("$FreeBSD$");
 struct getcontext_args {
 	struct __ucontext *ucp;
 }
-struct setcontext_args {
-	const struct __ucontext_t *ucp;
-}
-struct swapcontext_args {
-	struct __ucontext *oucp;
-	const struct __ucontext_t *ucp;
-}
 #endif
 
 int
@@ -78,6 +71,12 @@ sys_getcontext(struct thread *td, struct getcontext_args *uap)
 	return (ret);
 }
 
+#ifndef _SYS_SYSPROTO_H_
+struct setcontext_args {
+	const struct __ucontext_t *ucp;
+}
+#endif
+
 int
 sys_setcontext(struct thread *td, struct setcontext_args *uap)
 {
@@ -98,6 +97,13 @@ sys_setcontext(struct thread *td, struct setcontext_args *uap)
 	}
 	return (ret == 0 ? EJUSTRETURN : ret);
 }
+
+#ifndef _SYS_SYSPROTO_H_
+struct swapcontext_args {
+	struct __ucontext *oucp;
+	const struct __ucontext_t *ucp;
+}
+#endif
 
 int
 sys_swapcontext(struct thread *td, struct swapcontext_args *uap)
