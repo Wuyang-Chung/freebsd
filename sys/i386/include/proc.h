@@ -58,6 +58,7 @@ struct mdproc {
 #if defined(WYC)
 	struct proc_ldt *md_ldt;	/* (t) per-process ldt */
 #endif
+	int	gsel_ldt; //wyc the global selector for the ldt table
 	struct segment_descriptor p_ldt[3]; //wyc 0->c, 1->d, 2->s
 };
 

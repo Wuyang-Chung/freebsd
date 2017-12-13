@@ -93,6 +93,7 @@ ASSYM(TD_TID, offsetof(struct thread, td_tid));
 ASSYM(TDP_CALLCHAIN, TDP_CALLCHAIN);
 
 ASSYM(P_MD, offsetof(struct proc, p_md));
+ASSYM(GSEL_LDT, offsetof(struct mdproc, gsel_ldt));
 //wyc ASSYM(MD_LDT, offsetof(struct mdproc, md_ldt));
 ASSYM(P_FLAG2, offsetof(struct proc, p_flag2));
 ASSYM(P2_SAS, P2_SAS);
@@ -122,8 +123,8 @@ ASSYM(VM_MAXUSER_ADDRESS, VM_MAXUSER_ADDRESS);
 ASSYM(KERNBASE, KERNBASE);
 ASSYM(KERNLOAD, KERNLOAD);
 ASSYM(MCLBYTES, MCLBYTES);
-//ASSYM(PCB_CR0, offsetof(struct pcb, pcb_cr0));
-//ASSYM(PCB_CR2, offsetof(struct pcb, pcb_cr2));
+ASSYM(PCB_CR0, offsetof(struct pcb, pcb_cr0));
+ASSYM(PCB_CR2, offsetof(struct pcb, pcb_cr2));
 ASSYM(PCB_CR3, offsetof(struct pcb, pcb_cr3));
 ASSYM(PCB_CR4, offsetof(struct pcb, pcb_cr4));
 ASSYM(PCB_EDI, offsetof(struct pcb, pcb_edi));

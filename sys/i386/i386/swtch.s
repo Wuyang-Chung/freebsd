@@ -207,9 +207,9 @@ sw1:
 	movl	P_FLAG2(%esi), %eax	//wyc %eax = newtd->td_proc->p_flags
 	testl	$P2_SAS, %eax
 	jz	1f			//wyc if P2_SAS not set
-	lldt	sas_ldts
+	movl	P_MD+GSEL_LDT(%esi), %eax
+	lldt	%ax
 1:
-
 	/*wyc
 	    ecx: newtd
 	    edx: newpcb
@@ -359,7 +359,7 @@ sw0_3:	.asciz	"cpu_switch: no newthread supplied"
 END(cpu_switch)
 
 /*
- * savectx(pcb)
+ * int savectx(struct pcb *) __returns_twice;
  * Update pcb, saving current processor state.
  * 4(%esp) = pcb
  */
@@ -383,11 +383,11 @@ ENTRY(savectx)
 	pushfl
 	popl	PCB_PSL(%ecx)
 
-	//movl	%cr0,%eax
-	//movl	%eax,PCB_CR0(%ecx)
-	//movl	%cr2,%eax
-	//movl	%eax,PCB_CR2(%ecx)
-	movl	%cr4,%eax
+	movl	%cr0,%eax
+	movl	%eax,PCB_CR0(%ecx)
+	movl	%cr2,%eax
+	movl	%eax,PCB_CR2(%ecx)
+	movl	%cr4,%eax //wyc group of flags that enable several architectureal extensions
 	movl	%eax,PCB_CR4(%ecx)
 
 	movl	%dr0,%eax
@@ -418,7 +418,7 @@ ENTRY(savectx)
 END(savectx)
 
 /*
- * resumectx(pcb) __fastcall
+ * void resumectx(struct pcb *) __fastcall;
  * Resuming processor state from pcb.
 wyc
   ecx = pcb
@@ -440,14 +440,14 @@ ENTRY(resumectx)
 	mov	%ax,%ss
 
 	/* Restore CR2, CR4, CR3 and CR0 */
-	//movl	PCB_CR2(%ecx),%eax
-	//movl	%eax,%cr2
+	movl	PCB_CR2(%ecx),%eax
+	movl	%eax,%cr2
 	movl	PCB_CR4(%ecx),%eax
 	movl	%eax,%cr4
 	movl	PCB_CR3(%ecx),%eax
 	movl	%eax,%cr3
-	//movl	PCB_CR0(%ecx),%eax
-	//movl	%eax,%cr0
+	movl	PCB_CR0(%ecx),%eax
+	movl	%eax,%cr0
 	jmp	1f
 1:
 

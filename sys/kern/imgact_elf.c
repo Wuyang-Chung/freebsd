@@ -1014,7 +1014,7 @@ __attribute__((optnone)) //wyc
 			error = ENOMEM;
 			goto ret;
 		}
-		fill_cdseg(imgp->proc, cdseg_base, cdseg_size);
+		imgp->proc->p_md.gsel_ldt = fill_cdseg(imgp->proc, cdseg_base, cdseg_size);
 	}
 
 	for (i = 0; i < hdr->e_phnum; i++) {

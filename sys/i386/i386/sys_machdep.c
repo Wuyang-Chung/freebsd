@@ -101,16 +101,18 @@ static struct soft_segment_descriptor ssd = {
 	.ssd_gran	= 1,
 };
 
-static int sas_ldti = GUSERLDT0_SEL; //wyc
+static int sas_ldti = GUSERLDT0_SEL; //wyc ==19
 SYSCTL_INT(_vm, OID_AUTO, sas_ldti, CTLFLAG_RW, &sas_ldti, 0, "sas ldt index"); //wyc
 
-int sas_ldts; //wyc ldt selector
-
-//wyc
-void
+/*wyc
+Return:
+    the global selector of the ldt table
+*/
+int
 fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 {
 	int	i;
+	int	gsel_ldt; //wyc the global selector of ldt table
 
 	ssd.ssd_base = seg_base;
 	ssd.ssd_limit = (seg_size>>PAGE_SHIFT) - 1;
@@ -124,8 +126,10 @@ fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 	gdt_segs[sas_ldti].ssd_base = (unsigned)p->p_md.p_ldt;
 	for (i=0; i<MAXCPU ; i++)
 		ssdtosd(&gdt_segs[sas_ldti], &gdt[NGDT*i + sas_ldti].sd);
-	sas_ldts = GSEL(sas_ldti, SEL_KPL);
+	gsel_ldt = GSEL(sas_ldti, SEL_KPL);
 	sas_ldti++;
+
+	return gsel_ldt;
 }
 
 //wyc
