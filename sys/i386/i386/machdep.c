@@ -1664,7 +1664,8 @@ sdtossd(
     struct segment_descriptor *sd,
     struct soft_segment_descriptor *ssd)
 {
-	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
+	ssd->ssd_base  = (sd->sd_hibase << 24) |
+	    (sd->sd_midbase <<16) | sd->sd_lobase;
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;
 	ssd->ssd_type  = sd->sd_type;
 	ssd->ssd_dpl   = sd->sd_dpl;

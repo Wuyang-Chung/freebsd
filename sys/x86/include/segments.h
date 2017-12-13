@@ -61,7 +61,8 @@
  */
 struct segment_descriptor {
 	unsigned sd_lolimit:16;		/* segment extent (lsb) */
-	unsigned sd_lobase:24;		/* segment base address (lsb) */
+	unsigned sd_lobase:16;		/* segment base address (lsb) */
+	unsigned sd_midbase:8;		//wyc
 	unsigned sd_type:5;		/* segment type */
 	unsigned sd_dpl:2;		/* segment descriptor priority level */
 	unsigned sd_p:1;		/* segment descriptor present */
@@ -247,8 +248,8 @@ enum {
 	GBIOSUTIL_SEL,	/* 16 BIOS interface (Utility) */
 	GBIOSARGS_SEL,	/* 17 BIOS interface (Arguments) */
 	GNDIS_SEL,	/* 18 For the NDIS layer */
-	GUSERLDT0_SEL,	//wyc sas program 0 (echo server)
-	GUSERLDT1_SEL,	//wyc sas program 1 (client)
+	GUSERLDT0_SEL,	//wyc 19 sas program 0 (echo server)
+	GUSERLDT1_SEL,	//wyc 20 sas program 1 (client)
 	NGDT
 };
 

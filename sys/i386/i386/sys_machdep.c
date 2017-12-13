@@ -80,8 +80,9 @@ void
 fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 {
 
-	sdp->sd_lobase = base & 0xffffff;
-	sdp->sd_hibase = (base >> 24) & 0xff;
+	sdp->sd_lobase = base & 0xffff;
+	sdp->sd_midbase = (base >> 16) & 0xff;
+	sdp->sd_hibase =  (base >> 24) & 0xff;
 	sdp->sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sdp->sd_hilimit = 0xf;
 	sdp->sd_type = SDT_MEMRWA;
@@ -278,7 +279,8 @@ sysarch(
 		panic("I386_GET_FSBASE"); //wyc
 	    #if defined(WYC)
 		sdp = &td->td_pcb->pcb_fsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = (sdp->sd_hibase << 24) |
+		    (sdp->sd_midbase << 16) | sdp->sd_lobase;
 		error = copyout(&base, uap->parms, sizeof(base));
 	    #endif
 		break;
@@ -306,7 +308,8 @@ sysarch(
 		panic("I386_GET_GSBASE"); //wyc
 	    #if defined(WYC)
 		sdp = &td->td_pcb->pcb_gsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = (sdp->sd_hibase << 24) |
+		    (sdp->midbase << 16) | sdp->sd_lobase;
 		error = copyout(&base, uap->parms, sizeof(base));
 	    #endif
 		break;
