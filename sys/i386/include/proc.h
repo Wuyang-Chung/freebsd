@@ -59,7 +59,7 @@ struct mdproc {
 	struct proc_ldt *md_ldt;	/* (t) per-process ldt */
 #endif
 	int	gsel_ldt; //wyc the global selector for the ldt table
-	struct segment_descriptor p_ldt[3]; //wyc 0->c, 1->d, 2->s
+	struct segment_descriptor p_ldt[2]; //wyc 0->c, 1->d, 2->s
 };
 
 #define	KINFO_PROC_SIZE 768

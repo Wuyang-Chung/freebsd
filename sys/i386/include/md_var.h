@@ -63,7 +63,7 @@ void	doreti_popl_fs_fault(void) __asm(__STRING(doreti_popl_fs_fault));
 void	finishidentcpu(void);
 void	fill_based_sd(struct segment_descriptor *sdp, uint32_t base);
 int fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size); //wyc
-void fill_sseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size); //wyc
+//void fill_sseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size); //wyc
 void	i686_pagezero(void *addr);
 void	sse2_pagezero(void *addr);
 void	init_AMD_Elan_sc520(void);

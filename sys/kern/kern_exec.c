@@ -1208,6 +1208,7 @@ __attribute__((optnone)) //wyc
 		vmspace->vm_maxsaddr = (char *)stack_addr;
 	}
 	else { //imgp->sas
+#if 0
 		//wyc allocate stack segment
 		imgp->stack_base = 0;
 		imgp->stack_size = maxssiz;
@@ -1219,6 +1220,7 @@ __attribute__((optnone)) //wyc
 			return ENOMEM;
 		//wyctodo: allocate a stack segment here
 		fill_sseg(p, imgp->stack_base, imgp->stack_size);
+#endif
 	}
 
 	return (0);
@@ -1452,15 +1454,15 @@ exec_copyout_strings(
 		execpath_len = 0;
 	p = imgp->proc;
 	szsigcode = 0;
-#if defined(WYC)
-	arginfo = (struct ps_strings *)PS_STRINGS; //wyc 3G-4M-4K-sizeof(struct ps_strings)
-#else
 	if (!imgp->sas)
+#if defined(WYC)
+		arginfo = (struct ps_strings *)PS_STRINGS; //wyc 3G-4M-4K-sizeof(struct ps_strings)
+#else
 		arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
+#endif
 	else
 		arginfo = (struct ps_strings *)
 		    (imgp->stack_base + imgp->stack_size - sizeof(struct ps_strings));
-#endif
 	if (p->p_sysent->sv_sigcode_base == 0) { //wyc TRUE
 		if (p->p_sysent->sv_szsigcode != NULL) //wyc TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);

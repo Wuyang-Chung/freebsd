@@ -872,8 +872,6 @@ __attribute__((optnone)) //wyc
 	}
 
 	imgp->sas = hdr->e_flags; //wyc sas flag is stored in e_flags
-	if (hdr->e_flags) //wyc
-		imgp->proc->p_flag2 |= P2_SAS;
 	n = error = 0;
 	baddr = 0;
 	osrel = 0;
@@ -889,9 +887,13 @@ __attribute__((optnone)) //wyc
 		case PT_LOAD:
 			if (n == 0)
 				baddr = phdr[i].p_vaddr;
-			if (n == 1)
-				cdseg_size = round_page(phdr[i].p_vaddr+ phdr[i].p_memsz)
-				    + PAGE_SIZE;
+			if (n == 1) {
+				imgp->stack_base = 
+				    round_page(phdr[i].p_vaddr+ phdr[i].p_memsz) +
+				    PAGE_SIZE;
+				cdseg_size = imgp->stack_base + maxssiz;
+				imgp->stack_size = maxssiz;
+			}
 			n++;
 			break;
 		case PT_INTERP:
@@ -1014,6 +1016,7 @@ __attribute__((optnone)) //wyc
 			error = ENOMEM;
 			goto ret;
 		}
+		imgp->stack_base += cdseg_base;
 		imgp->proc->p_md.gsel_ldt = fill_cdseg(imgp->proc, cdseg_base, cdseg_size);
 	}
 

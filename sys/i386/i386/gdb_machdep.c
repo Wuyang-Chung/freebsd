@@ -71,7 +71,7 @@ gdb_cpu_getreg(int regnum, size_t *regsz)
 	case 7:  return (&kdb_thrctx->pcb_edi);
 	case 8:  return (&kdb_thrctx->pcb_eip);
 	case 10: return (&_kcodesel);
-	case 11: return (&_kdatasel);
+	case 11: return (&_kdatasel); //wyc GDB_REG_SS
 	case 12: return (&_kdatasel);
 	case 13: return (&_kdatasel);
 	case 14: return (&_kprivsel);

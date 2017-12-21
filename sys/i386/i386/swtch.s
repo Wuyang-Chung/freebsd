@@ -302,7 +302,6 @@ sw1:
 	addl	$4,%esp
 	popl	%edx
 2:
-	lldt	_default_ldt
 #endif //defined(WYC)
 
 	/* This must be done after loading the user LDT. */

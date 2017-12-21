@@ -1169,11 +1169,12 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 		regs->tf_fs = _udatasel;
 		regs->tf_ss = _udatasel;
 	} else {
+		td->td_proc->p_flag2 |= P2_SAS; //wyc
 		regs->tf_cs = LSEL(0, SEL_UPL);
 		regs->tf_ds = LSEL(1, SEL_UPL);
 		regs->tf_es = LSEL(1, SEL_UPL);
 		regs->tf_fs = LSEL(1, SEL_UPL);
-		regs->tf_ss = LSEL(2, SEL_UPL);
+		regs->tf_ss = LSEL(1, SEL_UPL);
 	}
 
 	/* PS_STRINGS value for BSD/OS binaries.  It is 0 for non-BSD/OS. */
@@ -1459,7 +1460,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_gran = 0		},
 [GUSERLDT0_SEL] = { //User LDT Descriptor per process
 	.ssd_base = 0,
-	.ssd_limit = (3 * sizeof(union descriptor)-1),
+	.ssd_limit = 2 * sizeof(struct segment_descriptor) - 1,
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
@@ -1468,7 +1469,7 @@ struct soft_segment_descriptor gdt_segs[NGDT] = {
 	.ssd_gran = 0		},
 [GUSERLDT1_SEL] = { //User LDT Descriptor per process
 	.ssd_base = 0,
-	.ssd_limit = (3 * sizeof(union descriptor)-1),
+	.ssd_limit = 2 * sizeof(struct segment_descriptor) - 1,
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,

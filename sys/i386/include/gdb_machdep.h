@@ -31,7 +31,24 @@
 
 #define	GDB_BUFSZ	400
 #define	GDB_NREGS	16
+
+#define	GDB_REG_EAX	0
+#define	GDB_REG_ECX	1
+#define	GDB_REG_EDX	2
+#define	GDB_REG_EBX	3
+#define	GDB_REG_ESP	4
+#define	GDB_REG_EBP	5
+#define	GDB_REG_ESI	6
+#define	GDB_REG_EDI	7
+#define	GDB_REG_EIP	8
 #define	GDB_REG_PC	8
+#define	GDB_REG_EFLAGS	9
+#define	GDB_REG_CS	10
+#define	GDB_REG_SS	11
+#define	GDB_REG_DS	12
+#define	GDB_REG_ES	13
+#define	GDB_REG_FS	14
+#define	GDB_REG_GS	15
 
 static __inline size_t
 gdb_cpu_regsz(int regnum __unused)

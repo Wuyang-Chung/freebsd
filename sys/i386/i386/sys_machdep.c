@@ -113,26 +113,27 @@ int
 fill_cdseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 {
 	int	i;
-	int	gsel_ldt; //wyc the global selector of ldt table
+	int	ldt_sel; //wyc the global selector of ldt table
 
 	ssd.ssd_base = seg_base;
 	ssd.ssd_limit = (seg_size>>PAGE_SHIFT) - 1;
 	ssd.ssd_type = SDT_MEMERA;
 	ssdtosd(&ssd, &p->p_md.p_ldt[0]);	//code segment
 	ssd.ssd_type = SDT_MEMRWA;
-	ssdtosd(&ssd, &p->p_md.p_ldt[1]);	//data segment
+	ssdtosd(&ssd, &p->p_md.p_ldt[1]);	//data and stack segment
 
 	if (sas_ldti >= NGDT)
 		panic("%s", __func__);
-	gdt_segs[sas_ldti].ssd_base = (unsigned)p->p_md.p_ldt;
+	gdt_segs[sas_ldti].ssd_base = (unsigned)&p->p_md.p_ldt[0];
 	for (i=0; i<MAXCPU ; i++)
 		ssdtosd(&gdt_segs[sas_ldti], &gdt[NGDT*i + sas_ldti].sd);
-	gsel_ldt = GSEL(sas_ldti, SEL_KPL);
+	ldt_sel = GSEL(sas_ldti, SEL_KPL);
 	sas_ldti++;
 
-	return gsel_ldt;
+	return ldt_sel;
 }
 
+#if 0
 //wyc
 void
 fill_sseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
@@ -143,6 +144,7 @@ fill_sseg(struct proc *p, vm_offset_t seg_base, vm_size_t seg_size)
 	ssd.ssd_type = SDT_MEMRWA;
 	ssdtosd(&ssd, &p->p_md.p_ldt[2]);	//stack segment
 }
+#endif
 
 #ifndef _SYS_SYSPROTO_H_
 struct sysarch_args {
