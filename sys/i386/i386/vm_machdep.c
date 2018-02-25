@@ -534,8 +534,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	 * at return to userland.
 	 */
 	base = (uint32_t)tls_base;
-	sd.sd_lobase = base & 0xffffff;
-	sd.sd_hibase = (base >> 24) & 0xff;
+	USD_SETBASE(&sd, base);
 	sd.sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sd.sd_hilimit = 0xf;
 	sd.sd_type  = SDT_MEMRWA;

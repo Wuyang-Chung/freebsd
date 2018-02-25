@@ -305,10 +305,10 @@ linux_set_cloned_tls(struct thread *td, void *desc)
 #ifdef DEBUG
 		if (ldebug(clone))
 			printf("Segment created in clone with "
-			"CLONE_SETTLS: lobase: %x, hibase: %x, "
+			"CLONE_SETTLS: lobase: %x, midbase %x, hibase: %x, "
 			"lolimit: %x, hilimit: %x, type: %i, "
 			"dpl: %i, p: %i, xx: %i, def32: %i, "
-			"gran: %i\n", sd.sd_lobase, sd.sd_hibase,
+			"gran: %i\n", sd.sd_lobase, sd.sd_midbase, sd.sd_hibase,
 			sd.sd_lolimit, sd.sd_hilimit, sd.sd_type,
 			sd.sd_dpl, sd.sd_p, sd.sd_xx,
 			sd.sd_def32, sd.sd_gran);
@@ -450,8 +450,7 @@ linux_modify_ldt(struct thread *td, struct linux_modify_ldt_args *uap)
 		ldt.num = 1;
 		desc.sd.sd_lolimit = (ld.limit & 0x0000ffff);
 		desc.sd.sd_hilimit = (ld.limit & 0x000f0000) >> 16;
-		desc.sd.sd_lobase = (ld.base_addr & 0x00ffffff);
-		desc.sd.sd_hibase = (ld.base_addr & 0xff000000) >> 24;
+		USD_SETBASE(&desc.sd, ld.base_addr);
 		desc.sd.sd_type = SDT_MEMRO | ((ld.read_exec_only ^ 1) << 1) |
 			(ld.contents << 2);
 		desc.sd.sd_dpl = 3;
@@ -698,10 +697,12 @@ linux_set_thread_area(struct thread *td, struct linux_set_thread_area_args *args
 	memcpy(&sd, &a, sizeof(a));
 #ifdef DEBUG
 	if (ldebug(set_thread_area))
-	   	printf("Segment created in set_thread_area: lobase: %x, hibase: %x, lolimit: %x, hilimit: %x, type: %i, dpl: %i, p: %i, xx: %i, def32: %i, gran: %i\n", sd.sd_lobase,
-			sd.sd_hibase,
-			sd.sd_lolimit,
-			sd.sd_hilimit,
+		printf("Segment created in set_thread_area: "
+		       "lobase: %x, midbase: %x, hibase: %x, "
+		       "lolimit: %x, hilimit: %x, "
+		       "type: %i, dpl: %i, p: %i, xx: %i, def32: %i, gran: %i\n",
+			sd.sd_lobase, sd.sd_midbase, sd.sd_hibase,
+			sd.sd_lolimit, sd.sd_hilimit,
 			sd.sd_type,
 			sd.sd_dpl,
 			sd.sd_p,

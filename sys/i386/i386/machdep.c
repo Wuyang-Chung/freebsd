@@ -648,11 +648,9 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 	 * Unconditionally fill the fsbase and gsbase into the mcontext.
 	 */
 	sdp = &td->td_pcb->pcb_fsd;
-	sf.sf_uc.uc_mcontext.mc_fsbase = sdp->sd_hibase << 24 |
-	    sdp->sd_lobase;
+	sf.sf_uc.uc_mcontext.mc_fsbase = USD_GETBASE(sdp);
 	sdp = &td->td_pcb->pcb_gsd;
-	sf.sf_uc.uc_mcontext.mc_gsbase = sdp->sd_hibase << 24 |
-	    sdp->sd_lobase;
+	sf.sf_uc.uc_mcontext.mc_gsbase = USD_GETBASE(sdp);
 	bzero(sf.sf_uc.uc_mcontext.mc_spare2,
 	    sizeof(sf.sf_uc.uc_mcontext.mc_spare2));
 	bzero(sf.sf_uc.__spare__, sizeof(sf.sf_uc.__spare__));
@@ -1272,7 +1270,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[GPRIV_SEL] =	/* 1 SMP Per-Processor Private Data Descriptor */
+[GPRIV_SEL] =	/* 1 pcpu: SMP Per-Processor Private Data Descriptor */
 {	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct pcpu)-1, //wyc
 	.ssd_type = SDT_MEMRWA,
@@ -1345,12 +1343,12 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-[GPROC0_SEL] =	/* 9 Proc 0 Tss Descriptor */
+[GPROC0_SEL] =	/* 9 common_tss Proc 0 Tss Descriptor */
 {
 	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1603,7 +1601,7 @@ sdtossd(
     struct segment_descriptor *sd,
     struct soft_segment_descriptor *ssd)
 {
-	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
+	ssd->ssd_base  = USD_GETBASE(sd);
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;
 	ssd->ssd_type  = sd->sd_type;
 	ssd->ssd_dpl   = sd->sd_dpl;
@@ -2503,7 +2501,7 @@ init386(int first)
 	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
 	r_gdt.rd_base =  (int) gdt;
 	mtx_init(&dt_lock, "descriptor tables", NULL, MTX_SPIN);
-	lgdt(&r_gdt);
+	lgdt(&r_gdt); //wyc will also load ds, es, gs, ss, fs and cs
 
 	pcpu_init(pc, 0, sizeof(struct pcpu));
 	for (pa = first; pa < first + DPCPU_SIZE; pa += PAGE_SIZE)
@@ -3057,9 +3055,9 @@ get_mcontext(struct thread *td, mcontext_t *mcp, int flags)
 	mcp->mc_len = sizeof(*mcp);
 	get_fpcontext(td, mcp, NULL, 0);
 	sdp = &td->td_pcb->pcb_fsd;
-	mcp->mc_fsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
+	mcp->mc_fsbase = USD_GETBASE(sdp);
 	sdp = &td->td_pcb->pcb_gsd;
-	mcp->mc_gsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
+	mcp->mc_gsbase = USD_GETBASE(sdp);
 	mcp->mc_flags = 0;
 	mcp->mc_xfpustate = 0;
 	mcp->mc_xfpustate_len = 0;

@@ -169,7 +169,7 @@ cpu_ptrace(struct thread *td, int req, void *addr, int data)
 	case PT_GETGSBASE:
 		sdp = req == PT_GETFSBASE ? &td->td_pcb->pcb_fsd :
 		    &td->td_pcb->pcb_gsd;
-		r = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		r = USD_GETBASE(sdp);
 		error = copyout(&r, addr, sizeof(r));
 		break;
 

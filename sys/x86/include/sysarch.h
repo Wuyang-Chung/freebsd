@@ -107,11 +107,11 @@ int i386_get_ldt(int, union descriptor *, int);
 int i386_set_ldt(int, union descriptor *, int);
 int i386_get_ioperm(unsigned int, unsigned int *, int *);
 int i386_set_ioperm(unsigned int, unsigned int, int);
-int i386_vm86(int, void *);
-int i386_get_fsbase(void **);
-int i386_get_gsbase(void **);
-int i386_set_fsbase(void *);
-int i386_set_gsbase(void *);
+int i386_vm86(int, void *);	//wyc No such function defined. It should be vm86_sysarch()
+int i386_get_fsbase(void **);	//wyc No such function defined
+int i386_get_gsbase(void **);	//wyc No such function defined 
+int i386_set_fsbase(void *);	//wyc No such function defined
+int i386_set_gsbase(void *);	//wyc No such function defined
 int i386_set_watch(int, unsigned int, int, int, struct dbreg *);
 int i386_clr_watch(int, struct dbreg *);
 int amd64_get_fsbase(void **);
@@ -120,19 +120,21 @@ int amd64_set_fsbase(void *);
 int amd64_set_gsbase(void *);
 int sysarch(int, void *);
 __END_DECLS
-#else
+#else // _KERNEL
 struct thread;
 union descriptor;
-
+#ifdef __i386__
 int i386_get_ldt(struct thread *, struct i386_ldt_args *);
 int i386_set_ldt(struct thread *, struct i386_ldt_args *, union descriptor *);
 int i386_get_ioperm(struct thread *, struct i386_ioperm_args *);
 int i386_set_ioperm(struct thread *, struct i386_ioperm_args *);
+#else
 int amd64_get_ldt(struct thread *, struct i386_ldt_args *);
 int amd64_set_ldt(struct thread *, struct i386_ldt_args *,
     struct user_segment_descriptor *);
 int amd64_get_ioperm(struct thread *, struct i386_ioperm_args *);
 int amd64_set_ioperm(struct thread *, struct i386_ioperm_args *);
-#endif
+#endif // __i386__
+#endif // ! _KERNEL
 
 #endif /* !_MACHINE_SYSARCH_H_ */
