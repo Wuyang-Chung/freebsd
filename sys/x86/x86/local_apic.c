@@ -324,7 +324,7 @@ static void	native_lapic_setup(int boot);
 static void	native_lapic_dump(const char *str);
 static void	native_lapic_disable(void);
 static void	native_lapic_eoi(void);
-static int	native_lapic_id(void);
+int	native_lapic_id(void); //wyc remove static
 static int	native_lapic_intr_pending(u_int vector);
 static u_int	native_apic_cpuid(u_int apic_id);
 static u_int	native_apic_alloc_vector(u_int apic_id, u_int irq);
@@ -356,7 +356,7 @@ static int 	native_lapic_ipi_wait(int delay);
 static int	native_lapic_ipi_alloc(inthand_t *ipifunc);
 static void	native_lapic_ipi_free(int vector);
 
-struct apic_ops apic_ops = {
+struct apic_ops_s apic_ops = { // wyc
 	.create			= native_lapic_create,
 	.init			= native_lapic_init,
 	.xapic_mode		= native_lapic_xapic_mode,
@@ -1052,7 +1052,7 @@ lapic_resume(struct pic *pic, bool suspend_cancelled)
 	lapic_setup(0);
 }
 
-static int
+int //wyc remove static
 native_lapic_id(void)
 {
 	uint32_t v;

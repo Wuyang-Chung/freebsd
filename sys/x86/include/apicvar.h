@@ -206,26 +206,26 @@ int	ioapic_set_smi(void *cookie, u_int pin);
  * Struct containing pointers to APIC functions whose
  * implementation is run time selectable.
  */
-struct apic_ops {
-	void	(*create)(u_int, int);
-	void	(*init)(vm_paddr_t);
+struct apic_ops_s {
+	void	(*create)(u_int apic_id, int boot_cpu);
+	void	(*init)(vm_paddr_t addr);
 	void	(*xapic_mode)(void);
 	bool	(*is_x2apic)(void);
-	void	(*setup)(int);
-	void	(*dump)(const char *);
+	void	(*setup)(int boot);
+	void	(*dump)(const char *boot);
 	void	(*disable)(void);
 	void	(*eoi)(void);
 	int	(*id)(void);
-	int	(*intr_pending)(u_int);
-	void	(*set_logical_id)(u_int, u_int, u_int);
-	u_int	(*cpuid)(u_int);
+	int	(*intr_pending)(u_int vector);
+	void	(*set_logical_id)(u_int apic_id, u_int cluster, u_int cluster_id);
+	u_int	(*cpuid)(u_int apic_id);
 
 	/* Vectors */
-	u_int	(*alloc_vector)(u_int, u_int);
-	u_int	(*alloc_vectors)(u_int, u_int *, u_int, u_int);
-	void	(*enable_vector)(u_int, u_int);
-	void	(*disable_vector)(u_int, u_int);
-	void	(*free_vector)(u_int, u_int, u_int);
+	u_int	(*alloc_vector)(u_int apic_id, u_int irq);
+	u_int	(*alloc_vectors)(u_int apic_id, u_int *irqs, u_int count, u_int align);
+	void	(*enable_vector)(u_int apic_id, u_int vector);
+	void	(*disable_vector)(u_int apic_id, u_int vector);
+	void	(*free_vector)(u_int apic_id, u_int vector, u_int irq);
 
 
 	/* PMC */
@@ -240,237 +240,330 @@ struct apic_ops {
 	int	(*enable_mca_elvt)(void);
 
 	/* IPI */
-	void	(*ipi_raw)(register_t, u_int);
-	void	(*ipi_vectored)(u_int, int);
-	int	(*ipi_wait)(int);
+	void	(*ipi_raw)(register_t icrlo, u_int dest);
+	void	(*ipi_vectored)(u_int vector, int dest);
+	int	(*ipi_wait)(int delay);
 	int	(*ipi_alloc)(inthand_t *ipifunc);
 	void	(*ipi_free)(int vector);
 
 	/* LVT */
-	int	(*set_lvt_mask)(u_int, u_int, u_char);
-	int	(*set_lvt_mode)(u_int, u_int, u_int32_t);
-	int	(*set_lvt_polarity)(u_int, u_int, enum intr_polarity);
-	int	(*set_lvt_triggermode)(u_int, u_int, enum intr_trigger);
+	int	(*set_lvt_mask)(u_int apic_id, u_int pin, u_char masked);
+	int	(*set_lvt_mode)(u_int apic_id, u_int pin, u_int32_t mode);
+	int	(*set_lvt_polarity)(u_int apic_id, u_int pin, enum intr_polarity pol);
+	int	(*set_lvt_triggermode)(u_int apic_id, u_int pin, enum intr_trigger trigger);
 };
 
-extern struct apic_ops apic_ops;
+extern struct apic_ops_s apic_ops;
 
 static inline void
 lapic_create(u_int apic_id, int boot_cpu)
 {
-
+#if defined(WYC)
+	native_lapic_create(apic_id, boot_cpu);
+#else
 	apic_ops.create(apic_id, boot_cpu);
+#endif
 }
 
 static inline void
 lapic_init(vm_paddr_t addr)
 {
-
+#if defined(WYC)
+	native_lapic_init(addr);
+#else
 	apic_ops.init(addr);
+#endif
 }
 
 static inline void
 lapic_xapic_mode(void)
 {
-
+#if defined(WYC)
+	native_lapic_xapic_mode();
+#else
 	apic_ops.xapic_mode();
+#endif
 }
 
 static inline bool
 lapic_is_x2apic(void)
 {
-
+#if defined(WYC)
+	return native_lapic_is_x2apic();
+#else
 	return (apic_ops.is_x2apic());
+#endif
 }
 
 static inline void
 lapic_setup(int boot)
 {
-
+#if defined(WYC)
+	native_lapic_setup(boot);
+#else
 	apic_ops.setup(boot);
+#endif
 }
 
 static inline void
 lapic_dump(const char *str)
 {
-
+#if defined(WYC)
+	native_lapic_dump(str);
+#else
 	apic_ops.dump(str);
+#endif
 }
 
 static inline void
 lapic_disable(void)
 {
-
+#if defined(WYC)
+	native_lapic_disable();
+#else
 	apic_ops.disable();
+#endif
 }
 
 static inline void
 lapic_eoi(void)
 {
-
+#if defined(WYC)
+	native_lapic_eoi();
+#else
 	apic_ops.eoi();
+#endif
 }
 
 static inline int
 lapic_id(void)
 {
-
+#if defined(WYC)
+	return native_lapic_id();
+#else
 	return (apic_ops.id());
+#endif
 }
 
 static inline int
 lapic_intr_pending(u_int vector)
 {
-
+#if defined(WYC)
+	return native_lapic_intr_pending();
+#else
 	return (apic_ops.intr_pending(vector));
+#endif
 }
 
 /* XXX: UNUSED */
 static inline void
 lapic_set_logical_id(u_int apic_id, u_int cluster, u_int cluster_id)
 {
-
+#if defined(WYC)
+	native_lapic_set_logical_id(apic_id, cluster, cluster_id);
+#else
 	apic_ops.set_logical_id(apic_id, cluster, cluster_id);
+#endif
 }
 
 static inline u_int
 apic_cpuid(u_int apic_id)
 {
-
+#if defined(WYC)
+	return native_apic_cpuid(apic_id);
+#else
 	return (apic_ops.cpuid(apic_id));
+#endif
 }
 
 static inline u_int
 apic_alloc_vector(u_int apic_id, u_int irq)
 {
-
+#if defined(WYC)
+	native_apic_alloc_vector(apic_id, irq);
+#else
 	return (apic_ops.alloc_vector(apic_id, irq));
+#endif
 }
 
 static inline u_int
 apic_alloc_vectors(u_int apic_id, u_int *irqs, u_int count, u_int align)
 {
-
+#if defined(WYC)
+	return native_apic_alloc_vectors(apic_id, irqs, count, align);
+#else
 	return (apic_ops.alloc_vectors(apic_id, irqs, count, align));
+#endif
 }
 
 static inline void
 apic_enable_vector(u_int apic_id, u_int vector)
 {
-
+#if defined(WYC)
+	native_apic_enable_vector(apic_id, vector);
+#else
 	apic_ops.enable_vector(apic_id, vector);
+#endif
 }
 
 static inline void
 apic_disable_vector(u_int apic_id, u_int vector)
 {
-
+#if defined(WYC)
+	native_apic_disable_vector(apic_id, vector);
+#else
 	apic_ops.disable_vector(apic_id, vector);
+#endif
 }
 
 static inline void
 apic_free_vector(u_int apic_id, u_int vector, u_int irq)
 {
-
+#if defined(WYC)
+	native_apic_free_vector(apic_id, vector, irq);
+#else
 	apic_ops.free_vector(apic_id, vector, irq);
+#endif
 }
 
 static inline int
 lapic_enable_pmc(void)
 {
-
+#if defined(WYC)
+	return native_lapic_enable_pmc();
+#else
 	return (apic_ops.enable_pmc());
+#endif
 }
 
 static inline void
 lapic_disable_pmc(void)
 {
-
+#if defined(WYC)
+	native_lapic_disable_pmc();
+#else
 	apic_ops.disable_pmc();
+#endif
 }
 
 static inline void
 lapic_reenable_pmc(void)
 {
-
+#if defined(WYC)
+	native_lapic_reenable_pmc();
+#else
 	apic_ops.reenable_pmc();
+#endif
 }
 
 static inline void
 lapic_enable_cmc(void)
 {
-
+#if defined(WYC)
+	native_lapic_enable_cmc();
+#else
 	apic_ops.enable_cmc();
+#endif
 }
 
 static inline int
 lapic_enable_mca_elvt(void)
 {
-
+#if defined(WYC)
+	return native_lapic_enable_mca_elvt();
+#else
 	return (apic_ops.enable_mca_elvt());
+#endif
 }
 
 static inline void
 lapic_ipi_raw(register_t icrlo, u_int dest)
 {
-
+#if defined(WYC)
+	native_lapic_ipi_raw(icrlo, dest);
+#else
 	apic_ops.ipi_raw(icrlo, dest);
+#endif
 }
 
 static inline void
 lapic_ipi_vectored(u_int vector, int dest)
 {
-
+#if defined(WYC)
+	native_lapic_ipi_vectored(vector, dest);
+#else
 	apic_ops.ipi_vectored(vector, dest);
+#endif
 }
 
 static inline int
 lapic_ipi_wait(int delay)
 {
-
+#if defined(WYC)
+	return native_lapic_ipi_wait(delay);
+#else
 	return (apic_ops.ipi_wait(delay));
+#endif
 }
 
 static inline int
 lapic_ipi_alloc(inthand_t *ipifunc)
 {
-
+#if defined(WYC)
+	return native_lapic_ipi_alloc(ipifunc);
+#else
 	return (apic_ops.ipi_alloc(ipifunc));
+#endif
 }
 
 static inline void
 lapic_ipi_free(int vector)
 {
-
+#if defined(WYC)
+	return native_lapic_ipi_free(vector);
+#else
 	return (apic_ops.ipi_free(vector));
+#endif
 }
 
 static inline int
 lapic_set_lvt_mask(u_int apic_id, u_int lvt, u_char masked)
 {
-
+#if defined(WYC)
+	return native_lapic_set_lvt_mask(apic_id, lvt, masked);
+#else
 	return (apic_ops.set_lvt_mask(apic_id, lvt, masked));
+#endif
 }
 
 static inline int
 lapic_set_lvt_mode(u_int apic_id, u_int lvt, u_int32_t mode)
 {
-
+#if defined(WYC)
+	return native_lapic_set_lvt_mode(apic_id, lvt, mode);
+#else
 	return (apic_ops.set_lvt_mode(apic_id, lvt, mode));
+#endif
 }
 
 static inline int
 lapic_set_lvt_polarity(u_int apic_id, u_int lvt, enum intr_polarity pol)
 {
-
+#if defined(WYC)
+	return native_lapic_set_lvt_polarity(apic_id, lvt, pol);
+#else
 	return (apic_ops.set_lvt_polarity(apic_id, lvt, pol));
+#endif
 }
 
 static inline int
 lapic_set_lvt_triggermode(u_int apic_id, u_int lvt, enum intr_trigger trigger)
 {
-
+#if defined(WYC)
+	return native_lapic_set_lvt_triggermode(apic_id, lvt, trigger);
+#else
 	return (apic_ops.set_lvt_triggermode(apic_id, lvt, trigger));
+#endif
 }
 
 void	lapic_handle_cmc(void);
