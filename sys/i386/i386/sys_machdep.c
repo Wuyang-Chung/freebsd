@@ -121,7 +121,7 @@ set_gsbase(struct thread *td, uint32_t base)
 	critical_exit();
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct sysarch_args {
 	int op;
 	char *parms;

@@ -51,6 +51,7 @@ vm86pcb:		.long	0
 /*
  * vm86_bioscall(struct trapframe_vm86 *vm86)
  */
+//wyc vesa_mod_event -> vesa_configure -> x86bios_intr -> vm86_bioscall
 ENTRY(vm86_bioscall)
 	movl	vm86pcb,%edx		/* scratch data area */
 	movl	4(%esp),%eax

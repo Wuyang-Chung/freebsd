@@ -216,7 +216,7 @@ sw1:
 	 * Set our stack pointer into the TSS, it's set to just
 	 * below the PCB.  In C, common_tss.tss_esp0 = &pcb - 16;
 	 */
-	leal	-16(%edx), %ebx			/* leave space for vm86 */
+	leal	-16(%edx), %ebx	// %edx: td_pcb	/* leave space for vm86 */
 	movl	%ebx, PCPU(COMMON_TSS) + TSS_ESP0
 
 	/*

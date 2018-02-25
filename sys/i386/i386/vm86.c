@@ -477,6 +477,7 @@ vm86_getpage(struct vm86context *vmc, int pagenum)
 	return (0);
 }
 
+//wyc vesa_mod_event -> vesa_configure -> x86bios_alloc -> vm86_addpage
 vm_offset_t
 vm86_addpage(struct vm86context *vmc, int pagenum, vm_offset_t kva)
 {
@@ -584,6 +585,7 @@ vm86_intcall(int intnum, struct vm86frame *vmf)
  * the "interrupt trampoline" will be used, otherwise we use the
  * caller's cs:ip routine.  
  */
+//wyc vesa_mod_event -> vesa_configure -> x86bios_intr -> vm86_datacall
 int
 vm86_datacall(int intnum, struct vm86frame *vmf, struct vm86context *vmc)
 {

@@ -46,7 +46,7 @@
  * to each CPU's data can be set up for things like "check curproc on all
  * other processors"
  */
-
+#if !defined(WYC)
 #define	PCPU_MD_FIELDS							\
 	char	pc_monitorbuf[128] __aligned(128); /* cache line */	\
 	struct	pcpu *pc_prvspace;	/* Self-reference */		\
@@ -69,7 +69,7 @@
 	vm_offset_t pc_qmap_addr;	/* KVA for temporary mappings */\
 	uint32_t pc_smp_tlb_done;	/* TLB op acknowledgement */	\
 	char	__pad[189]
-
+#endif // !defined(WYC)
 #ifdef _KERNEL
 
 #ifdef lint
