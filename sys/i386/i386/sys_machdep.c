@@ -79,8 +79,7 @@ void
 fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 {
 
-	sdp->sd_lobase = base & 0xffffff;
-	sdp->sd_hibase = (base >> 24) & 0xff;
+	USD_SETBASE(sdp, base);
 	sdp->sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sdp->sd_hilimit = 0xf;
 	sdp->sd_type = SDT_MEMRWA;
@@ -130,7 +129,9 @@ struct sysarch_args {
 #endif
 
 int
-sysarch(struct thread *td, struct sysarch_args *uap)
+sysarch(
+	struct thread *td,
+	struct sysarch_args *uap)
 {
 	int error;
 	union descriptor *lp;
@@ -158,8 +159,8 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
 		case I386_GET_GSBASE:
-		case I386_SET_GSBASE:
-		case I386_GET_XFPUSTATE:
+		case I386_SET_GSBASE: //wyc must support
+		case I386_GET_XFPUSTATE: //wyc must support
 			break;
 
 		case I386_SET_IOPERM:
@@ -186,7 +187,7 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 		    sizeof(struct i386_ldt_args))) != 0)
 			return (error);
 		break;
-	case I386_GET_XFPUSTATE:
+	case I386_GET_XFPUSTATE: //wyc must support
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
 			return (error);
@@ -228,7 +229,7 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 		break;
 	case I386_GET_FSBASE:
 		sdp = &td->td_pcb->pcb_fsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = USD_GETBASE(sdp);
 		error = copyout(&base, uap->parms, sizeof(base));
 		break;
 	case I386_SET_FSBASE:
@@ -245,10 +246,10 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 		break;
 	case I386_GET_GSBASE:
 		sdp = &td->td_pcb->pcb_gsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = USD_GETBASE(sdp);
 		error = copyout(&base, uap->parms, sizeof(base));
 		break;
-	case I386_SET_GSBASE:
+	case I386_SET_GSBASE: //wyc must support
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
 			/*
@@ -260,7 +261,7 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 			load_gs(GSEL(GUGS_SEL, SEL_UPL));
 		}
 		break;
-	case I386_GET_XFPUSTATE:
+	case I386_GET_XFPUSTATE: //wyc must support
 		if (kargs.xfpu.len > cpu_max_ext_state_size -
 		    sizeof(union savefpu))
 			return (EINVAL);
@@ -275,6 +276,8 @@ sysarch(struct thread *td, struct sysarch_args *uap)
 	return (error);
 }
 
+// vm86_sysarch    -> i386_extend_pcb
+// i386_set_ioperm -> i386_extend_pcb
 int
 i386_extend_pcb(struct thread *td)
 {
@@ -331,9 +334,9 @@ i386_extend_pcb(struct thread *td)
 }
 
 int
-i386_set_ioperm(td, uap)
-	struct thread *td;
-	struct i386_ioperm_args *uap;
+i386_set_ioperm(
+	struct thread *td,
+	struct i386_ioperm_args *uap)
 {
 	char *iomap;
 	u_int i;
