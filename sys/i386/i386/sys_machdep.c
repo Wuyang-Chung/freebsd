@@ -79,8 +79,7 @@ void
 fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
 {
 
-	sdp->sd_lobase = base & 0xffffff;
-	sdp->sd_hibase = (base >> 24) & 0xff;
+	USD_SETBASE(sdp, base);
 	sdp->sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sdp->sd_hilimit = 0xf;
 	sdp->sd_type = SDT_MEMRWA;
@@ -122,7 +121,7 @@ set_gsbase(struct thread *td, uint32_t base)
 	critical_exit();
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct sysarch_args {
 	int op;
 	char *parms;
@@ -130,9 +129,9 @@ struct sysarch_args {
 #endif
 
 int
-sysarch(td, uap)
-	struct thread *td;
-	register struct sysarch_args *uap;
+sysarch(
+	struct thread *td,
+	register struct sysarch_args *uap)
 {
 	int error;
 	union descriptor *lp;
@@ -142,7 +141,7 @@ sysarch(td, uap)
 		struct i386_get_xfpustate xfpu;
 	} kargs;
 	uint32_t base;
-	struct segment_descriptor *sdp;
+	//wyc struct segment_descriptor *sdp;
 
 	AUDIT_ARG_CMD(uap->op);
 
@@ -156,15 +155,17 @@ sysarch(td, uap)
 		switch (uap->op) {
 		case I386_GET_LDT:
 		case I386_SET_LDT:
+#if 0 //wyc
 		case I386_GET_IOPERM:
 		case I386_GET_FSBASE:
 		case I386_SET_FSBASE:
 		case I386_GET_GSBASE:
-		case I386_SET_GSBASE:
-		case I386_GET_XFPUSTATE:
+#endif
+		case I386_SET_GSBASE: //wyc must support
+		case I386_GET_XFPUSTATE: //wyc must support
 			break;
 
-		case I386_SET_IOPERM:
+		//case I386_SET_IOPERM:
 		default:
 #ifdef KTRACE
 			if (KTRPOINT(td, KTR_CAPFAIL))
@@ -176,19 +177,22 @@ sysarch(td, uap)
 #endif
 
 	switch (uap->op) {
+#if 0
 	case I386_GET_IOPERM:
 	case I386_SET_IOPERM:
 		if ((error = copyin(uap->parms, &kargs.iargs,
 		    sizeof(struct i386_ioperm_args))) != 0)
 			return (error);
 		break;
+#endif
 	case I386_GET_LDT:
 	case I386_SET_LDT:
 		if ((error = copyin(uap->parms, &kargs.largs,
 		    sizeof(struct i386_ldt_args))) != 0)
 			return (error);
 		break;
-	case I386_GET_XFPUSTATE:
+	case I386_GET_XFPUSTATE: //wyc must support
+		//panic("I386_GET_XFPUSTATE");
 		if ((error = copyin(uap->parms, &kargs.xfpu,
 		    sizeof(struct i386_get_xfpustate))) != 0)
 			return (error);
@@ -216,6 +220,7 @@ sysarch(td, uap)
 			error = i386_set_ldt(td, &kargs.largs, NULL);
 		}
 		break;
+#if 0 //wyc
 	case I386_GET_IOPERM:
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
@@ -230,7 +235,7 @@ sysarch(td, uap)
 		break;
 	case I386_GET_FSBASE:
 		sdp = &td->td_pcb->pcb_fsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = USD_GETBASE(sdp);
 		error = copyout(&base, uap->parms, sizeof(base));
 		break;
 	case I386_SET_FSBASE:
@@ -247,10 +252,11 @@ sysarch(td, uap)
 		break;
 	case I386_GET_GSBASE:
 		sdp = &td->td_pcb->pcb_gsd;
-		base = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		base = USD_GETBASE(sdp);
 		error = copyout(&base, uap->parms, sizeof(base));
 		break;
-	case I386_SET_GSBASE:
+#endif
+	case I386_SET_GSBASE: //wyc must support
 		error = copyin(uap->parms, &base, sizeof(base));
 		if (error == 0) {
 			/*
@@ -259,10 +265,10 @@ sysarch(td, uap)
 			 * normally only reload %gs on context switches.
 			 */
 			set_gsbase(td, base);
-			load_gs(GSEL(GUGS_SEL, SEL_UPL));
+			load_gs(GSEL(GPCPU_START+PCPU_GET(cpuid)*4+3, SEL_UPL)); //wyc GUGS_SEL
 		}
 		break;
-	case I386_GET_XFPUSTATE:
+	case I386_GET_XFPUSTATE: //wyc must support
 		if (kargs.xfpu.len > cpu_max_ext_state_size -
 		    sizeof(union savefpu))
 			return (EINVAL);
@@ -277,9 +283,16 @@ sysarch(td, uap)
 	return (error);
 }
 
+// vm86_sysarch    -> i386_extend_pcb
+// i386_set_ioperm -> i386_extend_pcb
 int
 i386_extend_pcb(struct thread *td)
 {
+	// Don't support private tss, iomap and vm86
+	panic("%s", __func__);
+	return EOPNOTSUPP;
+
+#if 0 //wyc
 	int i, offset;
 	u_long *addr;
 	struct pcb_ext *ext;
@@ -324,19 +337,24 @@ i386_extend_pcb(struct thread *td)
 	/* Switch to the new TSS. */
 	critical_enter();
 	td->td_pcb->pcb_ext = ext;
-	PCPU_SET(private_tss, 1);
+	PCPU_SET(private_tss, 1); //wyc private_tss not used
 	*PCPU_GET(tss_gdt) = ext->ext_tssd;
-	ltr(GSEL(GPROC0_SEL, SEL_KPL));
+	//wyc ltr(GSEL(GPROC0_SEL, SEL_KPL));
 	critical_exit();
 
 	return 0;
+#endif
 }
 
+#if 0 //wyc
 int
-i386_set_ioperm(td, uap)
-	struct thread *td;
-	struct i386_ioperm_args *uap;
+i386_set_ioperm(
+	struct thread *td,
+	struct i386_ioperm_args *uap)
 {
+	//panic("%s", __func__);
+	//return EOPNOTSUPP;
+
 	char *iomap;
 	u_int i;
 	int error;
@@ -375,6 +393,9 @@ i386_get_ioperm(td, uap)
 	struct thread *td;
 	struct i386_ioperm_args *uap;
 {
+	//panic("%s", __func__);
+	//return EOPNOTSUPP;
+
 	int i, state;
 	char *iomap;
 
@@ -402,6 +423,7 @@ i386_get_ioperm(td, uap)
 done:
 	return (0);
 }
+#endif
 
 /*
  * Update the GDT entry pointing to the LDT to point to the LDT of the
@@ -410,6 +432,8 @@ done:
 static void
 set_user_ldt_locked(struct mdproc *mdp)
 {
+	//panic("%s", __func__);	//wyc
+
 	struct proc_ldt *pldt;
 	int gdt_idx;
 
@@ -417,7 +441,7 @@ set_user_ldt_locked(struct mdproc *mdp)
 
 	pldt = mdp->md_ldt;
 	gdt_idx = GUSERLDT_SEL;
-	gdt_idx += PCPU_GET(cpuid) * NGDT;	/* always 0 on UP */
+	//gdt_idx += PCPU_GET(cpuid) * NGDT;	/* always 0 on UP */
 	gdt[gdt_idx].sd = pldt->ldt_sd;
 	lldt(GSEL(GUSERLDT_SEL, SEL_KPL));
 	PCPU_SET(currentldt, GSEL(GUSERLDT_SEL, SEL_KPL));

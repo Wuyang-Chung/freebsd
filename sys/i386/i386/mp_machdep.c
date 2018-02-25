@@ -223,7 +223,8 @@ init_secondary(void)
 	struct pcpu *pc;
 	vm_offset_t addr;
 	int	gsel_tss;
-	int	x, myid;
+	//int	x;
+	int	myid;
 	u_int	cr0;
 
 	/* bootAP is set in start_ap() to our ID. */
@@ -244,29 +245,39 @@ init_secondary(void)
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 
-	for (x = 0; x < NGDT; x++) {
-		ssdtosd(&gdt_segs[x], &gdt[myid * NGDT + x].sd);
-	}
+	ssdtosd(&gdt_segs[GPRIV_SEL],	&gdt[GPCPU_START + myid * 4 + 0].sd);
+	ssdtosd(&gdt_segs[GPROC0_SEL],	&gdt[GPCPU_START + myid * 4 + 1].sd);
+	ssdtosd(&gdt_segs[GUFS_SEL],	&gdt[GPCPU_START + myid * 4 + 2].sd);
+	ssdtosd(&gdt_segs[GUGS_SEL],	&gdt[GPCPU_START + myid * 4 + 3].sd);
 
-	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
-	r_gdt.rd_base = (int) &gdt[myid * NGDT];
-	lgdt(&r_gdt);			/* does magic intra-segment return */
+	r_gdt.rd_limit = MAX_GDT * sizeof(gdt[0]) - 1;
+	r_gdt.rd_base = (int) &gdt[0];
+	lgdt(&r_gdt, GSEL(GPCPU_START+myid*4, SEL_KPL)); //wyc will also load ds, es, gs, ss, fs and cs
 
 	lidt(&r_idt);
 
 	lldt(_default_ldt);
-	PCPU_SET(currentldt, _default_ldt);
+	//wyc PCPU_SET(currentldt, _default_ldt);
+	pc->pc_currentldt = _default_ldt;
 
-	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
-	gdt[myid * NGDT + GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;
+	gdt[GPCPU_START + myid*4 + 1].sd.sd_type = SDT_SYS386TSS;
+#if 0 //wyc
 	PCPU_SET(common_tss.tss_esp0, 0); /* not used until after switch */
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
 	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
-	PCPU_SET(tss_gdt, &gdt[myid * NGDT + GPROC0_SEL].sd);
+	PCPU_SET(tss_gdt, &gdt[GPCPU_START + myid*4 + 1].sd);
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
+#else
+	pc->pc_common_tss.tss_esp0 = 0;
+	pc->pc_common_tss.tss_ss0 = GSEL(GDATA_SEL, SEL_KPL);
+	pc->pc_common_tss.tss_ioopt = sizeof(struct i386tss) << 16;
+	pc->pc_tss_gdt = &gdt[GPCPU_START + myid*4 + 1].sd;
+	pc->pc_common_tssd = *pc->pc_tss_gdt;
+#endif
+	gsel_tss = GSEL(GPCPU_START + myid * 4 + 1, SEL_KPL);
 	ltr(gsel_tss);
 
-	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUFS_SEL].sd);
+	PCPU_SET(fsgs_gdt, &gdt[GPCPU_START + myid * 4 + 2].sd); //wyc GUFS_SEL for cpu myid
 
 	/*
 	 * Set to a known state:

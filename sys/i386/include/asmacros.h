@@ -169,7 +169,12 @@
 	movl	$KDSEL, %eax ;	/* reload with kernel's data segment */	\
 	movl	%eax, %ds ;						\
 	movl	%eax, %es ;						\
-	movl	$KPSEL, %eax ;	/* reload with per-CPU data segment */	\
+	/*movl	$KPSEL, %eax ;	 reload with per-CPU data segment */	\
+	call	native_lapic_id ;		/*wyc get apicid */	\
+	movl	apic_cpuids(,%eax,4), %eax ;	/*wyc get cpuid */	\
+	shll	$2, %eax ;			/*wyc cpuid*4 */	\
+	addl	$GPCPU_START, %eax ;					\
+	shll	$3, %eax ;	/* eax = (GPCPU_START + cpuid*4)<<3 */	\
 	movl	%eax, %fs
 
 #endif /* LOCORE */

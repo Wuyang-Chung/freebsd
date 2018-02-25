@@ -272,7 +272,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	/*
 	 * XXX don't copy the i/o pages.  this should probably be fixed.
 	 */
-	pcb2->pcb_ext = 0;
+	//wyc pcb2->pcb_ext = 0;
 
 	/* Copy the LDT, if necessary. */
 	mtx_lock_spin(&dt_lock);
@@ -358,7 +358,8 @@ cpu_thread_clean(struct thread *td)
 {
 	struct pcb *pcb;
 
-	pcb = td->td_pcb; 
+	pcb = td->td_pcb;
+#if 0 //wyc
 	if (pcb->pcb_ext != NULL) {
 		/* if (pcb->pcb_ext->ext_refcount-- == 1) ?? */
 		/*
@@ -369,6 +370,7 @@ cpu_thread_clean(struct thread *td)
 		    ctob(IOPAGES + 1));
 		pcb->pcb_ext = NULL;
 	}
+#endif
 }
 
 void
@@ -389,7 +391,7 @@ cpu_thread_alloc(struct thread *td)
 
 	td->td_pcb = pcb = get_pcb_td(td);
 	td->td_frame = (struct trapframe *)((caddr_t)pcb - 16) - 1;
-	pcb->pcb_ext = NULL; 
+	//wyc pcb->pcb_ext = NULL; 
 	pcb->pcb_save = get_pcb_user_save_pcb(pcb);
 	if (use_xsave) {
 		xhdr = (struct xstate_hdr *)(pcb->pcb_save + 1);
@@ -496,7 +498,7 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * pcb2->pcb_gs:	cloned above.
 	 * pcb2->pcb_ext:	cleared below.
 	 */
-	pcb2->pcb_ext = NULL;
+	//wyc pcb2->pcb_ext = NULL;
 
 	/* Setup to release spin count in fork_exit(). */
 	td->td_md.md_spinlock_count = 1;
@@ -551,8 +553,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	 * at return to userland.
 	 */
 	base = (uint32_t)tls_base;
-	sd.sd_lobase = base & 0xffffff;
-	sd.sd_hibase = (base >> 24) & 0xff;
+	USD_SETBASE(&sd, base);
 	sd.sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sd.sd_hilimit = 0xf;
 	sd.sd_type  = SDT_MEMRWA;
@@ -566,7 +567,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	td->td_pcb->pcb_gsd = sd;
 	if (td == curthread) {
 		PCPU_GET(fsgs_gdt)[1] = sd;
-		load_gs(GSEL(GUGS_SEL, SEL_UPL));
+		load_gs(GSEL(GPCPU_START+PCPU_GET(cpuid)*4+3, SEL_UPL)); //wyc GUGS_SEL
 	}
 	critical_exit();
 	return (0);

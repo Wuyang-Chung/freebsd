@@ -142,7 +142,7 @@ ASSYM(PCB_DR6, offsetof(struct pcb, pcb_dr6));
 ASSYM(PCB_DR7, offsetof(struct pcb, pcb_dr7));
 ASSYM(PCB_PSL, offsetof(struct pcb, pcb_psl));
 ASSYM(PCB_DBREGS, PCB_DBREGS);
-ASSYM(PCB_EXT, offsetof(struct pcb, pcb_ext));
+//wyc ASSYM(PCB_EXT, offsetof(struct pcb, pcb_ext));
 
 ASSYM(PCB_FSD, offsetof(struct pcb, pcb_fsd));
 ASSYM(PCB_GSD, offsetof(struct pcb, pcb_gsd));
@@ -203,20 +203,20 @@ ASSYM(BI_SIZE, offsetof(struct bootinfo, bi_size));
 ASSYM(BI_SYMTAB, offsetof(struct bootinfo, bi_symtab));
 ASSYM(BI_ESYMTAB, offsetof(struct bootinfo, bi_esymtab));
 ASSYM(BI_KERNEND, offsetof(struct bootinfo, bi_kernend));
-ASSYM(PC_SIZEOF, sizeof(struct pcpu));
+//ASSYM(PC_SIZEOF, sizeof(struct pcpu)); //wyc not referenced
 ASSYM(PC_PRVSPACE, offsetof(struct pcpu, pc_prvspace));
 ASSYM(PC_CURTHREAD, offsetof(struct pcpu, pc_curthread));
 ASSYM(PC_FPCURTHREAD, offsetof(struct pcpu, pc_fpcurthread));
 ASSYM(PC_IDLETHREAD, offsetof(struct pcpu, pc_idlethread));
 ASSYM(PC_CURPCB, offsetof(struct pcpu, pc_curpcb));
 ASSYM(PC_COMMON_TSS, offsetof(struct pcpu, pc_common_tss));
-ASSYM(PC_COMMON_TSSD, offsetof(struct pcpu, pc_common_tssd));
+//wyc ASSYM(PC_COMMON_TSSD, offsetof(struct pcpu, pc_common_tssd));
 ASSYM(PC_TSS_GDT, offsetof(struct pcpu, pc_tss_gdt));
 ASSYM(PC_FSGS_GDT, offsetof(struct pcpu, pc_fsgs_gdt));
 ASSYM(PC_CURRENTLDT, offsetof(struct pcpu, pc_currentldt));
 ASSYM(PC_CPUID, offsetof(struct pcpu, pc_cpuid));
 ASSYM(PC_CURPMAP, offsetof(struct pcpu, pc_curpmap));
-ASSYM(PC_PRIVATE_TSS, offsetof(struct pcpu, pc_private_tss));
+//wyc ASSYM(PC_PRIVATE_TSS, offsetof(struct pcpu, pc_private_tss));
 
 #ifdef DEV_APIC
 ASSYM(LA_EOI, LAPIC_EOI * LAPIC_MEM_MUL);
@@ -225,10 +225,11 @@ ASSYM(LA_ISR, LAPIC_ISR0 * LAPIC_MEM_MUL);
 
 ASSYM(KCSEL, GSEL(GCODE_SEL, SEL_KPL));
 ASSYM(KDSEL, GSEL(GDATA_SEL, SEL_KPL));
-ASSYM(KPSEL, GSEL(GPRIV_SEL, SEL_KPL));
+//ASSYM(KPSEL, GSEL(GPRIV_SEL, SEL_KPL));
+ASSYM(GPCPU_START, GPCPU_START); //wyc
 
 ASSYM(BC32SEL, GSEL(GBIOSCODE32_SEL, SEL_KPL));
-ASSYM(GPROC0_SEL, GPROC0_SEL);
+//wyc ASSYM(GPROC0_SEL, GPROC0_SEL);
 ASSYM(VM86_FRAMESIZE, sizeof(struct vm86frame));
 
 #ifdef PC98

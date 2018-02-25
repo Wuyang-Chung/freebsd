@@ -88,12 +88,12 @@ struct pcb { //wyc thread state block: kernel mode hardware execution state
 	uint16_t pcb_initial_npxcw;
 
 	caddr_t	pcb_onfault;	/* copyin/out fault recovery */
-	struct	pcb_ext	*pcb_ext;	/* optional pcb extension */
+	//wyc struct	pcb_ext	*pcb_ext;	/* optional pcb extension */
 	int	pcb_psl;	/* process status long */
 	u_long	pcb_vm86[2];	/* vm86bios scratch space */
 	union	savefpu *pcb_save;
 
-	uint32_t pcb_pad[10];
+	uint32_t pcb_pad[11]; //wyc must align at XSAVE_AREA_ALIGN(64)
 };
 
 /* Per-CPU state saved during suspend and resume. */

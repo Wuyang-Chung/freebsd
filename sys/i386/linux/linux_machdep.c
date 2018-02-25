@@ -269,6 +269,8 @@ linux_old_select(struct thread *td, struct linux_old_select_args *args)
 int
 linux_set_cloned_tls(struct thread *td, void *desc)
 {
+	panic("%s", __func__);
+#if 0 //wyc
 	struct segment_descriptor sd;
 	struct l_user_desc info;
 	int idx, error;
@@ -316,10 +318,11 @@ linux_set_cloned_tls(struct thread *td, void *desc)
 
 		/* set %gs */
 		td->td_pcb->pcb_gsd = sd;
-		td->td_pcb->pcb_gs = GSEL(GUGS_SEL, SEL_UPL);
+		td->td_pcb->pcb_gs = GSEL(_GUGS_SEL, SEL_UPL);
 	}
 
 	return (error);
+#endif //wyc
 }
 
 int
@@ -385,6 +388,8 @@ linux_mprotect(struct thread *td, struct linux_mprotect_args *uap)
 int
 linux_ioperm(struct thread *td, struct linux_ioperm_args *args)
 {
+	return EOPNOTSUPP;
+#if 0
 	int error;
 	struct i386_ioperm_args iia;
 
@@ -393,6 +398,7 @@ linux_ioperm(struct thread *td, struct linux_ioperm_args *args)
 	iia.enable = args->enable;
 	error = i386_set_ioperm(td, &iia);
 	return (error);
+#endif
 }
 
 int
@@ -450,8 +456,7 @@ linux_modify_ldt(struct thread *td, struct linux_modify_ldt_args *uap)
 		ldt.num = 1;
 		desc.sd.sd_lolimit = (ld.limit & 0x0000ffff);
 		desc.sd.sd_hilimit = (ld.limit & 0x000f0000) >> 16;
-		desc.sd.sd_lobase = (ld.base_addr & 0x00ffffff);
-		desc.sd.sd_hibase = (ld.base_addr & 0xff000000) >> 24;
+		USD_SETBASE(&desc.sd, ld.base_addr);
 		desc.sd.sd_type = SDT_MEMRO | ((ld.read_exec_only ^ 1) << 1) |
 			(ld.contents << 2);
 		desc.sd.sd_dpl = 3;
@@ -624,6 +629,8 @@ linux_ftruncate64(struct thread *td, struct linux_ftruncate64_args *args)
 int
 linux_set_thread_area(struct thread *td, struct linux_set_thread_area_args *args)
 {
+	panic("%s", __func__);
+#if 0 //wyc
 	struct l_user_desc info;
 	int error;
 	int idx;
@@ -715,10 +722,11 @@ linux_set_thread_area(struct thread *td, struct linux_set_thread_area_args *args
 	/* set %gs */
 	td->td_pcb->pcb_gsd = sd;
 	PCPU_GET(fsgs_gdt)[1] = sd;
-	load_gs(GSEL(GUGS_SEL, SEL_UPL));
+	load_gs(GSEL(_GUGS_SEL, SEL_UPL));
 	critical_exit();
    
 	return (0);
+#endif //wyc
 }
 
 int

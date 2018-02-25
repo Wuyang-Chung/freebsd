@@ -50,10 +50,25 @@ __FBSDID("$FreeBSD$");
 extern int vm86pa;
 extern struct pcb *vm86pcb;
 
-static struct mtx vm86_lock;
+//wyc static struct mtx vm86_lock;
 
-extern int vm86_bioscall(struct vm86frame *);
-extern void vm86_biosret(struct vm86frame *);
+extern int vm86_bioscall_s(struct vm86frame *);
+extern void vm86_biosret_s(struct vm86frame *);
+
+int vm86_bioscall(struct vm86frame *vmf);
+void vm86_biosret(struct vm86frame *vmf);
+
+int vm86_bioscall(struct vm86frame *vmf)
+{
+	panic("%s", __func__);
+	vm86_bioscall_s(vmf); //wyc defined in vm86bios.s
+}
+
+void vm86_biosret(struct vm86frame *vmf)
+{
+	panic("%s", __func__);
+	vm86_biosret_s(vmf); //wyc defined in vm86bios.s
+}
 
 void vm86_prepcall(struct vm86frame *);
 
@@ -76,6 +91,7 @@ struct system_map {
 #define PUSH_MASK	~(PSL_VM | PSL_RF | PSL_I)
 #define POP_MASK	~(PSL_VIP | PSL_VIF | PSL_VM | PSL_RF | PSL_IOPL)
 
+#if 0 //wyc
 static __inline caddr_t
 MAKE_ADDR(u_short sel, u_short off)
 {
@@ -126,11 +142,14 @@ POPL(struct vm86frame *vmf)
 	vmf->vmf_sp += 4;
 	return (x);
 }
+#endif
 
 int
 vm86_emulate(vmf)
 	struct vm86frame *vmf;
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	struct vm86_kernel *vm86;
 	caddr_t addr;
 	u_char i_byte;
@@ -338,6 +357,7 @@ vm86_emulate(vmf)
 		return (retcode);
 	}
 	return (SIGBUS);
+#endif
 }
 
 #define PGTABLE_SIZE	((1024 + 64) * 1024 / PAGE_SIZE)
@@ -359,6 +379,8 @@ struct vm86_layout {
 void
 vm86_initialize(void)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int i;
 	u_int *addr;
 	struct vm86_layout *vml = (struct vm86_layout *)vm86paddr;
@@ -465,22 +487,29 @@ vm86_initialize(void)
         msgbufinit((vm_offset_t)vm86paddr + sizeof(struct vm86_layout),
             ctob(3) - sizeof(struct vm86_layout));
 #endif
+#endif //wyc
 }
 
 vm_offset_t
 vm86_getpage(struct vm86context *vmc, int pagenum)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int i;
 
 	for (i = 0; i < vmc->npages; i++)
 		if (vmc->pmap[i].pte_num == pagenum)
 			return (vmc->pmap[i].kva);
 	return (0);
+#endif
 }
 
+//wyc vesa_mod_event -> vesa_configure -> x86bios_alloc -> vm86_addpage
 vm_offset_t
 vm86_addpage(struct vm86context *vmc, int pagenum, vm_offset_t kva)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int i, flags = 0;
 
 	for (i = 0; i < vmc->npages; i++)
@@ -504,6 +533,7 @@ overlap:
 	panic("vm86_addpage: overlap");
 full:
 	panic("vm86_addpage: not enough room");
+#endif
 }
 
 /*
@@ -512,6 +542,8 @@ full:
 void
 vm86_prepcall(struct vm86frame *vmf)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	struct vm86_kernel *vm86;
 	uint32_t *stack;
 	uint8_t *code;
@@ -538,6 +570,7 @@ vm86_prepcall(struct vm86frame *vmf)
 	vm86 = &curpcb->pcb_ext->ext_vm86;
 	if (!vm86->vm86_has_vme) 
 		vm86->vm86_eflags = vmf->vmf_eflags;  /* save VIF, VIP */
+#endif
 }
 
 /*
@@ -547,6 +580,8 @@ vm86_prepcall(struct vm86frame *vmf)
 void
 vm86_trap(struct vm86frame *vmf)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	caddr_t addr;
 
 	/* "should not happen" */
@@ -560,11 +595,14 @@ vm86_trap(struct vm86frame *vmf)
 		vmf->vmf_trapno = vmf->vmf_trapno << 16;
 
 	vm86_biosret(vmf);
+#endif
 }
 
 int
 vm86_intcall(int intnum, struct vm86frame *vmf)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int retval;
 
 	if (intnum < 0 || intnum > 0xff)
@@ -577,6 +615,7 @@ vm86_intcall(int intnum, struct vm86frame *vmf)
 	critical_exit();
 	mtx_unlock(&vm86_lock);
 	return (retval);
+#endif
 }
 
 /*
@@ -585,12 +624,15 @@ vm86_intcall(int intnum, struct vm86frame *vmf)
  * the "interrupt trampoline" will be used, otherwise we use the
  * caller's cs:ip routine.  
  */
+//wyc vesa_mod_event -> vesa_configure -> x86bios_intr -> vm86_datacall
 int
 vm86_datacall(intnum, vmf, vmc)
 	int intnum;
 	struct vm86frame *vmf;
 	struct vm86context *vmc;
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	pt_entry_t *pte = (pt_entry_t *)vm86paddr;
 	vm_paddr_t page;
 	int i, entry, retval;
@@ -617,11 +659,14 @@ vm86_datacall(intnum, vmf, vmc)
 	mtx_unlock(&vm86_lock);
 
 	return (retval);
+#endif
 }
 
 vm_offset_t
 vm86_getaddr(struct vm86context *vmc, u_short sel, u_short off)
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int i, page;
 	vm_offset_t addr;
 
@@ -631,6 +676,7 @@ vm86_getaddr(struct vm86context *vmc, u_short sel, u_short off)
 		if (page == vmc->pmap[i].pte_num)
 			return (vmc->pmap[i].kva + (addr & PAGE_MASK));
 	return (0);
+#endif
 }
 
 int
@@ -640,6 +686,8 @@ vm86_getptr(vmc, kva, sel, off)
 	u_short *sel;
 	u_short *off;
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int i;
 
 	for (i = 0; i < vmc->npages; i++)
@@ -650,6 +698,7 @@ vm86_getptr(vmc, kva, sel, off)
 			return (1);
 		}
 	return (0);
+#endif
 }
 	
 int
@@ -657,6 +706,8 @@ vm86_sysarch(td, args)
 	struct thread *td;
 	char *args;
 {
+	panic("%s", __func__); //wyc
+#if 0 //wyc
 	int error = 0;
 	struct i386_vm86_args ua;
 	struct vm86_kernel *vm86;
@@ -727,4 +778,5 @@ vm86_sysarch(td, args)
 		error = EINVAL;
 	}
 	return (error);
+#endif
 }

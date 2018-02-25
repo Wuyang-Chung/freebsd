@@ -177,7 +177,30 @@ struct pcpu {
 	 * reason not to keep the offsets of the MI fields constant
 	 * if only to make kernel debugging easier.
 	 */
+#if !defined(WYC)
 	PCPU_MD_FIELDS;
+#else
+	char	pc_monitorbuf[128] __aligned(128); /* cache line */
+	struct	pcpu *pc_prvspace;	/* Self-reference */
+	struct	pmap *pc_curpmap;
+	struct	i386tss pc_common_tss;
+	struct	segment_descriptor pc_common_tssd;
+	struct	segment_descriptor *pc_tss_gdt;
+	struct	segment_descriptor *pc_fsgs_gdt;
+	int	pc_currentldt;
+	u_int   pc_acpi_id;		/* ACPI CPU id */
+	u_int	pc_apic_id;
+	//wyc int	pc_private_tss;		/* Flag indicating private tss*/
+	u_int	pc_cmci_mask;		/* MCx banks for CMCI */
+	u_int	pc_vcpu_id;		/* Xen vCPU ID */
+	struct	mtx pc_cmap_lock;
+	void	*pc_cmap_pte1;
+	void	*pc_cmap_pte2;
+	caddr_t	pc_cmap_addr1;
+	caddr_t	pc_cmap_addr2;
+	vm_offset_t pc_qmap_addr;	/* KVA for temporary mappings */
+	uint32_t pc_smp_tlb_done;	/* TLB op acknowledgement */
+#endif
 } __aligned(CACHE_LINE_SIZE);
 
 #ifdef CTASSERT

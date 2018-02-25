@@ -88,7 +88,8 @@ extern struct soft_segment_descriptor gdt_segs[];
 extern struct gate_descriptor *idt;
 extern struct region_descriptor r_gdt, r_idt;
 
-void	lgdt(struct region_descriptor *rdp);
+//wyc lgdt will also load ds, es, gs, ss, fs and cs
+void	lgdt(struct region_descriptor *rdp, unsigned sel_pcpu);
 void	sdtossd(struct segment_descriptor *sdp,
 	    struct soft_segment_descriptor *ssdp);
 void	ssdtosd(struct soft_segment_descriptor *ssdp,

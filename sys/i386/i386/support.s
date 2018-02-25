@@ -678,7 +678,7 @@ END(bcmp)
 /*
  * Handling of special 386 registers and descriptor tables etc
  */
-/* void lgdt(struct region_descriptor *rdp); */
+/* void lgdt(struct region_descriptor *rdp, unsigned sel_pcpu); */
 ENTRY(lgdt)
 	/* reload the descriptor table */
 	movl	4(%esp),%eax
@@ -694,7 +694,8 @@ ENTRY(lgdt)
 	movl	%eax,%es
 	movl	%eax,%gs
 	movl	%eax,%ss
-	movl	$KPSEL,%eax
+	movl	8(%esp),%eax	//wyc %eax = sel_pcpu
+	//movl	$KPSEL,%eax
 	movl	%eax,%fs
 
 	/* reload code selector by turning return into intersegmental return */

@@ -492,18 +492,22 @@ options 	KTRACE_REQUEST_POOL=101
 
 #
 # KTR is a kernel tracing facility imported from BSD/OS.  It is
-# enabled with the KTR option.  KTR_ENTRIES defines the number of
+# enabled with the KTR option.
+# KTR_ENTRIES defines the number of
 # entries in the circular trace buffer; it may be an arbitrary number.
 # KTR_BOOT_ENTRIES defines the number of entries during the early boot,
 # before malloc(9) is functional.
 # KTR_COMPILE defines the mask of events to compile into the kernel as
-# defined by the KTR_* constants in <sys/ktr.h>.  KTR_MASK defines the
+# defined by the KTR_* constants in <sys/ktr.h>.
+# KTR_MASK defines the
 # initial value of the ktr_mask variable which determines at runtime
-# what events to trace.  KTR_CPUMASK determines which CPU's log
+# what events to trace.
+# KTR_CPUMASK determines which CPU's log
 # events, with bit X corresponding to CPU X.  The layout of the string
 # passed as KTR_CPUMASK must match a series of bitmasks each of them
 # separated by the "," character (ie:
-# KTR_CPUMASK=0xAF,0xFFFFFFFFFFFFFFFF).  KTR_VERBOSE enables
+# KTR_CPUMASK=0xAF,0xFFFFFFFFFFFFFFFF).
+# KTR_VERBOSE enables
 # dumping of KTR events to the console by default.  This functionality
 # can be toggled via the debug.ktr_verbose sysctl and defaults to off
 # if KTR_VERBOSE is not defined.  See ktr(4) and ktrdump(8) for details.

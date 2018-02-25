@@ -46,7 +46,7 @@
  * to each CPU's data can be set up for things like "check curproc on all
  * other processors"
  */
-
+#if !defined(WYC)
 #define	PCPU_MD_FIELDS							\
 	char	pc_monitorbuf[128] __aligned(128); /* cache line */	\
 	struct	pcpu *pc_prvspace;	/* Self-reference */		\
@@ -58,7 +58,7 @@
 	int	pc_currentldt;						\
 	u_int   pc_acpi_id;		/* ACPI CPU id */		\
 	u_int	pc_apic_id;						\
-	int	pc_private_tss;		/* Flag indicating private tss*/\
+	/*int	pc_private_tss;		   Flag indicating private tss*/\
 	u_int	pc_cmci_mask;		/* MCx banks for CMCI */	\
 	u_int	pc_vcpu_id;		/* Xen vCPU ID */		\
 	struct	mtx pc_cmap_lock;					\
@@ -68,8 +68,8 @@
 	caddr_t	pc_cmap_addr2;						\
 	vm_offset_t pc_qmap_addr;	/* KVA for temporary mappings */\
 	uint32_t pc_smp_tlb_done;	/* TLB op acknowledgement */	\
-	char	__pad[189]
-
+	char	__pad[193]
+#endif
 #ifdef _KERNEL
 
 #ifdef lint

@@ -101,7 +101,7 @@ SYSCTL_INT(_vm, OID_AUTO, old_mlock, CTLFLAG_RWTUN, &old_mlock, 0,
 #define	MAP_32BIT_MAX_ADDR	((vm_offset_t)1 << 31)
 #endif
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct sbrk_args {
 	int incr;
 };
@@ -114,7 +114,7 @@ sys_sbrk(struct thread *td, struct sbrk_args *uap)
 	return (EOPNOTSUPP);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct sstk_args {
 	int incr;
 };
@@ -157,7 +157,7 @@ ogetpagesize(struct thread *td, struct getpagesize_args *uap)
  * there would be no cache coherency between a descriptor and a VM mapping
  * both to the same character device.
  */
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct mmap_args {
 	void *addr;
 	size_t len;

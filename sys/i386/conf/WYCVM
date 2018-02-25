@@ -57,7 +57,7 @@ options 	GEOM_LABEL		# Provides labelization
 #options 	COMPAT_FREEBSD6		# Compatible with FreeBSD6
 #options 	COMPAT_FREEBSD7		# Compatible with FreeBSD7
 #options 	COMPAT_FREEBSD9		# Compatible with FreeBSD9
-options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
+#options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
 options 	SCSI_DELAY=5000		# Delay (in ms) before probing SCSI
 options 	KTRACE			# ktrace(1) support
 options 	STACK			# stack(9) support
@@ -74,8 +74,8 @@ options 	AUDIT			# Security event auditing
 #options 	MAC			# TrustedBSD MAC Framework
 
 # Support for Capsicum
-options 	CAPABILITY_MODE		# Capsicum capability mode
-options 	CAPABILITIES		# Capsicum capabilities
+#options 	CAPABILITY_MODE		# Capsicum capability mode
+#options 	CAPABILITIES		# Capsicum capabilities
 
 options 	KDTRACE_HOOKS		# Kernel DTrace hooks
 options 	DDB_CTF			# Kernel ELF linker loads CTF data
@@ -93,7 +93,7 @@ options	DDB		# console debugger
 #options	KDB_UNATTENDED	# when panic occurs, reboot instead of enter into debugger
 #options 	INVARIANTS		# enable extra sanity checking of internal structures
 
-options	MAXCPU=4	# defines the maximum number of CPUs that can boot in the system
+options	MAXCPU=2	# defines the maximum number of CPUs that can boot in the system
 
 # To make an SMP kernel, the next two lines are needed
 options 	SMP			# Symmetric MultiProcessor Kernel
@@ -196,7 +196,7 @@ device		psm			# PS/2 mouse
 device		kbdmux			# keyboard multiplexer
 
 device		vga			# VGA video card driver
-options 	VESA			# Add support for VESA BIOS Extensions (VBE)
+#wyc options 	VESA			# Add support for VESA BIOS Extensions (VBE)
 
 device		splash			# Splash screen and screen saver support
 

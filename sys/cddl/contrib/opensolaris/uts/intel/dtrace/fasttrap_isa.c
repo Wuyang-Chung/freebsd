@@ -898,7 +898,7 @@ fasttrap_do_seg(fasttrap_tracepoint_t *tp, struct reg *rp, uintptr_t *addr)
 #endif
 
 	} else {
-		if (ndx >= NGDT)
+		if (ndx >= MAX_GDT)
 			return (-1);
 
 #ifdef __i386__

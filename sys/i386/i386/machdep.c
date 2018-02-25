@@ -648,11 +648,9 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 	 * Unconditionally fill the fsbase and gsbase into the mcontext.
 	 */
 	sdp = &td->td_pcb->pcb_fsd;
-	sf.sf_uc.uc_mcontext.mc_fsbase = sdp->sd_hibase << 24 |
-	    sdp->sd_lobase;
+	sf.sf_uc.uc_mcontext.mc_fsbase = USD_GETBASE(sdp);
 	sdp = &td->td_pcb->pcb_gsd;
-	sf.sf_uc.uc_mcontext.mc_gsbase = sdp->sd_hibase << 24 |
-	    sdp->sd_lobase;
+	sf.sf_uc.uc_mcontext.mc_gsbase = USD_GETBASE(sdp);
 	bzero(sf.sf_uc.uc_mcontext.mc_spare2,
 	    sizeof(sf.sf_uc.uc_mcontext.mc_spare2));
 	bzero(sf.sf_uc.__spare__, sizeof(sf.sf_uc.__spare__));
@@ -703,6 +701,9 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 	 * eflags.
 	 */
 	if (regs->tf_eflags & PSL_VM) {
+#if 1 //wyc
+		panic("%s", __func__); //wyc
+#else
 		struct trapframe_vm86 *tf = (struct trapframe_vm86 *)regs;
 		struct vm86_kernel *vm86 = &td->td_pcb->pcb_ext->ext_vm86;
 
@@ -724,6 +725,7 @@ sendsig(sig_t catcher, ksiginfo_t *ksi, sigset_t *mask)
 		 * almost legitimately in probes for old cpu types.
 		 */
 		tf->tf_eflags &= ~(PSL_VM | PSL_NT | PSL_VIF | PSL_VIP);
+#endif
 	}
 
 	/*
@@ -1011,6 +1013,9 @@ sys_sigreturn(td, uap)
 	regs = td->td_frame;
 	eflags = ucp->uc_mcontext.mc_eflags;
 	if (eflags & PSL_VM) {
+#if 1 //wyc
+		panic("%s", __func__); //wyc
+#else
 		struct trapframe_vm86 *tf = (struct trapframe_vm86 *)regs;
 		struct vm86_kernel *vm86;
 
@@ -1050,6 +1055,7 @@ sys_sigreturn(td, uap)
 		tf->tf_ds = _udatasel;
 		tf->tf_es = _udatasel;
 		tf->tf_fs = _udatasel;
+#endif
 	} else {
 		/*
 		 * Don't allow users to change privileged or reserved flags.
@@ -1243,7 +1249,7 @@ SYSCTL_STRING(_machdep, OID_AUTO, bootmethod, CTLFLAG_RD, bootmethod, 0,
 
 int _default_ldt;
 
-union descriptor gdt[NGDT * MAXCPU];	/* global descriptor table */
+union descriptor gdt[MAX_GDT];	/* global descriptor table */
 union descriptor ldt[NLDT];		/* local descriptor table */
 static struct gate_descriptor idt0[NIDT];
 struct gate_descriptor *idt = &idt0[0];	/* interrupt descriptor table */
@@ -1272,7 +1278,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-[GPRIV_SEL] =	/* 1 SMP Per-Processor Private Data Descriptor */
+[GPRIV_SEL] =	/* 1 pcpu: SMP Per-Processor Private Data Descriptor */
 {	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct pcpu)-1, //wyc
 	.ssd_type = SDT_MEMRWA,
@@ -1345,12 +1351,12 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-[GPROC0_SEL] =	/* 9 Proc 0 Tss Descriptor */
+[GPROC0_SEL] =	/* 9 common_tss Proc 0 Tss Descriptor */
 {
 	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1603,7 +1609,7 @@ sdtossd(
     struct segment_descriptor *sd,
     struct soft_segment_descriptor *ssd)
 {
-	ssd->ssd_base  = (sd->sd_hibase << 24) | sd->sd_lobase;
+	ssd->ssd_base  = USD_GETBASE(sd);
 	ssd->ssd_limit = (sd->sd_hilimit << 16) | sd->sd_lolimit;
 	ssd->ssd_type  = sd->sd_type;
 	ssd->ssd_dpl   = sd->sd_dpl;
@@ -2496,13 +2502,17 @@ init386(int first)
 	gdt_segs[GPRIV_SEL].ssd_base = (int) pc;
 	gdt_segs[GPROC0_SEL].ssd_base = (int) &pc->pc_common_tss;
 
-	for (x = 0; x < NGDT; x++)
+	for (x = 0; x < GPCPU_START; x++)
 		ssdtosd(&gdt_segs[x], &gdt[x].sd);
+	ssdtosd(&gdt_segs[GPRIV_SEL],	&gdt[GPCPU_START+0].sd);
+	ssdtosd(&gdt_segs[GPROC0_SEL],	&gdt[GPCPU_START+1].sd);
+	ssdtosd(&gdt_segs[GUFS_SEL],	&gdt[GPCPU_START+2].sd);
+	ssdtosd(&gdt_segs[GUGS_SEL],	&gdt[GPCPU_START+3].sd);
 
-	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
-	r_gdt.rd_base =  (int) gdt;
 	mtx_init(&dt_lock, "descriptor tables", NULL, MTX_SPIN);
-	lgdt(&r_gdt);
+	r_gdt.rd_limit = MAX_GDT * sizeof(gdt[0]) - 1;
+	r_gdt.rd_base =  (int) gdt;
+	lgdt(&r_gdt, GSEL(GPCPU_START, SEL_KPL)); //wyc will also load ds, es, gs, ss, fs and cs
 
 	pcpu_init(pc, 0, sizeof(struct pcpu));
 	for (pa = first; pa < first + DPCPU_SIZE; pa += PAGE_SIZE)
@@ -2627,7 +2637,7 @@ init386(int first)
 	initializecpucache();
 
 	/* pointer to selector slot for %fs/%gs */
-	PCPU_SET(fsgs_gdt, &gdt[GUFS_SEL].sd);
+	PCPU_SET(fsgs_gdt, &gdt[GPCPU_START+2].sd); //wyc GUFS_SEL for cpu 0
 
 	dblfault_tss.tss_esp = dblfault_tss.tss_esp0 = dblfault_tss.tss_esp1 =
 	    dblfault_tss.tss_esp2 = (int)&dblfault_stack[sizeof(dblfault_stack)];
@@ -2647,13 +2657,22 @@ init386(int first)
 	dblfault_tss.tss_ldt = GSEL(GLDT_SEL, SEL_KPL);
 
 	/* Initialize the tss (except for the final esp0) early for vm86. */
-	PCPU_SET(common_tss.tss_esp0, thread0.td_kstack +
-	    thread0.td_kstack_pages * PAGE_SIZE - 16);
+#if 0 //wyc
+	PCPU_SET(common_tss.tss_esp0,
+	    thread0.td_kstack + thread0.td_kstack_pages * PAGE_SIZE - 16);
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
-	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
-	PCPU_SET(tss_gdt, &gdt[GPROC0_SEL].sd);
-	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
 	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
+	PCPU_SET(tss_gdt, &gdt[GPCPU_START+1].sd);
+	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
+#else
+	pc->pc_common_tss.tss_esp0 =
+	    thread0.td_kstack + thread0.td_kstack_pages * PAGE_SIZE - 16;
+	pc->pc_common_tss.tss_ss0 = GSEL(GDATA_SEL, SEL_KPL);
+	pc->pc_common_tss.tss_ioopt = sizeof(struct i386tss) << 16;
+	pc->pc_tss_gdt = &gdt[GPCPU_START+1].sd;
+	pc->pc_common_tssd = *pc->pc_tss_gdt;
+#endif
+	gsel_tss = GSEL(GPCPU_START+1, SEL_KPL);
 	ltr(gsel_tss);
 
 	/* Initialize the PIC early for vm86 calls. */
@@ -2691,7 +2710,7 @@ init386(int first)
 		i386_kdb_init();
 	}
 
-	vm86_initialize();
+	//wyc vm86_initialize();
 	getmemsize(first);
 	init_param2(physmem);
 
@@ -2725,7 +2744,7 @@ init386(int first)
 	/* Move esp0 in the tss to its final place. */
 	/* Note: -16 is so we can grow the trapframe if we came from vm86 */
 	PCPU_SET(common_tss.tss_esp0, (vm_offset_t)thread0.td_pcb - 16);
-	gdt[GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;	/* clear busy bit */
+	gdt[GPCPU_START+1].sd.sd_type = SDT_SYS386TSS;	/* clear busy bit */
 	ltr(gsel_tss);
 
 	/* make a call gate to reenter kernel with */
@@ -2757,7 +2776,7 @@ init386(int first)
 #else
 	thread0.td_pcb->pcb_cr3 = (int)IdlePTD;
 #endif
-	thread0.td_pcb->pcb_ext = 0;
+	//wyc thread0.td_pcb->pcb_ext = 0;
 	thread0.td_frame = &proc0_tf;
 
 	cpu_probe_amdc1e();
@@ -3053,9 +3072,9 @@ get_mcontext(struct thread *td, mcontext_t *mcp, int flags)
 	mcp->mc_len = sizeof(*mcp);
 	get_fpcontext(td, mcp, NULL, 0);
 	sdp = &td->td_pcb->pcb_fsd;
-	mcp->mc_fsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
+	mcp->mc_fsbase = USD_GETBASE(sdp);
 	sdp = &td->td_pcb->pcb_gsd;
-	mcp->mc_gsbase = sdp->sd_hibase << 24 | sdp->sd_lobase;
+	mcp->mc_gsbase = USD_GETBASE(sdp);
 	mcp->mc_flags = 0;
 	mcp->mc_xfpustate = 0;
 	mcp->mc_xfpustate_len = 0;

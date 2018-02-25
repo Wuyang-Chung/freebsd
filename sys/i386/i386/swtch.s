@@ -205,20 +205,21 @@ sw1:
 	 * At this point, we've switched address spaces and are ready
 	 * to load up the rest of the next context.
 	 */
+#if 0 //wyc
 	cmpl	$0, PCB_EXT(%edx)		/* has pcb extension? */
 	je	1f				/* If not, use the default */
 	movl	$1, PCPU(PRIVATE_TSS) 		/* mark use of private tss */
 	movl	PCB_EXT(%edx), %edi		/* new tss descriptor */
 	jmp	2f				/* Load it up */
-
+#endif
 1:	/*
 	 * Use the common default TSS instead of our own.
 	 * Set our stack pointer into the TSS, it's set to just
 	 * below the PCB.  In C, common_tss.tss_esp0 = &pcb - 16;
 	 */
-	leal	-16(%edx), %ebx			/* leave space for vm86 */
+	leal	-16(%edx), %ebx	// %edx: td_pcb	/* leave space for vm86 */
 	movl	%ebx, PCPU(COMMON_TSS) + TSS_ESP0
-
+#if 0 //wyc
 	/*
 	 * Test this CPU's  bit in the bitmap to see if this
 	 * CPU was using a private TSS.
@@ -226,18 +227,18 @@ sw1:
 	cmpl	$0, PCPU(PRIVATE_TSS)		/* Already using the common? */
 	je	3f				/* if so, skip reloading */
 	movl	$0, PCPU(PRIVATE_TSS)
-	PCPU_ADDR(COMMON_TSSD, %edi)
+	//wyc PCPU_ADDR(COMMON_TSSD, %edi)
 2:
 	/* Move correct tss descriptor into GDT slot, then reload tr. */
-	movl	PCPU(TSS_GDT), %ebx		/* entry in GDT */
+	//wyc movl	PCPU(TSS_GDT), %ebx		/* entry in GDT */
 	movl	0(%edi), %eax
 	movl	4(%edi), %esi
 	movl	%eax, 0(%ebx)
 	movl	%esi, 4(%ebx)
-	movl	$GPROC0_SEL*8, %esi		/* GSEL(GPROC0_SEL, SEL_KPL) */
-	ltr	%si
+	//wyc movl	$GPROC0_SEL*8, %esi		/* GSEL(GPROC0_SEL, SEL_KPL) */
+	//wyc ltr	%si
 3:
-
+#endif
 	/* Copy the %fs and %gs selectors into this pcpu gdt */
 	leal	PCB_FSD(%edx), %esi
 	movl	PCPU(FSGS_GDT), %edi

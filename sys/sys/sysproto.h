@@ -33,6 +33,7 @@ struct thread;
 #define	PADR_(t)	0
 #endif
 
+#if !defined(WYC)
 struct nosys_args {
 	register_t dummy;
 };
@@ -1796,6 +1797,8 @@ struct numa_setaffinity_args {
 struct fdatasync_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
 };
+#endif
+
 int	nosys(struct thread *, struct nosys_args *);
 void	sys_sys_exit(struct thread *, struct sys_exit_args *);
 int	sys_fork(struct thread *, struct fork_args *);

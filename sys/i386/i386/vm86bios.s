@@ -51,7 +51,9 @@ vm86pcb:		.long	0
 /*
  * vm86_bioscall(struct trapframe_vm86 *vm86)
  */
-ENTRY(vm86_bioscall)
+//wyc vesa_mod_event -> vesa_configure -> x86bios_intr -> vm86_bioscall
+//this function will not be called
+ENTRY(vm86_bioscall_s)
 	movl	vm86pcb,%edx		/* scratch data area */
 	movl	4(%esp),%eax
 	movl	%eax,SCR_ARGFRAME(%edx)	/* save argument pointer */
@@ -87,21 +89,21 @@ ENTRY(vm86_bioscall)
 	pushl	%eax			/* save curpcb */
 	movl	%edx,PCPU(CURPCB)	/* set curpcb to vm86pcb */
 
-	movl	PCPU(TSS_GDT),%ebx	/* entry in GDT */
+	//wyc movl	PCPU(TSS_GDT),%ebx	/* entry in GDT */
 	movl	0(%ebx),%eax
 	movl	%eax,SCR_TSS0(%edx)	/* save first word */
 	movl	4(%ebx),%eax
 	andl    $~0x200, %eax		/* flip 386BSY -> 386TSS */
 	movl	%eax,SCR_TSS1(%edx)	/* save second word */
-
+#if 0 //wyc
 	movl	PCB_EXT(%edx),%edi	/* vm86 tssd entry */
 	movl	0(%edi),%eax
 	movl	%eax,0(%ebx)
 	movl	4(%edi),%eax
 	movl	%eax,4(%ebx)
-	movl	$GPROC0_SEL*8,%esi	/* GSEL(entry, SEL_KPL) */
-	ltr	%si
-
+	//wyc movl	$GPROC0_SEL*8,%esi	/* GSEL(entry, SEL_KPL) */
+	//wyc ltr	%si
+#endif
 	movl	%cr3,%eax
 	pushl	%eax			/* save address space */
 	movl	IdlePTD,%ecx
@@ -136,7 +138,8 @@ ENTRY(vm86_bioscall)
 /*
  * vm86_biosret(struct trapframe_vm86 *vm86)
  */
-ENTRY(vm86_biosret)
+//wyc this function will no be called
+ENTRY(vm86_biosret_s)
 	movl	vm86pcb,%edx		/* data area */
 
 	movl	4(%esp),%esi		/* source */
@@ -153,13 +156,13 @@ ENTRY(vm86_biosret)
 	popl	%eax
 	movl	%eax,%cr3		/* install old page table */
 
-	movl	PCPU(TSS_GDT),%ebx		/* entry in GDT */
+	//wyc movl	PCPU(TSS_GDT),%ebx		/* entry in GDT */
 	movl	SCR_TSS0(%edx),%eax
 	movl	%eax,0(%ebx)		/* restore first word */
 	movl	SCR_TSS1(%edx),%eax
 	movl	%eax,4(%ebx)		/* restore second word */
-	movl	$GPROC0_SEL*8,%esi	/* GSEL(entry, SEL_KPL) */
-	ltr	%si
+	//wyc movl	$GPROC0_SEL*8,%esi	/* GSEL(entry, SEL_KPL) */
+	//wyc ltr	%si
 	
 	popl	PCPU(CURPCB)		/* restore curpcb/curproc */
 	movl	SCR_ARGFRAME(%edx),%edx	/* original stack frame */

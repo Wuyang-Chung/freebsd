@@ -38,34 +38,37 @@
 
 /*
  * Intel 386 Context Data Type
+wyc:
+    (x) not referenced
+    (d) referenced by dblfault_tss
  */
 
 struct i386tss {
-	int	tss_link;	/* actually 16 bits: top 16 bits must be zero */
+	int	tss_link;	/* ( x) actually 16 bits: top 16 bits must be zero */
 	int	tss_esp0; 	/* kernel stack pointer privilege level 0 */
 	int	tss_ss0;	/* actually 16 bits: top 16 bits must be zero */
-	int	tss_esp1; 	/* kernel stack pointer privilege level 1 */
-	int	tss_ss1;	/* actually 16 bits: top 16 bits must be zero */
-	int	tss_esp2; 	/* kernel stack pointer privilege level 2 */
-	int	tss_ss2;	/* actually 16 bits: top 16 bits must be zero */
-	int	tss_cr3; 	/* page table directory */
-	int	tss_eip; 	/* program counter */
-	int	tss_eflags; 	/* program status longword */
-	int	tss_eax;
-	int	tss_ecx;
-	int	tss_edx;
-	int	tss_ebx;
-	int	tss_esp; 	/* user stack pointer */
-	int	tss_ebp; 	/* user frame pointer */
-	int	tss_esi;
-	int	tss_edi;
-	int	tss_es;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_cs;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_ss;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_ds;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_fs;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_gs;		/* actually 16 bits: top 16 bits must be zero */
-	int	tss_ldt;	/* actually 16 bits: top 16 bits must be zero */
+	int	tss_esp1; 	/* (d ) kernel stack pointer privilege level 1 */
+	int	tss_ss1;	/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_esp2; 	/* (d ) kernel stack pointer privilege level 2 */
+	int	tss_ss2;	/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_cr3; 	/* (d ) page table directory */
+	int	tss_eip; 	/* (d ) program counter */
+	int	tss_eflags; 	/* (d ) program status longword */
+	int	tss_eax;	/* ( x) */
+	int	tss_ecx;	/* ( x) */
+	int	tss_edx;	/* ( x) */
+	int	tss_ebx;	/* ( x) */
+	int	tss_esp; 	/* (d ) user stack pointer */
+	int	tss_ebp; 	/* (d ) user frame pointer */
+	int	tss_esi;	/* ( x) */
+	int	tss_edi;	/* ( x) */
+	int	tss_es;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_cs;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_ss;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_ds;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_fs;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_gs;		/* (d ) actually 16 bits: top 16 bits must be zero */
+	int	tss_ldt;	/* (d ) actually 16 bits: top 16 bits must be zero */
 	int	tss_ioopt;	/* options & io offset bitmap: currently zero */
 				/* XXX unimplemented .. i/o permission bitmap */
 };

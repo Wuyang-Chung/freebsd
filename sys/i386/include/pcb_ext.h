@@ -44,7 +44,7 @@ struct pcb_ext {
 };
 
 #ifdef _KERNEL
-extern int private_tss;
+//extern int private_tss; //wyc This is not referenced or defined. should be removed
 
 int i386_extend_pcb(struct thread *);
 

@@ -1112,6 +1112,7 @@ panicifcpuunsupported(void)
 
 static	volatile u_int trap_by_rdmsr;
 
+#if !defined(WYC) //wyc the following will cause SI fail to parse the code
 /*
  * Special exception 6 handler.
  * The rdmsr instruction generates invalid opcodes fault on 486-class
@@ -1153,6 +1154,7 @@ __asm
 	iret								\n\
 ");
 #endif
+#endif	//#if !defined(WYC)
 
 /*
  * Distinguish IBM Blue Lightning CPU from Cyrix CPUs that does not

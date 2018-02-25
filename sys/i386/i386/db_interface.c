@@ -154,7 +154,8 @@ db_segsize(struct trapframe *tfp)
 	    plp = curthread->td_proc->p_md.md_ldt;
 	    sdp = (plp != NULL) ? &plp->ldt_sd : &ldt[0].sd;
 	} else {
-	    sdp = &gdt[PCPU_GET(cpuid) * NGDT].sd;
+	    //wyc sdp = &gdt[PCPU_GET(cpuid) * NGDT].sd;
+	    sdp = &gdt[0].sd;
 	}
 	return (sdp[IDXSEL(sel)].sd_def32 == 0 ? 16 : 32);
 }

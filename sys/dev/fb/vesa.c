@@ -1963,13 +1963,14 @@ vesa_unload(void)
 static int
 vesa_mod_event(module_t mod, int type, void *data)
 {
-
+#if 0 //wyc
 	switch (type) {
 	case MOD_LOAD:
 		return (vesa_load());
 	case MOD_UNLOAD:
 		return (vesa_unload());
 	}
+#endif
 	return (EOPNOTSUPP);
 }
 

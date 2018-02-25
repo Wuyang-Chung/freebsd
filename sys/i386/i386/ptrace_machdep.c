@@ -169,7 +169,7 @@ cpu_ptrace(struct thread *td, int req, void *addr, int data)
 	case PT_GETGSBASE:
 		sdp = req == PT_GETFSBASE ? &td->td_pcb->pcb_fsd :
 		    &td->td_pcb->pcb_gsd;
-		r = sdp->sd_hibase << 24 | sdp->sd_lobase;
+		r = USD_GETBASE(sdp);
 		error = copyout(&r, addr, sizeof(r));
 		break;
 
@@ -181,10 +181,10 @@ cpu_ptrace(struct thread *td, int req, void *addr, int data)
 		fill_based_sd(&sd, r);
 		if (req == PT_SETFSBASE) {
 			td->td_pcb->pcb_fsd = sd;
-			td->td_frame->tf_fs = GSEL(GUFS_SEL, SEL_UPL);
+			td->td_frame->tf_fs = GSEL(GUFS_SEL, SEL_UPL); //wyctodo
 		} else {
 			td->td_pcb->pcb_gsd = sd;
-			td->td_pcb->pcb_gs = GSEL(GUGS_SEL, SEL_UPL);
+			td->td_pcb->pcb_gs = GSEL(GUGS_SEL, SEL_UPL); //wyctodo
 		}
 		break;
 
