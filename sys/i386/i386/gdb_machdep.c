@@ -42,6 +42,23 @@ __FBSDID("$FreeBSD$");
 
 #include <gdb/gdb.h>
 
+#define REG_EAX		0
+#define REG_ECX		1
+#define REG_EDX		2
+#define REG_EBX		3
+#define REG_ESP		4
+#define REG_EBP		5
+#define REG_ESI		6
+#define REG_EDI		7
+#define REG_EIP		8
+#define REG_EFLAGS	9
+#define REG_CS		10
+#define REG_SS		11
+#define REG_DS		12
+#define REG_ES		13
+#define REG_FS		14
+#define REG_GS		15
+
 void *
 gdb_cpu_getreg(int regnum, size_t *regsz)
 {
@@ -70,11 +87,12 @@ gdb_cpu_getreg(int regnum, size_t *regsz)
 	case 6:  return (&kdb_thrctx->pcb_esi);
 	case 7:  return (&kdb_thrctx->pcb_edi);
 	case 8:  return (&kdb_thrctx->pcb_eip);
-	case 10: return (&_kcodesel);
+	case 10: return (&_kcodesel);	//wyc also shown above
 	case 11: return (&_kdatasel);
-	case 12: return (&_kdatasel);
-	case 13: return (&_kdatasel);
-	case 14: return (&_kprivsel);
+	case 12: return (&_kdatasel);	//wyc also shown above
+	case 13: return (&_kdatasel);	//wyc also shown above
+	case 14: 			//wyc also shown above
+		return (&_kprivsel);
 	case 15: return (&kdb_thrctx->pcb_gs);
 	}
 	return (NULL);

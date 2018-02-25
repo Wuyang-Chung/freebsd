@@ -199,7 +199,7 @@ sysctl_kern_stackprot(SYSCTL_HANDLER_ARGS)
  */
 static const struct execsw **execsw;
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct execve_args {
 	char    *fname; 
 	char    **argv;
@@ -226,7 +226,7 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	return (error);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct fexecve_args {
 	int	fd;
 	char	**argv;
@@ -254,7 +254,7 @@ sys_fexecve(struct thread *td, struct fexecve_args *uap)
 	return (error);
 }
 
-#ifndef _SYS_SYSPROTO_H_
+#if defined(WYC)
 struct __mac_execve_args {
 	char	*fname;
 	char	**argv;

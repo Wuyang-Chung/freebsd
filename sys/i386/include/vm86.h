@@ -119,7 +119,7 @@ struct vm86context {
 struct vm86_kernel {
 	caddr_t	vm86_intmap;			/* interrupt map */
 	u_int	vm86_eflags;			/* emulated flags */
-	int	vm86_has_vme;			/* VME support */
+	int	vm86_has_vme; // Virtual 8086 mode enhancements support */
 	int	vm86_inited;			/* we were initialized */
 	int	vm86_debug;
 	caddr_t	vm86_sproc;			/* address of sproc */

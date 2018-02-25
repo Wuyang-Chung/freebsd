@@ -250,7 +250,7 @@ init_secondary(void)
 
 	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
 	r_gdt.rd_base = (int) &gdt[myid * NGDT];
-	lgdt(&r_gdt);			/* does magic intra-segment return */
+	lgdt(&r_gdt); //wyc will also load ds, es, gs, ss, fs and cs
 
 	lidt(&r_idt);
 
