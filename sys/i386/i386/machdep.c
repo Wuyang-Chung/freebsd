@@ -2508,8 +2508,13 @@ init386(int first)
 		pmap_kenter(pa + KERNBASE, pa);
 	dpcpu_init((void *)(first + KERNBASE), 0);
 	first += DPCPU_SIZE;
+#if 0 //wyc
 	PCPU_SET(prvspace, pc);
 	PCPU_SET(curthread, &thread0);
+#else
+	pc->pc_prvspace = pc;
+	pc->pc_curthread = &thread0;
+#endif
 	/* Non-late cninit() and printf() can be moved up to here. */
 
 	/*
@@ -2531,7 +2536,11 @@ init386(int first)
 
 	_default_ldt = GSEL(GLDT_SEL, SEL_KPL);
 	lldt(_default_ldt);
+#if 0 //wyc
 	PCPU_SET(currentldt, _default_ldt);
+#else
+	pc->pc_currentldt = _default_ldt;
+#endif
 
 	/* exceptions */
 	for (x = 0; x < NIDT; x++)
@@ -2625,9 +2634,6 @@ init386(int first)
 	initializecpu();	/* Initialize CPU registers */
 	initializecpucache();
 
-	/* pointer to selector slot for %fs/%gs */
-	PCPU_SET(fsgs_gdt, &gdt[GUFS_SEL].sd);
-
 	dblfault_tss.tss_esp = dblfault_tss.tss_esp0 = dblfault_tss.tss_esp1 =
 	    dblfault_tss.tss_esp2 = (int)&dblfault_stack[sizeof(dblfault_stack)];
 	dblfault_tss.tss_ss = dblfault_tss.tss_ss0 = dblfault_tss.tss_ss1 =
@@ -2644,15 +2650,30 @@ init386(int first)
 	dblfault_tss.tss_fs = GSEL(GPRIV_SEL, SEL_KPL);
 	dblfault_tss.tss_cs = GSEL(GCODE_SEL, SEL_KPL);
 	dblfault_tss.tss_ldt = GSEL(GLDT_SEL, SEL_KPL);
+#if 0 //wyc
+	/* pointer to selector slot for %fs/%gs */
+	PCPU_SET(fsgs_gdt, &gdt[GUFS_SEL].sd);
 
 	/* Initialize the tss (except for the final esp0) early for vm86. */
 	PCPU_SET(common_tss.tss_esp0, thread0.td_kstack +
 	    thread0.td_kstack_pages * PAGE_SIZE - 16);
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
-	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
+	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
 	PCPU_SET(tss_gdt, &gdt[GPROC0_SEL].sd);
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
-	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
+#else
+	/* pointer to selector slot for %fs/%gs */
+	pc->pc_fsgs_gdt = &gdt[GUFS_SEL].sd;
+
+	/* Initialize the tss (except for the final esp0) early for vm86. */
+	pc->pc_common_tss.tss_esp0 = thread0.td_kstack +
+	    thread0.td_kstack_pages * PAGE_SIZE - 16;
+	pc->pc_common_tss.tss_ss0 = GSEL(GDATA_SEL, SEL_KPL);
+	pc->pc_common_tss.tss_ioopt = sizeof(struct i386tss) << 16;
+	pc->pc_tss_gdt = &gdt[GPROC0_SEL].sd;
+	pc->pc_common_tssd = gdt[GPROC0_SEL].sd;
+#endif
+	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
 	ltr(gsel_tss);
 
 	/* Initialize the PIC early for vm86 calls. */
@@ -2723,10 +2744,17 @@ init386(int first)
 		    1);
 		xhdr->xstate_bv = xsave_mask;
 	}
+#if 0 //wyc
 	PCPU_SET(curpcb, thread0.td_pcb);
 	/* Move esp0 in the tss to its final place. */
 	/* Note: -16 is so we can grow the trapframe if we came from vm86 */
 	PCPU_SET(common_tss.tss_esp0, (vm_offset_t)thread0.td_pcb - 16);
+#else
+	pc->pc_curpcb = thread0.td_pcb;
+	/* Move esp0 in the tss to its final place. */
+	/* Note: -16 is so we can grow the trapframe if we came from vm86 */
+	pc->pc_common_tss.tss_esp0 = (vm_offset_t)thread0.td_pcb - 16;
+#endif
 	gdt[GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;	/* clear busy bit */
 	ltr(gsel_tss);
 
