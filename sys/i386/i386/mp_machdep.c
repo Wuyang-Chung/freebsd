@@ -255,18 +255,27 @@ init_secondary(void)
 	lidt(&r_idt);
 
 	lldt(_default_ldt);
-	PCPU_SET(currentldt, _default_ldt);
 
-	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
 	gdt[myid * NGDT + GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;
+#if 0 //wyc
+	PCPU_SET(currentldt, _default_ldt);
 	PCPU_SET(common_tss.tss_esp0, 0); /* not used until after switch */
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));
 	PCPU_SET(common_tss.tss_ioopt, (sizeof (struct i386tss)) << 16);
 	PCPU_SET(tss_gdt, &gdt[myid * NGDT + GPROC0_SEL].sd);
 	PCPU_SET(common_tssd, *PCPU_GET(tss_gdt));
-	ltr(gsel_tss);
-
 	PCPU_SET(fsgs_gdt, &gdt[myid * NGDT + GUFS_SEL].sd);
+#else
+	pc->pc_currentldt = _default_ldt;
+	pc->pc_common_tss.tss_esp0 = 0; /* not used until after switch */
+	pc->pc_common_tss.tss_ss0 = GSEL(GDATA_SEL, SEL_KPL);
+	pc->pc_common_tss.tss_ioopt = sizeof(struct i386tss) << 16;
+	pc->pc_tss_gdt =    &gdt[myid * NGDT + GPROC0_SEL].sd;
+	pc->pc_common_tssd = gdt[myid * NGDT + GPROC0_SEL].sd;
+	pc->pc_fsgs_gdt =   &gdt[myid * NGDT + GUFS_SEL].sd;
+#endif
+	gsel_tss = GSEL(GPROC0_SEL, SEL_KPL);
+	ltr(gsel_tss);
 
 	/*
 	 * Set to a known state:
