@@ -1437,7 +1437,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 };
 
 static struct soft_segment_descriptor ldt_segs[] = {
-	/* Null Descriptor - overwritten by call gate */
+[LSYS5CALLS_SEL] =	/* 0 Null Descriptor - overwritten by call gate */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1446,7 +1446,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-	/* Null Descriptor - overwritten by call gate */
+[LSYS5SIGR_SEL] =	/* 1 Null Descriptor - overwritten by call gate */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1455,7 +1455,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-	/* Null Descriptor - overwritten by call gate */
+[L43BSDCALLS_SEL] =	/* 2 Null Descriptor - overwritten by call gate */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1464,7 +1464,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-	/* Code Descriptor for user */
+[LUCODE_SEL] =		/* 3 Code Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
@@ -1473,7 +1473,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-	/* Null Descriptor - overwritten by call gate */
+[LSOL26CALLS_SEL] =	/* 4 Null Descriptor - overwritten by call gate */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
@@ -1482,7 +1482,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
-	/* Data Descriptor for user */
+[LUDATA_SEL] =		/* 5 Data Descriptor for user */
 {	.ssd_base = 0x0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,

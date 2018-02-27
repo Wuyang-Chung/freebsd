@@ -124,7 +124,7 @@ union descriptor {
 	struct segment_descriptor sd;
 	struct gate_descriptor gd;
 };
-#else
+#else // !__i386__
 /*
  * Gate descriptors (e.g. indirect descriptors, trap, interrupt etc. 128 bit)
  * Only interrupt and trap gates have gd_ist.
@@ -148,7 +148,7 @@ union descriptor {
 	struct user_segment_descriptor sd;
 	struct gate_descriptor gd;
 };
-#endif
+#endif // __i386__
 
 	/* system segments and gate types */
 #define	SDT_SYSNULL	 0	/* system null */

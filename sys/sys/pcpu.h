@@ -190,7 +190,7 @@ struct pcpu {
 	int	pc_currentldt;
 	u_int   pc_acpi_id;		/* ACPI CPU id */
 	u_int	pc_apic_id;
-	//wyc int	pc_private_tss;		/* Flag indicating private tss*/
+	int	pc_private_tss;		/* Flag indicating private tss*/
 	u_int	pc_cmci_mask;		/* MCx banks for CMCI */
 	u_int	pc_vcpu_id;		/* Xen vCPU ID */
 	struct	mtx pc_cmap_lock;
