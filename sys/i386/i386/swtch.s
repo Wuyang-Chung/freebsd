@@ -264,6 +264,7 @@ sw1:
 	movl	%edx, PCPU(CURPCB)
 	movl	%ecx, PCPU(CURTHREAD)		/* into next thread */
 
+#if 0 //wyc
 	/*
 	 * Determine the LDT to use and load it if is the default one and
 	 * that is not the current one.
@@ -290,7 +291,7 @@ sw1:
 	addl	$4,%esp
 	popl	%edx
 2:
-
+#endif
 	/* This must be done after loading the user LDT. */
 	.globl	cpu_switch_load_gs
 cpu_switch_load_gs:

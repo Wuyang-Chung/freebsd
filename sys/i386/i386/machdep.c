@@ -1128,13 +1128,13 @@ exec_setregs(struct thread *td, struct image_params *imgp, u_long stack)
 	/* Reset pc->pcb_gs and %gs before possibly invalidating it. */
 	pcb->pcb_gs = _udatasel;
 	load_gs(_udatasel);
-
+#if defined(WYC)
 	mtx_lock_spin(&dt_lock);
 	if (td->td_proc->p_md.md_ldt)
 		user_ldt_free(td);
 	else
 		mtx_unlock_spin(&dt_lock);
-  
+#endif
 	/*
 	 * Reset the fs and gs bases.  The values from the old address
 	 * space do not make sense for the new program.  In particular,
@@ -1242,7 +1242,7 @@ SYSCTL_STRING(_machdep, OID_AUTO, bootmethod, CTLFLAG_RD, bootmethod, 0,
 int _default_ldt;
 
 union descriptor gdt[NGDT * MAXCPU];	/* global descriptor table */
-union descriptor ldt[NLDT];		/* local descriptor table */
+union descriptor ldt[1/*NLDT*/];		/* local descriptor table */
 static struct gate_descriptor idt0[NIDT];
 struct gate_descriptor *idt = &idt0[0];	/* interrupt descriptor table */
 struct region_descriptor r_gdt, r_idt;	/* table descriptors */
@@ -1355,7 +1355,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_gran = 0		},
 [GLDT_SEL] =	/* 10 LDT Descriptor */
 {	.ssd_base = (int) ldt,
-	.ssd_limit = sizeof(ldt)-1,
+	.ssd_limit = 0, //wyc sizeof(ldt)-1,
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = SEL_UPL,
 	.ssd_p = 1,
@@ -1364,7 +1364,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_gran = 0		},
 [GUSERLDT_SEL] = /* 11 User LDT Descriptor per process */
 {	.ssd_base = (int) ldt,
-	.ssd_limit = (512 * sizeof(union descriptor)-1),
+	.ssd_limit = 0, //wyc (512 * sizeof(union descriptor)-1),
 	.ssd_type = SDT_SYSLDT,
 	.ssd_dpl = 0,
 	.ssd_p = 1,
@@ -1435,7 +1435,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_def32 = 0,
 	.ssd_gran = 0		},
 };
-
+#if defined(WYC)
 static struct soft_segment_descriptor ldt_segs[] = {
 [LSYS5CALLS_SEL] =	/* 0 Null Descriptor - overwritten by call gate */
 {	.ssd_base = 0x0,
@@ -1492,7 +1492,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
 };
-
+#endif
 void
 setidt(
 	int idx,
@@ -2438,7 +2438,7 @@ i386_kdb_init(void)
 register_t
 init386(int first)
 {
-	struct gate_descriptor *gdp;
+	//wyc struct gate_descriptor *gdp;
 	int gsel_tss, metadata_missing, x, pa;
 	struct pcpu *pc;
 	struct xstate_hdr *xhdr;
@@ -2526,13 +2526,13 @@ init386(int first)
 	 */
 	mutex_init();
 	mtx_init(&icu_lock, "icu", NULL, MTX_SPIN | MTX_NOWITNESS | MTX_NOPROFILE);
-
+#if defined(WYC)
 	/* make ldt memory segments */
 	ldt_segs[LUCODE_SEL].ssd_limit = atop(0 - 1);
 	ldt_segs[LUDATA_SEL].ssd_limit = atop(0 - 1);
 	for (x = 0; x < nitems(ldt_segs); x++)
 		ssdtosd(&ldt_segs[x], &ldt[x].sd);
-
+#endif
 	_default_ldt = GSEL(GLDT_SEL, SEL_KPL);
 	lldt(_default_ldt);
 #if 0 //wyc
@@ -2753,7 +2753,7 @@ init386(int first)
 #endif
 	gdt[GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;	/* clear busy bit */
 	ltr(gsel_tss);
-
+#if 0 //wyc
 	/* make a call gate to reenter kernel with */
 	gdp = &ldt[LSYS5CALLS_SEL].gd;
 
@@ -2770,7 +2770,7 @@ init386(int first)
 	/* XXX yes! */
 	ldt[LBSDICALLS_SEL] = ldt[LSYS5CALLS_SEL];
 	ldt[LSOL26CALLS_SEL] = ldt[LSYS5CALLS_SEL];
-
+#endif
 	/* transfer to user mode */
 
 	_ucodesel = GSEL(GUCODE_SEL, SEL_UPL);

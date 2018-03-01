@@ -251,6 +251,7 @@ union descriptor {
 #define	GNDIS_SEL	18	/* For the NDIS layer */
 #define	NGDT		19
 
+#if defined(WYC)
 /*
  * Entries in the Local Descriptor Table (LDT)
  */
@@ -264,7 +265,7 @@ union descriptor {
 /* #define	LPOSIXCALLS_SEL	5*/	/* notyet */
 #define	LBSDICALLS_SEL	16	/* BSDI system call gate */
 #define	NLDT		(LBSDICALLS_SEL + 1)
-
+#endif // defined(WYC)
 #else /* !__i386__ */
 /*
  * Entries in the Global Descriptor Table (GDT)

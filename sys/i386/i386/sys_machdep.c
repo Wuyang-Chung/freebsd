@@ -71,9 +71,11 @@ __FBSDID("$FreeBSD$");
 #ifdef SMP
 static void set_user_ldt_rv(void *arg);
 #endif
+#if defined(WYC) //wyc
 static int i386_set_ldt_data(struct thread *, int start, int num,
     union descriptor *descs);
 static int i386_ldt_grow(struct thread *td, int len);
+#endif
 
 void
 fill_based_sd(struct segment_descriptor *sdp, uint32_t base)
@@ -134,7 +136,7 @@ sysarch(
 	struct sysarch_args *uap)
 {
 	int error;
-	union descriptor *lp;
+	//wyc union descriptor *lp;
 	union {
 		struct i386_ldt_args largs;
 		struct i386_ioperm_args iargs;
@@ -183,9 +185,12 @@ sysarch(
 		break;
 	case I386_GET_LDT:
 	case I386_SET_LDT:
+#if 0 //wyc
 		if ((error = copyin(uap->parms, &kargs.largs,
 		    sizeof(struct i386_ldt_args))) != 0)
 			return (error);
+#endif
+		return ENOTSUP;
 		break;
 	case I386_GET_XFPUSTATE: //wyc must support
 		if ((error = copyin(uap->parms, &kargs.xfpu,
@@ -197,6 +202,7 @@ sysarch(
 	}
 
 	switch (uap->op) {
+#if defined(WYC) //wyc
 	case I386_GET_LDT:
 		error = i386_get_ldt(td, &kargs.largs);
 		break;
@@ -215,6 +221,7 @@ sysarch(
 			error = i386_set_ldt(td, &kargs.largs, NULL);
 		}
 		break;
+#endif
 	case I386_GET_IOPERM:
 		error = i386_get_ioperm(td, &kargs.iargs);
 		if (error == 0)
@@ -404,6 +411,7 @@ done:
 	return (0);
 }
 
+#if defined(WYC) //wyc
 /*
  * Update the GDT entry pointing to the LDT to point to the LDT of the
  * current process. Manage dt_lock holding/unholding autonomously.
@@ -418,7 +426,9 @@ set_user_ldt_locked(struct mdproc *mdp)
 
 	pldt = mdp->md_ldt;
 	gdt_idx = GUSERLDT_SEL;
+#ifdef SMP //wyc
 	gdt_idx += PCPU_GET(cpuid) * NGDT;	/* always 0 on UP */
+#endif
 	gdt[gdt_idx].sd = pldt->ldt_sd;
 	lldt(GSEL(GUSERLDT_SEL, SEL_KPL));
 	PCPU_SET(currentldt, GSEL(GUSERLDT_SEL, SEL_KPL));
@@ -432,6 +442,7 @@ set_user_ldt(struct mdproc *mdp)
 	set_user_ldt_locked(mdp);
 	mtx_unlock_spin(&dt_lock);
 }
+#endif
 
 #ifdef SMP
 static void
@@ -445,6 +456,7 @@ set_user_ldt_rv(void *arg)
 }
 #endif
 
+#if defined(WYC) //wyc
 /*
  * dt_lock must be held. Returns with dt_lock held.
  */
@@ -810,3 +822,4 @@ i386_ldt_grow(struct thread *td, int len)
 	}
 	return (0);
 }
+#endif // defined(WYC)

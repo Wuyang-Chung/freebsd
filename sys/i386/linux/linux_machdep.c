@@ -414,6 +414,8 @@ linux_iopl(struct thread *td, struct linux_iopl_args *args)
 int
 linux_modify_ldt(struct thread *td, struct linux_modify_ldt_args *uap)
 {
+	return ENOTSUP;
+#if 0 //wyc
 	int error;
 	struct i386_ldt_args ldt;
 	struct l_descriptor ld;
@@ -471,6 +473,7 @@ linux_modify_ldt(struct thread *td, struct linux_modify_ldt_args *uap)
 	}
 
 	return (error);
+#endif
 }
 
 int

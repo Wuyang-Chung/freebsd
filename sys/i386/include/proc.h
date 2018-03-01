@@ -78,10 +78,12 @@ struct syscall_args {
 	    (char *)&td;						\
 } while (0)
 
+#if defined(WYC) //wyc
 void 	set_user_ldt(struct mdproc *);
 struct 	proc_ldt *user_ldt_alloc(struct mdproc *, int);
 void 	user_ldt_free(struct thread *);
 void	user_ldt_deref(struct proc_ldt *pldt);
+#endif //defined(WYC)
 
 extern struct mtx dt_lock;
 #endif	/* _KERNEL */

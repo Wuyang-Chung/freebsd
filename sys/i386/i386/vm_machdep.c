@@ -159,6 +159,8 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 
 	p1 = td1->td_proc;
 	if ((flags & RFPROC) == 0) {
+		panic("%s", __func__); //wyc RFPROC is always set
+#if defined(WYC) //wyc
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;
@@ -176,6 +178,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 			} else
 				mtx_unlock_spin(&dt_lock);
 		}
+#endif
 		return;
 	}
 
@@ -256,7 +259,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	 * XXX don't copy the i/o pages.  this should probably be fixed.
 	 */
 	pcb2->pcb_ext = 0;
-
+#if defined(WYC) //wyc
 	/* Copy the LDT, if necessary. */
 	mtx_lock_spin(&dt_lock);
 	if (mdp2->md_ldt != NULL) {
@@ -270,7 +273,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 		}
 	}
 	mtx_unlock_spin(&dt_lock);
-
+#endif
 	/* Setup to release spin count in fork_exit(). */
 	td2->td_md.md_spinlock_count = 1;
 	td2->td_md.md_saved_flags = PSL_KERNEL | PSL_I;
@@ -306,7 +309,7 @@ cpu_fork_kthread_handler(struct thread *td, void (*func)(void *), void *arg)
 void
 cpu_exit(struct thread *td)
 {
-
+#if defined(WYC) //wyc
 	/*
 	 * If this process has a custom LDT, release it.  Reset pc->pcb_gs
 	 * and %gs before we free it in case they refer to an LDT entry.
@@ -318,6 +321,7 @@ cpu_exit(struct thread *td)
 		user_ldt_free(td);
 	} else
 		mtx_unlock_spin(&dt_lock);
+#endif
 }
 
 void

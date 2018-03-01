@@ -124,8 +124,10 @@ __END_DECLS
 struct thread;
 union descriptor;
 #ifdef __i386__
+#if defined(WYC) //wyc
 int i386_get_ldt(struct thread *, struct i386_ldt_args *);
 int i386_set_ldt(struct thread *, struct i386_ldt_args *, union descriptor *);
+#endif
 int i386_get_ioperm(struct thread *, struct i386_ioperm_args *);
 int i386_set_ioperm(struct thread *, struct i386_ioperm_args *);
 #else
