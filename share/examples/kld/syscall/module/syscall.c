@@ -34,14 +34,20 @@
 #include <sys/kernel.h>
 #include <sys/systm.h>
 
+struct hello_arg {
+	unsigned int a0;
+	unsigned int a1;
+};
+
 /*
  * The function for implementing the syscall.
  */
 static int
 hello(struct thread *td, void *arg)
 {
+	struct hello_arg *uap = arg;
 
-	printf("hello kernel\n");
+	printf("hello kernel %u %u\n", uap->a0, uap->a1);
 	return (0);
 }
 
@@ -49,7 +55,7 @@ hello(struct thread *td, void *arg)
  * The `sysent' for the new syscall
  */
 static struct sysent hello_sysent = {
-	0,			/* sy_narg */
+	2,			/* sy_narg */
 	hello			/* sy_call */
 };
 
