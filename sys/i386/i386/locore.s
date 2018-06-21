@@ -675,7 +675,7 @@ no_kernend:
 /*
  * Enable PSE and PGE.
  */
-#ifndef DISABLE_PSE
+#ifndef DISABLE_PSE	/*wyc true, not defined. PSE: enable 4M page. */
 	testl	$CPUID_PSE, R(cpu_feature)
 	jz	1f
 	movl	$PG_PS, R(pseflag)
@@ -684,7 +684,7 @@ no_kernend:
 	movl	%eax, %cr4
 1:
 #endif
-#ifndef DISABLE_PG_G
+#ifndef DISABLE_PG_G	/*wyc true, not defined. PG_G: global page */
 	testl	$CPUID_PGE, R(cpu_feature)
 	jz	2f
 	movl	$PG_G, R(pgeflag)
