@@ -170,6 +170,12 @@ clear_orphan(struct proc *p)
 	p->p_treeflag &= ~P_TREE_ORPHANED;
 }
 
+#if defined(WYC)
+struct sys_exit_args {
+	int rval;
+};
+#endif
+
 /*
  * exit -- death of process.
  */

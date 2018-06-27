@@ -77,8 +77,12 @@ kproc_start(const void *udata)
  * fmt and following will be *printf'd into (*newpp)->p_comm (for ps, etc.).
  */
 int
-kproc_create(void (*func)(void *), void *arg,
-    struct proc **newpp, int flags, int pages, const char *fmt, ...)
+kproc_create(
+    void (*func)(void *), void *arg,
+    struct proc **newpp,
+    int flags,
+    int pages,
+    const char *fmt, ...)
 {
 	struct fork_req fr;
 	int error;

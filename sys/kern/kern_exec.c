@@ -215,11 +215,11 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	int error;
 
 	error = pre_execve(td, &oldvmspace);
-	if (error != 0)
+	if (error != ESUCCESS)
 		return (error);
 	error = exec_copyin_args(&args, uap->fname, UIO_USERSPACE,
 	    uap->argv, uap->envv);
-	if (error == 0)
+	if (error == ESUCCESS)
 		error = kern_execve(td, &args, NULL);
 	//wyc will run to here even if kern_execve succeeds
 	post_execve(td, error, oldvmspace);

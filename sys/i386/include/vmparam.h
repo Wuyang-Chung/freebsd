@@ -134,7 +134,7 @@
  * Kernel physical load address.
  */
 #ifndef KERNLOAD
-#define	KERNLOAD		(1 << PDRSHIFT)
+#define	KERNLOAD		(1 << PDRSHIFT)	//wyc 4M
 #endif /* !defined(KERNLOAD) */
 
 /*
@@ -144,21 +144,21 @@
  * messy at times, but hey, we'll do anything to save a page :-)
  */
 
-#define VM_MAX_KERNEL_ADDRESS	VADDR(KPTDI+NKPDE-1, NPTEPG-1)
+#define VM_MAX_KERNEL_ADDRESS	VADDR(KPTDI+NKPDE-1, NPTEPG-1)	//wyc 4G - 4K
 
-#define VM_MIN_KERNEL_ADDRESS	VADDR(PTDPTDI, PTDPTDI)
+#define VM_MIN_KERNEL_ADDRESS	VADDR(PTDPTDI, PTDPTDI)	//wyc (3G-4M)+(3M-4K) == 3G-1M-4K
 
-#define	KERNBASE		VADDR(KPTDI, 0)
+#define	KERNBASE		VADDR(KPTDI, 0)		//wyc 3G
 
-#define UPT_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)
-#define UPT_MIN_ADDRESS		VADDR(PTDPTDI, 0)
+#define UPT_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)	//wyc user page table max. 3G-1M-4K
+#define UPT_MIN_ADDRESS		VADDR(PTDPTDI, 0)	//wyc user page table min. 3G-4M
 
-#define VM_MAXUSER_ADDRESS	VADDR(PTDPTDI, 0)
+#define VM_MAXUSER_ADDRESS	VADDR(PTDPTDI, 0)	//wyc 3G-4M
 
-#define	SHAREDPAGE		(VM_MAXUSER_ADDRESS - PAGE_SIZE)
-#define	USRSTACK		SHAREDPAGE
+#define	SHAREDPAGE		(VM_MAXUSER_ADDRESS - PAGE_SIZE) //wyc 3G-4M-4K
+#define	USRSTACK		SHAREDPAGE		//wyc 3G-4M-4K
 
-#define VM_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI)
+#define VM_MAX_ADDRESS		VADDR(PTDPTDI, PTDPTDI) //wyc (3G-4M)+(3M-4K) == 3G-1M-4K
 #define VM_MIN_ADDRESS		((vm_offset_t)0)
 
 /*

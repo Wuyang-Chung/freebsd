@@ -175,15 +175,24 @@ struct __hack
 /*
  * Atomic compare and set, used by the mutex functions.
  *
- * cmpset:
+ * atomic_cmpset_char:
+ * atomic_cmpset_short:
+ * atomic_cmpset_int:
  *	if (*dst == expect)
  *		*dst = src
+ *		return 1; //wyc
+ *	else
+ *		return 0; //wyc
  *
- * fcmpset:
+ * atomic_fcmpset_char:
+ * atomic_fcmpset_short:
+ * atomic_fcmpset_int:
  *	if (*dst == *expect)
  *		*dst = src
+ *		return 1; //wyc
  *	else
  *		*expect = *dst
+ *		return 0; //wyc
  *
  * Returns 0 on failure, non-zero on success.
  */
@@ -196,7 +205,7 @@ atomic_cmpset_##TYPE(volatile u_##TYPE *dst, u_##TYPE expect, u_##TYPE src) \
 	__asm __volatile(				\
 	"	" MPLOCKED "		"		\
 	"	cmpxchg	%3,%1 ;		"		\
-	"	sete	%0 ;		"		\
+	"	sete	%0 ;		" /*wyc set byte if equal */		\
 	"# atomic_cmpset_" #TYPE "	"		\
 	: "=q" (res),			/* 0 */		\
 	  "+m" (*dst),			/* 1 */		\

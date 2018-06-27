@@ -959,7 +959,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 	}
 
-	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork and sfork
+	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
 		if (vm2 == NULL) {
 			error = ENOMEM;

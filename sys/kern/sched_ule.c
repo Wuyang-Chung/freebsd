@@ -2555,7 +2555,7 @@ sched_add(struct thread *td, int flags)
 	 * Recalculate the priority before we select the target cpu or
 	 * run-queue.
 	 */
-	if (PRI_BASE(td->td_pri_class) == PRI_TIMESHARE)
+	if (PRI_BASE(td->td_pri_class) == PRI_TIMESHARE) //wycgit this is redundant since the priority class will be checked in sched_priority
 		sched_priority(td);
 #ifdef SMP
 	/*
