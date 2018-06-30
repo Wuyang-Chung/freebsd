@@ -1528,7 +1528,7 @@ extern inthand_t
 	IDTVEC(xen_intr_upcall),
 #endif
 	IDTVEC(lcall_syscall), IDTVEC(int0x80_syscall);
-#endif //!defined(WYC)
+#endif // !WYC
 
 #ifdef DDB
 /*

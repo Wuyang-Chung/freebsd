@@ -1155,7 +1155,7 @@ __asm
 	iret								\n\
 ");
 #endif
-#endif	//#if !defined(WYC)
+#endif // !WYC
 
 /*
  * Distinguish IBM Blue Lightning CPU from Cyrix CPUs that does not

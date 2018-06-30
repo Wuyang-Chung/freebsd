@@ -56,12 +56,20 @@ struct sysentvec elf32_freebsd_sysvec = {
 	.sv_errsize	= 0,
 	.sv_errtbl	= NULL,
 	.sv_transtrap	= NULL,
+#if defined(WYC)
+	.sv_fixup	= elf32_freebsd_fixup,
+#else
 	.sv_fixup	= __elfN(freebsd_fixup),
+#endif
 	.sv_sendsig	= sendsig,
 	.sv_sigcode	= sigcode,
 	.sv_szsigcode	= &szsigcode,
 	.sv_name	= "FreeBSD ELF32",
+#if defined(WYC)
+	.sv_coredump	= elf32_coredump,
+#else
 	.sv_coredump	= __elfN(coredump),
+#endif
 	.sv_imgact_try	= NULL,
 	.sv_minsigstksz	= MINSIGSTKSZ,
 	.sv_pagesize	= PAGE_SIZE,

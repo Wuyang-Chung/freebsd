@@ -1160,7 +1160,7 @@ options 	P1003_1B_MQUEUE
 #####################################################################
 # SECURITY POLICY PARAMETERS
 
-# Support for BSM audit
+# Support for BSM audit	# Sun's Basic Security Module
 options 	AUDIT
 
 # Support for Mandatory Access Control (MAC):

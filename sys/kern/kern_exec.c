@@ -1144,7 +1144,7 @@ exec_new_vmspace(struct image_params *imgp, struct sysentvec *sv)
 #endif
 	if (obj != NULL) { //wyc TRUE
 		vm_object_reference(obj);
-		error = vm_map_fixed(map, obj, 0,
+		error = vm_map_fixed(map, obj, 0, //wyc ,,object_offset=0
 #if defined(WYC)
 		    elf32_freebsd_sysvec.sv_shared_page_base, //wyc ==3G-4M-4K ==0xBFBF_F000
 		    elf32_freebsd_sysvec.sv_shared_page_len,  //wyc ==4K

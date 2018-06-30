@@ -832,7 +832,6 @@ fork1(struct thread *td, struct fork_req *fr)
 	struct thread *td2;
 	struct vmspace *vm2;
 	struct file *fp_procdesc;
-	vm_ooffset_t mem_charged;
 	int error, nprocs_new, ok;
 	static int curfail;
 	static struct timeval lastfail;
@@ -932,7 +931,6 @@ fork1(struct thread *td, struct fork_req *fr)
 			goto fail2;
 	}
 
-	mem_charged = 0;
 	/*wyc
 	    allocate new proc, new thread and thread stack
 	*/
@@ -960,6 +958,9 @@ fork1(struct thread *td, struct fork_req *fr)
 	}
 
 	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
+		vm_ooffset_t mem_charged; //wyc
+
+		mem_charged = 0;
 		vm2 = vmspace_fork(p1->p_vmspace, &mem_charged);
 		if (vm2 == NULL) {
 			error = ENOMEM;
@@ -1041,7 +1042,7 @@ fail2:
 		fdrop(fp_procdesc, td);
 	}
 	atomic_add_int(&nprocs, -1);
-	pause("fork", hz / 2);
+	pause("fork", hz / 2);	//wyc slow down to prevent fork attack
 	return (error);
 }
 

@@ -201,7 +201,7 @@ struct pcpu {
 	vm_offset_t pc_qmap_addr;	/* KVA for temporary mappings */
 	uint32_t pc_smp_tlb_done;	/* TLB op acknowledgement */
 	uint32_t pc_ibpb_set;
-#endif //defined(WYC)
+#endif // !WYC
 } __aligned(CACHE_LINE_SIZE);
 
 #ifdef CTASSERT

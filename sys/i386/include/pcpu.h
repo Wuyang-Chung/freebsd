@@ -70,7 +70,7 @@
 	uint32_t pc_smp_tlb_done;	/* TLB op acknowledgement */	\
 	uint32_t pc_ibpb_set;						\
 	char	__pad[185]
-#endif // !defined(WYC)
+#endif // !WYC
 #ifdef _KERNEL
 
 #ifdef lint

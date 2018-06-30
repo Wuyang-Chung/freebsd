@@ -1797,7 +1797,7 @@ struct numa_setaffinity_args {
 struct fdatasync_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
 };
-#endif
+#endif // !WYC
 
 int	nosys(struct thread *, struct nosys_args *);
 void	sys_sys_exit(struct thread *, struct sys_exit_args *);

@@ -118,7 +118,7 @@ SYSCTL_INT(_debug, OID_AUTO, __elfN(legacy_coredump), CTLFLAG_RW,
     &elf_legacy_coredump, 0,
     "include all and only RW pages in core dumps");
 
-int __elfN(nxstack) =
+int __elfN(nxstack) =	//wyc non-executable stack. ==0 for i386
 #if defined(__amd64__) || defined(__powerpc64__) /* both 64 and 32 bit */ || \
     (defined(__arm__) && __ARM_ARCH >= 7) || defined(__aarch64__)
 	1;
@@ -390,7 +390,12 @@ __elfN(get_brandinfo)(struct image_params *imgp, const char *interp,
 }
 
 static int
-__elfN(check_header)(const Elf_Ehdr *hdr)
+#if defined(WYC)
+elf32_check_header(
+#else
+__elfN(check_header)(
+#endif
+    const Elf_Ehdr *hdr)
 {
 	Elf_Brandinfo *bi;
 	int i;
@@ -415,11 +420,16 @@ __elfN(check_header)(const Elf_Ehdr *hdr)
 	if (i == MAX_BRANDS)
 		return (ENOEXEC);
 
-	return (0);
+	return (ESUCCESS);
 }
 
 static int
-__elfN(map_partial)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
+#if defined(WYC)
+elf32_map_partial(
+#else
+__elfN(map_partial)(
+#endif
+    vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot)
 {
 	struct sf_buf *sf;
@@ -451,8 +461,18 @@ __elfN(map_partial)(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 }
 
 static int
-__elfN(map_insert)(struct image_params *imgp, vm_map_t map, vm_object_t object,
-    vm_ooffset_t offset, vm_offset_t start, vm_offset_t end, vm_prot_t prot,
+#if defined(WYC)
+elf32_map_insert(
+#else
+__elfN(map_insert)(
+#endif
+    struct image_params *imgp,
+    vm_map_t map,
+    vm_object_t object,
+    vm_ooffset_t offset,
+    vm_offset_t start,
+    vm_offset_t end, //wyc it's actually end address + 1
+    vm_prot_t prot,
     int cow)
 {
 	struct sf_buf *sf;
@@ -461,7 +481,12 @@ __elfN(map_insert)(struct image_params *imgp, vm_map_t map, vm_object_t object,
 	int error, locked, rv;
 
 	if (start != trunc_page(start)) {
-		rv = __elfN(map_partial)(map, object, offset, start,
+#if defined(WYC)
+		rv = elf32_map_partial(
+#else
+		rv = __elfN(map_partial)(
+#endif
+		    map, object, offset, start,
 		    round_page(start), prot);
 		if (rv != KERN_SUCCESS)
 			return (rv);
@@ -469,7 +494,12 @@ __elfN(map_insert)(struct image_params *imgp, vm_map_t map, vm_object_t object,
 		start = round_page(start);
 	}
 	if (end != round_page(end)) {
-		rv = __elfN(map_partial)(map, object, offset +
+#if defined(WYC)
+		rv = elf32_map_partial(
+#else
+		rv = __elfN(map_partial)(
+#endif
+		    map, object, offset +
 		    trunc_page(end) - start, trunc_page(end), end, prot);
 		if (rv != KERN_SUCCESS)
 			return (rv);
@@ -518,9 +548,21 @@ __elfN(map_insert)(struct image_params *imgp, vm_map_t map, vm_object_t object,
 	return (KERN_SUCCESS);
 }
 
+/*wyc
+    For data segment, 'memsz' is almost alway greater than 'filsz'
+*/
 static int
-__elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
-    caddr_t vmaddr, size_t memsz, size_t filsz, vm_prot_t prot,
+#if defined(WYC)
+elf32_load_section(
+#else
+__elfN(load_section)(
+#endif
+    struct image_params *imgp,
+    vm_ooffset_t offset,	//wyc offset in file
+    caddr_t vmaddr, 	//wyc offset in virtual address
+    size_t memsz, 	//wyc object size in memory
+    size_t filsz, 	//wyc object size in file
+    vm_prot_t prot,
     size_t pagesize)
 {
 	struct sf_buf *sf;
@@ -569,8 +611,12 @@ __elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
 		/* cow flags: don't dump readonly sections in core */
 		cow = MAP_COPY_ON_WRITE | MAP_PREFAULT |
 		    (prot & VM_PROT_WRITE ? 0 : MAP_DISABLE_COREDUMP);
-
-		rv = __elfN(map_insert)(imgp, map,
+#if defined(WYC)
+		rv = elf32_map_insert(
+#else
+		rv = __elfN(map_insert)(
+#endif
+				      imgp, map,
 				      object,
 				      file_addr,	/* file offset */
 				      map_addr,		/* virtual start */
@@ -582,7 +628,7 @@ __elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
 
 		/* we can stop now if we've covered it all */
 		if (memsz == filsz)
-			return (0);
+			return (ESUCCESS);
 	}
 
 
@@ -600,7 +646,12 @@ __elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
 
 	/* This had damn well better be true! */
 	if (map_len != 0) {
-		rv = __elfN(map_insert)(imgp, map, NULL, 0, map_addr,
+#if defined(WYC)
+		rv = elf32_map_insert(
+#else
+		rv = __elfN(map_insert)(
+#endif
+		    imgp, map, NULL, 0, map_addr,
 		    map_addr + map_len, prot, 0);
 		if (rv != KERN_SUCCESS)
 			return (EINVAL);
@@ -645,8 +696,13 @@ __elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
  * the entry point for the loaded file.
  */
 static int
-__elfN(load_file)(struct proc *p, const char *file, u_long *addr,
-	u_long *entry, size_t pagesize)
+#if defined(WYC)
+elf32_load_file(
+#else
+__elfN(load_file)(
+#endif
+    struct proc *p, const char *file, u_long *addr,
+    u_long *entry, size_t pagesize)
 {
 	struct {
 		struct nameidata nd;
@@ -688,7 +744,7 @@ __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 	imgp->execlabel = NULL;
 
 	NDINIT(nd, LOOKUP, LOCKLEAF | FOLLOW, UIO_SYSSPACE, file, curthread);
-	if ((error = namei(nd)) != 0) {
+	if ((error = namei(nd)) != ESUCCESS) {
 		nd->ni_vp = NULL;
 		goto fail;
 	}
@@ -715,7 +771,11 @@ __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 	imgp->object = nd->ni_vp->v_object;
 
 	hdr = (const Elf_Ehdr *)imgp->image_header;
+#if defined(WYC)
+	if ((error = elf32_check_header(hdr)) != 0)
+#else
 	if ((error = __elfN(check_header)(hdr)) != 0)
+#endif
 		goto fail;
 	if (hdr->e_type == ET_DYN)
 		rbase = *addr;
@@ -742,8 +802,14 @@ __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 	for (i = 0, numsegs = 0; i < hdr->e_phnum; i++) {
 		if (phdr[i].p_type == PT_LOAD && phdr[i].p_memsz != 0) {
 			/* Loadable segment */
+#if defined(WYC)
+			prot = elf32_trans_prot(phdr[i].p_flags);
+			error = elf32_load_section(
+#else
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
-			error = __elfN(load_section)(imgp, phdr[i].p_offset,
+			error = __elfN(load_section)(
+#endif
+			    imgp, phdr[i].p_offset,
 			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + rbase,
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot, pagesize);
 			if (error != 0)
@@ -774,7 +840,12 @@ fail:
 }
 
 static int
-__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
+#if defined(WYC)
+exec_elf32_imgact(
+#else
+__CONCAT(exec_, __elfN(imgact))(
+#endif
+    struct image_params *imgp)
 {
 	struct thread *td;
 	const Elf_Ehdr *hdr;
@@ -799,7 +870,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	 * Only allow ET_EXEC & ET_DYN here, reject ET_DYN later
 	 * if particular brand doesn't support it.
 	 */
-	if (__elfN(check_header)(hdr) != 0 ||
+#if defined(WYC)
+	if (elf32_check_header(hdr) != ESUCCESS ||
+#else
+	if (__elfN(check_header)(hdr) != ESUCCESS ||
+#endif
 	    (hdr->e_type != ET_EXEC && hdr->e_type != ET_DYN))
 		return (-1);
 
@@ -860,7 +935,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 				    interp_name_len, phdr[i].p_offset,
 				    UIO_SYSSPACE, IO_NODELOCKED, td->td_ucred,
 				    NOCRED, NULL, td);
-				if (error != 0) {
+				if (error != ESUCCESS) {
 					uprintf("i/o error PT_INTERP\n");
 					goto ret;
 				}
@@ -872,7 +947,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			}
 			break;
 		case PT_GNU_STACK:
+#if defined(WYC)
+			if (elf32_nxstack)
+#else
 			if (__elfN(nxstack))
+#endif
 				imgp->stack_prot =
 				    __elfN(trans_prot)(phdr[i].p_flags);
 			imgp->stack_sz = phdr[i].p_memsz;
@@ -880,7 +959,12 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		}
 	}
 
+#if defined(WYC)
+	brand_info = &freebsd_brand_info; //wyc brand_info == freebsd_brand_info
+	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
+#else
 	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
+#endif
 	    &osrel);
 	if (brand_info == NULL) {
 		uprintf("ELF binary type \"%u\" not known.\n",
@@ -921,11 +1005,11 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 	 */
 	VOP_UNLOCK(imgp->vp, 0);
 
-	error = exec_new_vmspace(imgp, sv);
+	error = exec_new_vmspace(imgp, sv); //wyc destroy old address and allocate a new user stack
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
-	if (error != 0)
+	if (error != KERN_SUCCESS)
 		goto ret;
 
 	for (i = 0; i < hdr->e_phnum; i++) {
@@ -933,9 +1017,15 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		case PT_LOAD:	/* Loadable segment */
 			if (phdr[i].p_memsz == 0)
 				break;
+#if defined(WYC)
+			prot = elf32_trans_prot(phdr[i].p_flags);
+			error = elf32_load_section(
+#else
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
-			error = __elfN(load_section)(imgp, phdr[i].p_offset,
-			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr,
+			error = __elfN(load_section)(
+#endif
+			    imgp, phdr[i].p_offset,
+			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
 			if (error != 0)
@@ -951,7 +1041,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			    hdr->e_phoff + hdr->e_phnum * hdr->e_phentsize
 				<= phdr[i].p_filesz)
 				proghdr = phdr[i].p_vaddr + hdr->e_phoff +
-				    et_dyn_addr;
+				    et_dyn_addr; //wyc et_dyn_addr==0
 
 			seg_addr = trunc_page(phdr[i].p_vaddr + et_dyn_addr);
 			seg_size = round_page(phdr[i].p_memsz +
@@ -978,7 +1068,7 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			total_size += seg_size;
 			break;
 		case PT_PHDR: 	/* Program header table info */
-			proghdr = phdr[i].p_vaddr + et_dyn_addr;
+			proghdr = phdr[i].p_vaddr + et_dyn_addr; //wyc et_dny_addr==0
 			break;
 		default:
 			break;
@@ -1041,7 +1131,12 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 			path = malloc(MAXPATHLEN, M_TEMP, M_WAITOK);
 			snprintf(path, MAXPATHLEN, "%s%s",
 			    brand_info->emul_path, interp);
-			error = __elfN(load_file)(imgp->proc, path, &addr,
+#if defined(WYC)
+			error = elf32_load_file(
+#else
+			error = __elfN(load_file)(
+#endif
+			    imgp->proc, path, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 			free(path, M_TEMP);
 			if (error == 0)
@@ -1050,13 +1145,23 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 		if (!have_interp && newinterp != NULL &&
 		    (brand_info->interp_path == NULL ||
 		    strcmp(interp, brand_info->interp_path) == 0)) {
-			error = __elfN(load_file)(imgp->proc, newinterp, &addr,
+#if defined(WYC)
+			error = elf32_load_file(
+#else
+			error = __elfN(load_file)(
+#endif
+			    imgp->proc, newinterp, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 			if (error == 0)
 				have_interp = TRUE;
 		}
 		if (!have_interp) {
-			error = __elfN(load_file)(imgp->proc, interp, &addr,
+#if defined(WYC)
+			error = elf32_load_file(
+#else
+			error = __elfN(load_file)(
+#endif
+			    imgp->proc, interp, &addr,
 			    &imgp->entry_addr, sv->sv_pagesize);
 		}
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
@@ -1097,7 +1202,12 @@ __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 #define	suword __CONCAT(suword, __ELF_WORD_SIZE)
 
 int
-__elfN(freebsd_fixup)(register_t **stack_base, struct image_params *imgp)
+#if defined(WYC)
+elf32_freebsd_fixup(
+#else
+__elfN(freebsd_fixup)(
+#endif
+    register_t **stack_base, struct image_params *imgp)
 {
 	Elf_Auxargs *args = (Elf_Auxargs *)imgp->auxargs;
 	Elf_Addr *base;
@@ -1483,9 +1593,9 @@ done:
  * program header entry.
  */
 static void
-cb_put_phdr(entry, closure)
-	vm_map_entry_t entry;
-	void *closure;
+cb_put_phdr(
+	vm_map_entry_t entry,
+	void *closure)
 {
 	struct phdr_closure *phc = (struct phdr_closure *)closure;
 	Elf_Phdr *phdr = phc->phdr;
@@ -1509,9 +1619,9 @@ cb_put_phdr(entry, closure)
  * the number of segments and their total size.
  */
 static void
-cb_size_segment(entry, closure)
-	vm_map_entry_t entry;
-	void *closure;
+cb_size_segment(
+	vm_map_entry_t entry,
+	void *closure)
 {
 	struct sseg_closure *ssc = (struct sseg_closure *)closure;
 
@@ -1525,10 +1635,10 @@ cb_size_segment(entry, closure)
  * caller-supplied data.
  */
 static void
-each_writable_segment(td, func, closure)
-	struct thread *td;
-	segment_callback func;
-	void *closure;
+each_writable_segment(
+	struct thread *td,
+	segment_callback func,
+	void *closure)
 {
 	struct proc *p = td->td_proc;
 	vm_map_t map = &p->p_vmspace->vm_map;
@@ -2419,14 +2529,27 @@ __elfN(check_note)(struct image_params *imgp, Elf_Brandnote *checknote,
 /*
  * Tell kern_execve.c about it, with a little help from the linker.
  */
-static struct execsw __elfN(execsw) = {
-	__CONCAT(exec_, __elfN(imgact)),
-	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE))
+#if defined(WYC)
+static struct execsw elf32_execsw = {
+	exec_elf32_imgact,
+	"ELF32"
 };
-EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw));
+EXEC_SET(elf32, elf32_execsw);
+#else
+static struct execsw __elfN(execsw) = { //wyc elf32_execsw
+	__CONCAT(exec_, __elfN(imgact)), //wyc exec_elf32_imgact
+	__XSTRING(__CONCAT(ELF, __ELF_WORD_SIZE)) //wyc "ELF32"
+};
+EXEC_SET(__CONCAT(elf, __ELF_WORD_SIZE), __elfN(execsw)); //wyc elf32_execsw
+#endif
 
 static vm_prot_t
-__elfN(trans_prot)(Elf_Word flags)
+#if defined(WYC)
+elf32_trans_prot(
+#else
+__elfN(trans_prot)(
+#endif
+    Elf_Word flags)
 {
 	vm_prot_t prot;
 
