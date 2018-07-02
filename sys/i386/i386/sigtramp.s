@@ -81,7 +81,7 @@ freebsd4_sigcode:
 					/* on stack */
 1:
 	jmp	1b
-#endif
+#endif /* COMPAT_FREEBSD4 */
 
 #ifdef COMPAT_43
 	ALIGN_TEXT

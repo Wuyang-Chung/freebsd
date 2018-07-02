@@ -86,8 +86,17 @@ typedef u_char vm_prot_t;	/* protection codes */
 #define VM_PROT_RW		(VM_PROT_READ|VM_PROT_WRITE)
 #define	VM_PROT_DEFAULT		VM_PROT_ALL
 
-enum obj_type { OBJT_DEFAULT, OBJT_SWAP, OBJT_VNODE, OBJT_DEVICE, OBJT_PHYS,
-		OBJT_DEAD, OBJT_SG, OBJT_MGTDEVICE };
+enum obj_type {
+	OBJT_DEFAULT,	//wyc not having an object yet
+	OBJT_SWAP,
+	OBJT_VNODE,	//wyc provide the physical memory for caching file data
+	OBJT_DEVICE, 	//wyc e.g. frame buffer
+	OBJT_PHYS,	//wyc time-of-day, trampoline code. marked unmanged
+	OBJT_DEAD,	//wyc after dealloc
+	OBJT_SG,	//wyc Scatter-Gather
+	OBJT_MGTDEVICE,	//wyc == OBJT_DEVICE with .pgo_init == NULL
+	NOBJT		//wycgit
+};
 typedef u_char objtype_t;
 
 union vm_map_object;

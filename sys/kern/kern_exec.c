@@ -214,15 +214,15 @@ sys_execve(struct thread *td, struct execve_args *uap)
 	struct vmspace *oldvmspace;
 	int error;
 
-	error = pre_execve(td, &oldvmspace);
+	error = pre_execve(td, &oldvmspace); //wyc enforce single threading
 	if (error != ESUCCESS)
 		return (error);
 	error = exec_copyin_args(&args, uap->fname, UIO_USERSPACE,
-	    uap->argv, uap->envv);
+	    uap->argv, uap->envv); //wyc the size of args is 1KiB+256KiB
 	if (error == ESUCCESS)
 		error = kern_execve(td, &args, NULL);
 	//wyc will run to here even if kern_execve succeeds
-	post_execve(td, error, oldvmspace);
+	post_execve(td, error, oldvmspace); //wyc force other threads to suicide
 	return (error);
 }
 
@@ -319,7 +319,7 @@ post_execve(struct thread *td, int error, struct vmspace *oldvmspace)
 		 * If success, we upgrade to SINGLE_EXIT state to
 		 * force other threads to suicide.
 		 */
-		if (error == 0)
+		if (error == ESUCCESS)
 			thread_single(p, SINGLE_EXIT);
 		else
 			thread_single_end(p, SINGLE_BOUNDARY);
@@ -355,11 +355,12 @@ kern_execve(struct thread *td, struct image_args *args, struct mac *mac_p)
  * In-kernel implementation of execve().  All arguments are assumed to be
  * userspace pointers from the passed thread.
  */
+//wyc mac_p is usually NULL
 static int
 do_execve(
-	struct thread *td,
-	struct image_args *args,
-	struct mac *mac_p)
+    struct thread *td,
+    struct image_args *args,
+    struct mac *mac_p)
 {
 	struct proc *p = td->td_proc;
 	struct nameidata nd;
@@ -590,12 +591,13 @@ interpret:
 	/*
 	 * Do the best to calculate the full path to the image file.
 	 */
+	//wyc get imgp->execpath
 	if (args->fname != NULL && args->fname[0] == '/')
 		imgp->execpath = args->fname;
 	else {
 		VOP_UNLOCK(imgp->vp, 0);
 		if (vn_fullpath(td, imgp->vp, &imgp->execpath,
-		    &imgp->freepath) != 0)
+		    &imgp->freepath) != ESUCCESS)
 			imgp->execpath = args->fname;
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
 	}
@@ -699,7 +701,7 @@ interpret:
 	/*
 	 * Copy out strings (args and env) and initialize stack base
 	 */
-	if (p->p_sysent->sv_copyout_strings)
+	if (p->p_sysent->sv_copyout_strings) //wyc =exec_copyout_strings()
 		stack_base = (*p->p_sysent->sv_copyout_strings)(imgp);
 	else
 		stack_base = exec_copyout_strings(imgp);
@@ -903,7 +905,7 @@ interpret:
 
 	/* Set values passed into the program in registers. */
 	if (p->p_sysent->sv_setregs) //wyc ==exec_setregs
-		(*p->p_sysent->sv_setregs)(td, imgp, 
+		(*p->p_sysent->sv_setregs)(td, imgp,
 		    (u_long)(uintptr_t)stack_base);
 	else
 		exec_setregs(td, imgp, (u_long)(uintptr_t)stack_base);
@@ -1199,6 +1201,10 @@ exec_new_vmspace(struct image_params *imgp, struct sysentvec *sv)
  * Copy out argument and environment strings from the old process address
  * space into the temporary string buffer.
  */
+/*wyc
+  args: OUT
+  fname, argv, envv: IN
+*/
 int
 exec_copyin_args(struct image_args *args, char *fname,
     enum uio_seg segflg, char **argv, char **envv)
@@ -1216,7 +1222,7 @@ exec_copyin_args(struct image_args *args, char *fname,
 	 * environment strings.
 	 */
 	error = exec_alloc_args(args);
-	if (error != 0)
+	if (error != ESUCCESS)
 		return (error);
 
 	/*
@@ -1529,7 +1535,7 @@ exec_copyout_strings(struct image_params *imgp)
 #else
 	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
 #endif
-	if (p->p_sysent->sv_sigcode_base == 0) { //wyc TRUE
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc FALSE
 		if (p->p_sysent->sv_szsigcode != NULL) //wyc TRUE
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}

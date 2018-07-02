@@ -71,7 +71,9 @@ shared_page_alloc_locked(int size, int align)
 {
 	int res;
 
-	res = roundup(shared_page_free, align);
+	KASSERT(powerof2(align), //wycgit
+	    ("%s: align = %x is not power of 2", __func__, align));
+	res = roundup2(shared_page_free, align); //wycgit
 	if (res + size >= IDX_TO_OFF(shared_page_obj->size))
 		res = -1;
 	else
@@ -110,8 +112,12 @@ shared_page_init(void *dummy __unused)
 	vm_offset_t addr;
 
 	sx_init(&shared_page_alloc_sx, "shpsx");
-	shared_page_obj = vm_pager_allocate(OBJT_PHYS, 0, PAGE_SIZE,
-	    VM_PROT_DEFAULT, 0, NULL);
+	shared_page_obj =
+#if defined(WYC)
+	    phys_pager_alloc(0, PAGE_SIZE, VM_PROT_DEFAULT, 0, NULL);
+#else
+	    vm_pager_allocate(OBJT_PHYS, 0, PAGE_SIZE, VM_PROT_DEFAULT, 0, NULL);
+#endif
 	VM_OBJECT_WLOCK(shared_page_obj);
 	m = vm_page_grab(shared_page_obj, 0, VM_ALLOC_NOBUSY | VM_ALLOC_ZERO);
 	m->valid = VM_PAGE_BITS_ALL;
@@ -221,7 +227,7 @@ alloc_sv_tk(void)
 	int tk_base;
 	uint32_t tk_ver;
 
-	tk_ver = VDSO_TK_VER_CURR;
+	tk_ver = VDSO_TK_VER_CURR; //wyc virtual dynamic shared object
 	svtk = malloc(sizeof(struct vdso_sv_tk), M_TEMP, M_WAITOK | M_ZERO);
 	tk_base = shared_page_alloc(sizeof(struct vdso_timekeep) +
 	    sizeof(struct vdso_timehands) * VDSO_TH_NUM, 16);
@@ -229,7 +235,7 @@ alloc_sv_tk(void)
 	shared_page_write(tk_base + offsetof(struct vdso_timekeep, tk_ver),
 	    sizeof(uint32_t), &tk_ver);
 	svtk->sv_timekeep_off = tk_base;
-	timekeep_push_vdso();
+	timekeep_push_vdso(); //wycgit this could be removed since host_svtk is NULL at this point
 	return (svtk);
 }
 
@@ -286,3 +292,7 @@ exec_sysvec_init(void *param)
 #endif
 	}
 }
+#if defined(WYC)
+SYSINIT(elf32_sysvec, SI_SUB_EXEC, SI_ORDER_ANY, 
+    (sysinit_cfunc_t)exec_sysvec_init, &elf32_freebsd_sysvec);
+#endif

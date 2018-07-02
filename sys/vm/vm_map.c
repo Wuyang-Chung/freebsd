@@ -283,8 +283,17 @@ vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 
 	if (pinit == NULL)
 		pinit = &pmap_pinit;
+	else {
+		//wyc 'pinit' is always NULL in i386.
+		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
+		panic("%s: pinit not NULL", __func__);	
+	}
 
+#if defined(WYC)
+	if (!pmap_pinit(vmspace_pmap(vm))) {
+#else
 	if (!pinit(vmspace_pmap(vm))) {
+#endif
 		uma_zfree(vmspace_zone, vm);
 		return (NULL);
 	}

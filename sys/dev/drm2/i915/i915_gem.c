@@ -249,7 +249,7 @@ i915_gem_create(struct drm_file *file,
 	int ret;
 	u32 handle;
 
-	size = roundup(size, PAGE_SIZE);
+	size = roundup2(size, PAGE_SIZE); //wycgit
 	if (size == 0)
 		return -EINVAL;
 

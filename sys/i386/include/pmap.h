@@ -152,8 +152,8 @@
  * XXX This works for now, but I am not real happy with it, I'll fix it
  * right after I fix locore.s and the magic 28K hole
  */
-#define	KPTDI		(NPDEPTD-NKPDE)	/* start of kernel virtual pde's */
-#define	PTDPTDI		(KPTDI-NPGPTD)	/* ptd entry that points to ptd! */
+#define	KPTDI	(NPDEPTD-NKPDE)	//wyc 768 /* start of kernel virtual pde's */
+#define	PTDPTDI	(KPTDI-NPGPTD)	//wyc 767 /* ptd entry that points to ptd! */
 
 /*
  * XXX doesn't really belong here I guess...
@@ -342,8 +342,13 @@ typedef struct pv_entry {
  * pv_entries are allocated in chunks per-process.  This avoids the
  * need to track per-pmap assignments.
  */
+#if defined(QUEUE_MACRO_DEBUG) //wyc
+#define	_NPCM	5
+#define	_NPCPV	143
+#else
 #define	_NPCM	11
 #define	_NPCPV	336
+#endif
 struct pv_chunk {
 	pmap_t			pc_pmap;
 	TAILQ_ENTRY(pv_chunk)	pc_list;

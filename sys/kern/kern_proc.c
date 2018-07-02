@@ -2507,7 +2507,7 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 			    strlen(kve->kve_path) + 1;
 		else
 			kve->kve_structsize = sizeof(*kve);
-		kve->kve_structsize = roundup(kve->kve_structsize,
+		kve->kve_structsize = roundup2(kve->kve_structsize, //wycgit
 		    sizeof(uint64_t));
 
 		/* Halt filling and truncate rather than exceeding maxlen */

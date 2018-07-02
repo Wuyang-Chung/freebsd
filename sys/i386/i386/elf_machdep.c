@@ -92,8 +92,13 @@ struct sysentvec elf32_freebsd_sysvec = {
 	.sv_schedtail	= NULL,
 	.sv_thread_detach = NULL,
 	.sv_trap	= NULL,
+#if defined(WYC)
+	.sv_shared_page_obj = shared_page_obj,	//wyc initialized in exec_sysvec_init()
+#endif
 };
+#if !defined(WYC)
 INIT_SYSENTVEC(elf32_sysvec, &elf32_freebsd_sysvec);
+#endif
 
 static Elf32_Brandinfo freebsd_brand_info = {
 	.brand		= ELFOSABI_FREEBSD,

@@ -1923,7 +1923,7 @@ pmap_pinit(pmap_t pmap)
 
 	CPU_ZERO(&pmap->pm_active);
 	TAILQ_INIT(&pmap->pm_pvchunk);
-	bzero(&pmap->pm_stats, sizeof pmap->pm_stats);
+	bzero(&pmap->pm_stats, sizeof(pmap->pm_stats)); //wyc add parenthesis for sizeof
 
 	return (1);
 }
@@ -2140,9 +2140,15 @@ pmap_growkernel(vm_offset_t addr)
  * page management routines.
  ***************************************************/
 
+#if defined(QUEUE_MACRO_DEBUG) //wyc
+CTASSERT(sizeof(struct pv_chunk) <= PAGE_SIZE);
+CTASSERT(_NPCM == 5);
+CTASSERT(_NPCPV == 143);
+#else
 CTASSERT(sizeof(struct pv_chunk) == PAGE_SIZE);
 CTASSERT(_NPCM == 11);
 CTASSERT(_NPCPV == 336);
+#endif
 
 static __inline struct pv_chunk *
 pv_to_chunk(pv_entry_t pv)

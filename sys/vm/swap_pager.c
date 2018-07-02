@@ -2041,8 +2041,11 @@ swap_pager_find_least(vm_object_t object, vm_pindex_t pindex)
 			if (sb->d[i] != SWAPBLK_NONE)
 				return (sb->p + i);
 		}
+		KASSERT(powerof2(SWAP_META_PAGES), //wycgit
+		    ("%s: SWAP_META_PAGES = %x is not power of 2",
+		    __func__, SWAP_META_PAGES));
 		sb = SWAP_PCTRIE_LOOKUP_GE(&object->un_pager.swp.swp_blks,
-		    roundup(pindex, SWAP_META_PAGES));
+		    roundup2(pindex, SWAP_META_PAGES)); //wycgit
 		if (sb == NULL)
 			return (object->size);
 	}

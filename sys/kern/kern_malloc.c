@@ -506,7 +506,7 @@ malloc(unsigned long size, struct malloc_type *mtp, int flags)
 			size = zone->uz_size;
 		malloc_type_zone_allocated(mtp, va == NULL ? 0 : size, indx);
 	} else {
-		size = roundup(size, PAGE_SIZE);
+		size = roundup2(size, PAGE_SIZE); //wycgit
 		zone = NULL;
 		va = uma_large_malloc(size, flags);
 		malloc_type_allocated(mtp, va == NULL ? 0 : size);

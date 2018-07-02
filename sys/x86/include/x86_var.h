@@ -70,8 +70,8 @@ extern	char	ctx_switch_xsave[];
 extern	u_int	hv_high;
 extern	char	hv_vendor[];
 extern	char	kstack[];
-extern	char	sigcode[];
-extern	int	szsigcode;
+extern	char	sigcode[]; //wyc defined in sigtramp.s
+extern	int	szsigcode; //wyc defined in sigtramp.s
 extern	int	vm_page_dump_size;
 extern	int	workaround_erratum383;
 extern	int	_udatasel;
