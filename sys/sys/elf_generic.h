@@ -55,6 +55,30 @@
 #define	__ELFN(x)	__CONCAT(__CONCAT(__CONCAT(ELF,__ELF_WORD_SIZE),_),x)
 #define	__ElfType(x)	typedef __ElfN(x) __CONCAT(Elf_,x)
 
+#if defined(WYC)
+typedef Elf32_Addr	Elf_Addr;
+typedef Elf32_Half	Elf_Half;
+typedef Elf32_Off	Elf_Off;
+typedef Elf32_Sword	Elf_Sword;
+typedef Elf32_Word	Elf_Word;
+typedef Elf32_Ehdr	Elf_Ehdr;
+typedef Elf32_Shdr	Elf_Shdr;
+typedef Elf32_Phdr	Elf_Phdr;
+typedef Elf32_Dyn	Elf_Dyn;
+typedef Elf32_Rel	Elf_Rel;
+typedef Elf32_Rela	Elf_Rela;
+typedef Elf32_Sym	Elf_Sym;
+typedef Elf32_Verdef	Elf_Verdef;
+typedef Elf32_Verdaux	Elf_Verdaux;
+typedef Elf32_Verneed	Elf_Verneed;
+typedef Elf32_Vernaux	Elf_Vernaux;
+typedef Elf32_Versym	Elf_Versym;
+
+/* Non-standard ELF types. */
+typedef Elf32_Hashelt	Elf_Hashelt;
+typedef Elf32_Size	Elf_Size;
+typedef Elf32_Ssize	Elf_Ssize;
+#else
 __ElfType(Addr);
 __ElfType(Half);
 __ElfType(Off);
@@ -77,6 +101,7 @@ __ElfType(Versym);
 __ElfType(Hashelt);
 __ElfType(Size);
 __ElfType(Ssize);
+#endif
 
 #define	ELF_R_SYM	__ELFN(R_SYM)
 #define	ELF_R_TYPE	__ELFN(R_TYPE)

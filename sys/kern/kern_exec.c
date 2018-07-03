@@ -418,7 +418,7 @@ do_execve(
 	imgp->args = args;
 	oldcred = p->p_ucred;
 
-#ifdef MAC
+#ifdef MAC //wyc Mandatory Access Control
 	error = mac_execve_enter(imgp, mac_p);
 	if (error)
 		goto exec_fail;
@@ -695,7 +695,11 @@ interpret:
 	}
 
 	/* ABI enforces the use of Capsicum. Switch into capabilities mode. */
+#if defined(WYC)
+	if (p->p_sysent->sv_flags&SV_CAPSICUM) //wyc FALSE
+#else
 	if (SV_PROC_FLAG(p, SV_CAPSICUM))
+#endif
 		sys_cap_enter(td, NULL);
 
 	/*
@@ -1535,8 +1539,8 @@ exec_copyout_strings(struct image_params *imgp)
 #else
 	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
 #endif
-	if (p->p_sysent->sv_sigcode_base == 0) { //wyc FALSE
-		if (p->p_sysent->sv_szsigcode != NULL) //wyc TRUE
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc sigtramp not in shared page, FALSE
+		if (p->p_sysent->sv_szsigcode != NULL)
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;
@@ -1544,14 +1548,14 @@ exec_copyout_strings(struct image_params *imgp)
 	/*
 	 * install sigcode
 	 */
-	if (szsigcode != 0) {
+	if (szsigcode != 0) { //wyc FALSE
 		destp -= szsigcode;
 		destp = rounddown2(destp, sizeof(void *));
 		copyout(p->p_sysent->sv_sigcode, (void *)destp, szsigcode);
 	}
 
 	/*
-	 * Copy the image path for the rtld.
+	 * Copy the image path for the rtld - run-time link-editor
 	 */
 	if (execpath_len != 0) {
 		destp -= execpath_len;
@@ -1560,11 +1564,11 @@ exec_copyout_strings(struct image_params *imgp)
 	}
 
 	/*
-	 * Prepare the canary for SSP.
+	 * Prepare the canary for SSP(Stack Smashing Protector).
 	 */
 	arc4rand(canary, sizeof(canary), 0);
 	destp -= sizeof(canary);
-	//wyc??? should do rounddown2(destp, ??) here.
+	//wyc??? why not do rounddown2(destp, ??) here.
 	imgp->canary = destp;
 	copyout(canary, (void *)destp, sizeof(canary));
 	imgp->canarylen = sizeof(canary);

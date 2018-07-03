@@ -95,10 +95,10 @@ struct sysentvec { //wyc elf32_freebsd_sysvec
 	int 		*sv_errtbl;	//wyc =NULL /* errno translation table */
 	int		(*sv_transtrap)(int, int); //wyc =NULL
 					/* translate trap-to-signal mapping */
-	int		(*sv_fixup) 	//wyc =elf32_freebsd_fixup
+	int		(*sv_fixup)	//wyc =elf32_freebsd_fixup
 			    (register_t **, struct image_params *);
 					/* stack fixup function */
-	void		(*sv_sendsig)  //wyc =sendsig
+	void		(*sv_sendsig)	//wyc =sendsig
 			    (void (*)(int), struct ksiginfo *, struct __sigset *);
 			    		/* send signal */
 	char 		*sv_sigcode;	//wyc =sigcode /* start of sigtramp code */
@@ -128,10 +128,10 @@ struct sysentvec { //wyc elf32_freebsd_sysvec
 			    (struct thread *);
 	const char	**sv_syscallnames;	//wyc =syscallnames
 	vm_offset_t	sv_timekeep_base;
-	vm_offset_t	sv_shared_page_base; //wyc =SHAREDPAGE==3G-4M-4K
-	vm_offset_t	sv_shared_page_len;  //wyc =4K
-	vm_offset_t	sv_sigcode_base;
-	void		*sv_shared_page_obj; //wyc =shared_page_obj
+	vm_offset_t	sv_shared_page_base;	//wyc =SHAREDPAGE==3G-4M-4K
+	vm_offset_t	sv_shared_page_len;	//wyc =4K
+	vm_offset_t	sv_sigcode_base;	//wyc the address of sigtramp if in shared page
+	void		*sv_shared_page_obj;	//wyc =shared_page_obj
 	void		(*sv_schedtail)(struct thread *); //wyc =NULL
 	void		(*sv_thread_detach)(struct thread *); //wyc =NULL
 	int		(*sv_trap)(struct thread *); //wyc =NULL

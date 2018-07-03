@@ -73,7 +73,11 @@ typedef struct {
 } Elf64_Auxinfo;
 #endif
 
+#if defined(WYC)
+typedef Elf32_Auxinfo	Elf_Auxinfo;
+#else
 __ElfType(Auxinfo);
+#endif
 
 /* Values for a_type. */
 #define	AT_NULL		0	/* Terminates the vector. */

@@ -2894,11 +2894,11 @@ sysctl_kern_proc_sigtramp(SYSCTL_HANDLER_ARGS)
 	}
 #endif
 	bzero(&kst, sizeof(kst));
-	if (sv->sv_sigcode_base != 0) {
+	if (sv->sv_sigcode_base != 0) { //wyc sigtramp in shared page
 		kst.ksigtramp_start = (char *)sv->sv_sigcode_base;
 		kst.ksigtramp_end = (char *)sv->sv_sigcode_base +
 		    *sv->sv_szsigcode;
-	} else {
+	} else { //wyc sigtramp at top of the user stack
 		kst.ksigtramp_start = (char *)sv->sv_psstrings -
 		    *sv->sv_szsigcode;
 		kst.ksigtramp_end = (char *)sv->sv_psstrings;

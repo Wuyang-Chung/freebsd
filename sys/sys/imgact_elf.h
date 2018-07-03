@@ -84,8 +84,13 @@ typedef struct {
 #define	BI_BRAND_ONLY_STATIC	0x0008	/* Match only interp-less binaries. */
 } __ElfN(Brandinfo);
 
+#if defined(WYC)
+typedef Elf32_Auxargs	Elf_Auxargs;
+typedef Elf32_Brandinfo	Elf_Brandinfo;
+#else
 __ElfType(Auxargs);
 __ElfType(Brandinfo);
+#endif
 
 #define	MAX_BRANDS	8
 
