@@ -483,7 +483,7 @@ interpret:
 	imgp->object = imgp->vp->v_object;
 
 	if (imgp->object == NULL) //wyc
-		panic("%s: imgp->object == NULL", __func__); //wyc
+		panic("imgp->object == NULL"); //wyc
 
 	if (imgp->object != NULL) //wyc imgp->object should never be NULL
 		vm_object_reference(imgp->object);
@@ -1132,7 +1132,7 @@ exec_new_vmspace(struct image_params *imgp, struct sysentvec *sv)
 		//wyc the old vmspace will be released in post_execve()
 		//     the new vmspace will be stored in p->p_vmspace
 		error = vmspace_exec(p, sv_minuser, sv->sv_maxuser);
-		if (error)
+		if (error != ESUCCESS)
 			return (error);
 		vmspace = p->p_vmspace;
 		map = &vmspace->vm_map;
@@ -1539,14 +1539,14 @@ exec_copyout_strings(struct image_params *imgp)
 #else
 	arginfo = (struct ps_strings *)p->p_sysent->sv_psstrings;
 #endif
-	if (p->p_sysent->sv_sigcode_base == 0) { //wyc sigtramp not in shared page, FALSE
+	if (p->p_sysent->sv_sigcode_base == 0) { //wyc if sigtramp not in shared page, FALSE
 		if (p->p_sysent->sv_szsigcode != NULL)
 			szsigcode = *(p->p_sysent->sv_szsigcode);
 	}
 	destp =	(uintptr_t)arginfo;
 
 	/*
-	 * install sigcode
+	 * install sigcode if sigtramp not in shared page
 	 */
 	if (szsigcode != 0) { //wyc FALSE
 		destp -= szsigcode;
@@ -1559,6 +1559,7 @@ exec_copyout_strings(struct image_params *imgp)
 	 */
 	if (execpath_len != 0) {
 		destp -= execpath_len;
+		destp = rounddown2(destp, sizeof(void *)); //wycgit this is useless if imgp->execpath is not aligned
 		imgp->execpathp = destp;
 		copyout(imgp->execpath, (void *)destp, execpath_len);
 	}
@@ -1568,7 +1569,7 @@ exec_copyout_strings(struct image_params *imgp)
 	 */
 	arc4rand(canary, sizeof(canary), 0);
 	destp -= sizeof(canary);
-	//wyc??? why not do rounddown2(destp, ??) here.
+	//wyc no need to do rounddown2() here because size of canary is multiple of 8
 	imgp->canary = destp;
 	copyout(canary, (void *)destp, sizeof(canary));
 	imgp->canarylen = sizeof(canary);

@@ -882,7 +882,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * certain parts of a process from itself.
 	 */
 	if ((flags & RFPROC) == 0) { //wyc FALSE. RFPROC is always specified except for rfork
-		panic("%s: (flags & RFPROC) == 0", __func__); //wyc
+		panic("(flags & RFPROC) == 0"); //wyc
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)

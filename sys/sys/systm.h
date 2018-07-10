@@ -283,7 +283,7 @@ long	fuword(volatile const void *base);
 int	fuword16(volatile const void *base);
 int32_t	fuword32(volatile const void *base);
 int64_t	fuword64(volatile const void *base);
-int	fueword(volatile const void *base, long *val);
+int	fueword(volatile const void *base, long *val); //wyc fetch user with error check
 int	fueword32(volatile const void *base, int32_t *val);
 int	fueword64(volatile const void *base, int64_t *val);
 int	subyte(volatile void *base, int byte);

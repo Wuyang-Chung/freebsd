@@ -1235,16 +1235,18 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		protoeflags |= MAP_ENTRY_NOCOREDUMP;
 	if (cow & MAP_STACK_GROWS_DOWN)
 		protoeflags |= MAP_ENTRY_GROWS_DOWN;
-	if (cow & MAP_STACK_GROWS_UP)
-		protoeflags |= MAP_ENTRY_GROWS_UP;
+	if (cow & MAP_STACK_GROWS_UP)	//wyc FALSE always
+		//protoeflags |= MAP_ENTRY_GROWS_UP;
+		panic("MAP_STACK_GROWS_UP"); //wyc
 	if (cow & MAP_VN_WRITECOUNT)
 		protoeflags |= MAP_ENTRY_VN_WRITECNT;
 	if ((cow & MAP_CREATE_GUARD) != 0)
 		protoeflags |= MAP_ENTRY_GUARD;
 	if ((cow & MAP_CREATE_STACK_GAP_DN) != 0)
 		protoeflags |= MAP_ENTRY_STACK_GAP_DN;
-	if ((cow & MAP_CREATE_STACK_GAP_UP) != 0)
-		protoeflags |= MAP_ENTRY_STACK_GAP_UP;
+	if ((cow & MAP_CREATE_STACK_GAP_UP) != 0) //wyc FALSE always
+		//protoeflags |= MAP_ENTRY_STACK_GAP_UP;
+		panic("MAP_CREATE_STACK_GAP_UP"); //wyc
 	if (cow & MAP_INHERIT_SHARE)
 		inheritance = VM_INHERIT_SHARE;
 	else
@@ -1459,9 +1461,15 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 }
 
 int
-vm_map_fixed(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
-    vm_offset_t start, vm_size_t length, vm_prot_t prot,
-    vm_prot_t max, int cow)
+vm_map_fixed(
+    vm_map_t map,
+    vm_object_t object,
+    vm_ooffset_t offset,
+    vm_offset_t start,
+    vm_size_t length,
+    vm_prot_t prot,
+    vm_prot_t max,
+    int cow)
 {
 	vm_offset_t end;
 	int result;
@@ -3643,12 +3651,13 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	 * and cow to be 0.  Possibly we should eliminate these as input
 	 * parameters, and just pass these values here in the insert call.
 	 */
-	if (orient == MAP_STACK_GROWS_DOWN) {
+	if (orient == MAP_STACK_GROWS_DOWN) { //wyc TRUE always
 		bot = addrbos + max_ssize - init_ssize;
 		top = bot + init_ssize;
 		gap_bot = addrbos;
 		gap_top = bot;
 	} else /* if (orient == MAP_STACK_GROWS_UP) */ {
+		panic("MAP_STACK_GROWS_UP"); //wyc
 		bot = addrbos;
 		top = bot + init_ssize;
 		gap_bot = top;
@@ -3667,7 +3676,8 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 	    (new_entry->eflags & MAP_ENTRY_GROWS_UP) != 0,
 	    ("new entry lacks MAP_ENTRY_GROWS_UP"));
 	rv = vm_map_insert(map, NULL, 0, gap_bot, gap_top, VM_PROT_NONE,
-	    VM_PROT_NONE, MAP_CREATE_GUARD | (orient == MAP_STACK_GROWS_DOWN ?
+	    VM_PROT_NONE, MAP_CREATE_GUARD |
+	    (orient == MAP_STACK_GROWS_DOWN ? //wyc TRUE always
 	    MAP_CREATE_STACK_GAP_DN : MAP_CREATE_STACK_GAP_UP));
 	if (rv != KERN_SUCCESS)
 		(void)vm_map_delete(map, bot, top);
@@ -3938,7 +3948,7 @@ vmspace_exec(struct proc *p, vm_offset_t minuser, vm_offset_t maxuser)
 	if (p == curthread->td_proc)
 		pmap_activate(curthread);
 	curthread->td_pflags |= TDP_EXECVMSPC;
-	return (0);
+	return (ESUCCESS);
 }
 
 /*

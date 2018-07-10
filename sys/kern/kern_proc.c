@@ -2898,7 +2898,7 @@ sysctl_kern_proc_sigtramp(SYSCTL_HANDLER_ARGS)
 		kst.ksigtramp_start = (char *)sv->sv_sigcode_base;
 		kst.ksigtramp_end = (char *)sv->sv_sigcode_base +
 		    *sv->sv_szsigcode;
-	} else { //wyc sigtramp at top of the user stack
+	} else { //wyc sigtramp in psstrings
 		kst.ksigtramp_start = (char *)sv->sv_psstrings -
 		    *sv->sv_szsigcode;
 		kst.ksigtramp_end = (char *)sv->sv_psstrings;

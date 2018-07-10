@@ -555,7 +555,7 @@ ENTRY(copyinstr)
 	movl	16(%esp),%edi			/* %edi = to */
 	movl	20(%esp),%edx			/* %edx = maxlen */
 
-	movl	$VM_MAXUSER_ADDRESS,%eax
+	movl	$VM_MAXUSER_ADDRESS,%eax	//wyc 3G-4M
 
 	/* make sure 'from' is within bounds */
 	subl	%esi,%eax
@@ -572,14 +572,13 @@ ENTRY(copyinstr)
 2:
 	decl	%edx
 	jz	3f
-
 	lodsb
 	stosb
 	orb	%al,%al
 	jnz	2b
 
 	/* Success -- 0 byte reached */
-	decl	%edx
+	decl	%edx	//wyc the length is including the '\0' character
 	xorl	%eax,%eax
 	jmp	cpystrflt_x
 3:
@@ -597,9 +596,9 @@ cpystrflt_x:
 	/* set *lencopied and return %eax */
 	movl	PCPU(CURPCB),%ecx
 	movl	$0,PCB_ONFAULT(%ecx)
-	movl	20(%esp),%ecx
+	movl	20(%esp),%ecx	//wyc maxlen
 	subl	%edx,%ecx
-	movl	24(%esp),%edx
+	movl	24(%esp),%edx	//wyc lencopied, including the '\0' character
 	testl	%edx,%edx
 	jz	1f
 	movl	%ecx,(%edx)
@@ -620,31 +619,31 @@ ENTRY(copystr)
 	movl	16(%esp),%edi			/* %edi = to */
 	movl	20(%esp),%edx			/* %edx = maxlen */
 	incl	%edx
-1:
+2:
 	decl	%edx
-	jz	4f
+	jz	3f
 	lodsb
 	stosb
 	orb	%al,%al
-	jnz	1b
+	jnz	2b
 
 	/* Success -- 0 byte reached */
 	decl	%edx
 	xorl	%eax,%eax
-	jmp	6f
-4:
+	jmp	4f
+3:
 	/* edx is zero -- return ENAMETOOLONG */
 	movl	$ENAMETOOLONG,%eax
 
-6:
+4:
 	/* set *lencopied and return %eax */
-	movl	20(%esp),%ecx
+	movl	20(%esp),%ecx	//wyc %ecx = maxlen
 	subl	%edx,%ecx
-	movl	24(%esp),%edx
+	movl	24(%esp),%edx	//wyc %edx = lencopied
 	testl	%edx,%edx
-	jz	7f
+	jz	1f
 	movl	%ecx,(%edx)
-7:
+1:
 	popl	%edi
 	popl	%esi
 	ret
