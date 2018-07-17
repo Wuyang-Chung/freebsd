@@ -533,20 +533,20 @@ intr_prof_stack_use(struct thread *td, struct trapframe *frame)
  */
 int
 vm_forkproc(
-	struct thread *td,
-	struct proc *p2,
-	struct thread *td2,
-	struct vmspace *vm2, //wyc vm2 == NULL for vfork
-	int flags)
+    struct thread *td,
+    struct proc *p2,
+    struct thread *td2,
+    struct vmspace *vm2, //wyc vm2 == NULL for vfork
+    int flags)
 {
 	struct proc *p1 = td->td_proc;
-	int error;
 
-	//wyc panic if p2 != td2->td_proc
-	if ( p2 != td2->td_proc )
-		panic("%s", __func__);
+	if ((flags & RFPROC) == 0) { //wyc FALSE always
+#if 1 //wyc
+		panic("RFPROC == 0"); //wyc
+#else
+		int error;
 
-	if ((flags & RFPROC) == 0) { //wyc FALSE. RFPROC is always specified.
 		/*
 		 * Divorce the memory, if it is shared, essentially
 		 * this changes shared memory amongst threads, into
@@ -561,6 +561,7 @@ vm_forkproc(
 		}
 		cpu_fork(td, p2, td2, flags);
 		return (0);
+#endif
 	}
 
 	if (flags & RFMEM) { //wyc TRUE for vfork

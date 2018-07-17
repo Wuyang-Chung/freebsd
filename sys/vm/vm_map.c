@@ -3951,6 +3951,11 @@ vmspace_exec(struct proc *p, vm_offset_t minuser, vm_offset_t maxuser)
 	return (ESUCCESS);
 }
 
+#if 0
+/*wyc
+    Will only be called when RFPROC==0. Since RFPROC is always 1,
+    this function will never be called
+*/
 /*
  * Unshare the specified VM space for forcing COW.  This
  * is called by rfork, for the (RFMEM|RFPROC) == 0 case.
@@ -3980,6 +3985,7 @@ vmspace_unshare(struct proc *p)
 	vmspace_free(oldvmspace);
 	return (0);
 }
+#endif
 
 /*
  *	vm_map_lookup:

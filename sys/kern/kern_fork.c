@@ -111,8 +111,9 @@ sys_fork(struct thread *td, struct fork_args *uap)
 	fr.fr_pidp = &pid;
 	error = fork1(td, &fr);
 	if (error == 0) {
-		td->td_retval[0] = pid; //wyc return value to the parent
-		td->td_retval[1] = 0; //wyc in child process it is assigned to 1. Why?
+		td->td_retval[0] = pid;	//wyc return value to the parent
+		td->td_retval[1] = 0;	//wyc in child process it is assigned to 1
+					//wyc see cpu_fork(): td2->td_frame->tf_edx = 1;
 	}
 	return (error);
 }
@@ -355,6 +356,7 @@ again:
 /*wyc
   This function will not be called because RFPROC is always TRUE
 */
+#if 0
 static int
 fork_norfproc(struct thread *td, int flags)
 {
@@ -404,12 +406,13 @@ fail:
 	}
 	return (error);
 }
+#endif
 
 static void
 do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *td2,
-    struct vmspace *vm2, //wyc NULL for vfork
-    struct file *fp_procdesc //wyc NULL for vfork
-) __attribute__((optnone)) //wyc
+    struct vmspace *vm2,	//wyc NULL for vfork
+    struct file *fp_procdesc)	//wyc NULL for vfork
+//__attribute__((optnone))	//wyc
 {
 	struct proc *p1, *pptr;
 	int trypid;
@@ -423,7 +426,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	p1 = td->td_proc;
 	//wyc panic if p2 != td2->td_proc
 	if ( p2 != td2->td_proc )
-		panic("%s: p2 != td2->td_proc", __func__);
+		panic("p2 != td2->td_proc"); //wyc
 
 	trypid = fork_findpid(fr->fr_flags); //wyc for thread, it is tid_alloc()
 
@@ -470,10 +473,10 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Copy filedesc.
 	 */
-	if (fr->fr_flags & RFCFDG) {	//wyc close all fds. FALSE for vfork
+	if (fr->fr_flags & RFCFDG) {	//wyc close all fds. FALSE for (v)fork
 		fd = fdinit(p1->p_fd, false);
 		fdtol = NULL;
-	} else if (fr->fr_flags & RFFDG) {	//wyc copy fd table. TRUE for vfork
+	} else if (fr->fr_flags & RFFDG) {	//wyc copy fd table. TRUE for (v)fork
 		fd = fdcopy(p1->p_fd);
 		fdtol = NULL;
 	} else {
@@ -676,7 +679,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * of init.  This effectively disassociates the child from the
 	 * parent.
 	 */
-	if ((fr->fr_flags & RFNOWAIT) != 0) { //wyc FALSE for vfork
+	if ((fr->fr_flags & RFNOWAIT) != 0) { //wyc FALSE for (v)fork
 		pptr = p1->p_reaper; //wyc normall reaper is init process.
 		p2->p_reaper = pptr;
 	} else {
@@ -729,7 +732,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * can happen that might cause that process to need the descriptor.
 	 * However, don't do this until after fork(2) can no longer fail.
 	 */
-	if (fr->fr_flags & RFPROCDESC) //wyc FALSE for vfork
+	if (fr->fr_flags & RFPROCDESC) //wyc FALSE for (v)fork
 		procdesc_new(p2, fr->fr_pd_flags);
 
 	/*
@@ -794,12 +797,12 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	knote_fork(p1->p_klist, p2->p_pid);
 	SDT_PROBE3(proc, , , create, p2, p1, fr->fr_flags);
 
-	if (fr->fr_flags & RFPROCDESC) { //wyc FALSE for vfork
+	if (fr->fr_flags & RFPROCDESC) { //wyc FALSE for (v)fork
 		procdesc_finit(p2->p_procdesc, fp_procdesc);
 		fdrop(fp_procdesc, td);
 	}
 
-	if ((fr->fr_flags & RFSTOPPED) == 0) { //wyc TRUE for vfork
+	if ((fr->fr_flags & RFSTOPPED) == 0) { //wyc TRUE for (v)fork
 		/*
 		 * If RFSTOPPED not requested, make child runnable and
 		 * add to run queue.
@@ -840,7 +843,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	flags = fr->fr_flags;
 	pages = fr->fr_pages;
 
-	if ((flags & RFSTOPPED) != 0) //wyc FALSE for fork and vfork
+	if ((flags & RFSTOPPED) != 0) //wyc FALSE for (v)fork
 		MPASS(fr->fr_procp != NULL && fr->fr_pidp == NULL);
 	else
 		MPASS(fr->fr_procp == NULL);
@@ -861,9 +864,9 @@ fork1(struct thread *td, struct fork_req *fr)
 	if ((flags & RFTSIGZMB) != 0 && (u_int)RFTSIGNUM(flags) > _SIG_MAXSIG)
 		return (EINVAL);
 
-	if ((flags & RFPROCDESC) != 0) { //wyc FALSE
+	if ((flags & RFPROCDESC) != 0) { //wyc FALSE almost
 		/* Can't not create a process yet get a process descriptor. */
-		if ((flags & RFPROC) == 0) //wyc FALSE. RFPROC is always specified.
+		if ((flags & RFPROC) == 0) //wyc FALSE always
 			return (EINVAL);
 
 		/* Must provide a place to put a procdesc if creating one. */
@@ -881,13 +884,15 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * Here we don't create a new process, but we divorce
 	 * certain parts of a process from itself.
 	 */
-	if ((flags & RFPROC) == 0) { //wyc FALSE. RFPROC is always specified except for rfork
-		panic("(flags & RFPROC) == 0"); //wyc
+	if ((flags & RFPROC) == 0) { //wyc FALSE always
+		panic("RFPROC == 0"); //wyc
+#if 0 //wyc
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)
 			*fr->fr_pidp = 0;
 		return (fork_norfproc(td, flags));
+#endif
 	}
 
 	fp_procdesc = NULL;
@@ -1055,7 +1060,7 @@ fork_exit(
     void (*callout)(void *, struct trapframe *),//wyc fork_return()
     void *arg,			//wyc struct thread *td
     struct trapframe *frame)	//wyc (int)td->td_frame - sizeof(void *)
-__attribute__((optnone))	//wyc
+//__attribute__((optnone))	//wyc
 {
 	struct proc *p;
 	struct thread *td;

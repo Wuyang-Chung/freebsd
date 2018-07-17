@@ -52,7 +52,7 @@
 #include <machine/pmap.h>
 #include <machine/specialreg.h>
 
-#include "assym.s"
+#include "assym.s"	//wyc in /usr/obj/"source code path"/sys/"kern conf"
 
 /*
  *	XXX
@@ -67,13 +67,18 @@
  * Within PTmap, the page directory can be found (third indirection).
  */
 	.globl	PTmap,PTD,PTDpde
-	.set	PTmap,(PTDPTDI << PDRSHIFT)
-	.set	PTD,PTmap + (PTDPTDI * PAGE_SIZE)
-	.set	PTDpde,PTD + (PTDPTDI * PDESIZE)
+	.set	PTmap,(PTDPTDI << PDRSHIFT)		/*wyc == 3G-4M      == 0xBFC0_0000 */
+	.set	PTD,PTmap + (PTDPTDI * PAGE_SIZE)	/*wyc == 3G-1M-4K   == 0xBFEF_F000 */
+	.set	PTDpde,PTD + (PTDPTDI * PDESIZE)	/*wyc == 3G-1M-1K-4 == 0xBFEF_FBFC */
 
 /*
  * Compiled KERNBASE location and the kernel load address
  */
+/*wyc
+	KERNBASE and KERNLOAD are defined in sys/i386/include/vmparam.h
+	The actual value can be found in assym.s
+	kernbase and kernload are referenced in sys/conf/ldscript.i386
+*/
 	.globl	kernbase
 	.set	kernbase,KERNBASE
 	.globl	kernload
@@ -133,13 +138,18 @@ pc98_system_parameter:
 
 #define R(foo) ((foo)-KERNBASE)
 
+/*wycgit
+    %esi = physfree;
+    physfree += foo*PAGE_SIZE
+    bzero(%esi, foo*PAGE_SIZE);
+*/
 #define ALLOCPAGES(foo) \
 	movl	R(physfree), %esi ; \
-	movl	$((foo)*PAGE_SIZE), %eax ; \
+	movl	$((foo)*PAGE_SIZE), %ecx ; \
+	movl	%ecx, %eax ; \
 	addl	%esi, %eax ; \
 	movl	%eax, R(physfree) ; \
 	movl	%esi, %edi ; \
-	movl	$((foo)*PAGE_SIZE),%ecx ; \
 	xorl	%eax,%eax ; \
 	cld ; \
 	rep ; \
@@ -647,7 +657,7 @@ no_kernend:
 	ALLOCPAGES(NKPT)
 	movl	%esi,R(KPTphys)
 	addl	$(KERNBASE-(KPTDI<<(PDRSHIFT-PAGE_SHIFT+PTESHIFT))),%esi
-	movl	%esi,R(KPTmap)
+	movl	%esi,R(KPTmap) //wyc KPTmap will be reintialized by pmap_bootstrap()
 
 /* Allocate Page Table Directory */
 #if defined(PAE) || defined(PAE_TABLES)
@@ -655,7 +665,7 @@ no_kernend:
 	ALLOCPAGES(1)
 	movl	%esi,R(IdlePDPT)
 #endif
-	ALLOCPAGES(NPGPTD)
+	ALLOCPAGES(NPGPTD) //wyc 1
 	movl	%esi,R(IdlePTD)
 
 /* Allocate KSTACK */
@@ -675,7 +685,7 @@ no_kernend:
 /*
  * Enable PSE and PGE.
  */
-#ifndef DISABLE_PSE	/*wyc true, not defined. PSE: enable 4M page. */
+#ifndef DISABLE_PSE	//wyc true, not defined. PSE: enable 4M page.
 	testl	$CPUID_PSE, R(cpu_feature)
 	jz	1f
 	movl	$PG_PS, R(pseflag)
@@ -684,7 +694,7 @@ no_kernend:
 	movl	%eax, %cr4
 1:
 #endif
-#ifndef DISABLE_PG_G	/*wyc true, not defined. PG_G: global page */
+#ifndef DISABLE_PG_G	//wyc true, not defined. PG_G: global page
 	testl	$CPUID_PGE, R(cpu_feature)
 	jz	2f
 	movl	$PG_G, R(pgeflag)

@@ -1094,6 +1094,7 @@ cpu_fetch_syscall_args(struct thread *td)
  * syscall - system call request C handler.  A system call is
  * essentially treated as a trap by reusing the frame layout.
  */
+//wyc called by int0x80_syscall
 void
 syscall(struct trapframe *frame)
 {

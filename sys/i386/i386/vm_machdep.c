@@ -157,8 +157,14 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	struct pcb *pcb2;
 	struct mdproc *mdp2;
 
+	//wyc panic if p2 != td2->td_proc
+	if ( p2 != td2->td_proc )
+		panic("p2 != td2->td_proc");
+
 	p1 = td1->td_proc;
-	if ((flags & RFPROC) == 0) {
+	if ((flags & RFPROC) == 0) { //wyc FALSE always
+		panic("RFPROC == 0"); //wyc
+#if 0 //wyc
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;
@@ -177,11 +183,12 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 				mtx_unlock_spin(&dt_lock);
 		}
 		return;
+#endif
 	}
 
 	/* Ensure that td1's pcb is up to date. */
 	if (td1 == curthread)
-		td1->td_pcb->pcb_gs = rgs();
+		td1->td_pcb->pcb_gs = rgs(); //wyc gs points to TLS
 	critical_enter();
 	if (PCPU_GET(fpcurthread) == td1)
 		npxsave(td1->td_pcb->pcb_save);
@@ -236,12 +243,18 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 #else
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
+#if defined(WYC)
+	//wyc the thread 'td2' will resume by executing fork_trampoline and
+	//    fork_trampline() will call
+	//    fork_exit(fork_return, td2, td2->td_frame - sizeof(void *)
+	fork_exit(fork_return, td2, (int)td2->td_frame - sizeof(void *);
+#endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;	/* fork_trampoline argument */
+	pcb2->pcb_esi = (int)fork_return;	/* fork_exit(callout,,)*/ /* fork_trampoline argument */
 	pcb2->pcb_ebp = 0;
-	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *);
-	pcb2->pcb_ebx = (int)td2;		/* fork_trampoline argument */
-	pcb2->pcb_eip = (int)fork_trampoline;
+	pcb2->pcb_esp = (int)td2->td_frame - sizeof(void *); /* fork_exit(,,frame)*/
+	pcb2->pcb_ebx = (int)td2;		/* fork_exit(,arg,)*/ /* fork_trampoline argument */
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc the place where the child will start exection
 	pcb2->pcb_psl = PSL_KERNEL;		/* ints disabled */
 	/*-
 	 * pcb2->pcb_dr*:	cloned above.
@@ -393,10 +406,10 @@ cpu_set_syscall_retval(struct thread *td, int error)
 {
 
 	switch (error) {
-	case 0:
+	case ESUCCESS:
 		td->td_frame->tf_eax = td->td_retval[0];
 		td->td_frame->tf_edx = td->td_retval[1];
-		td->td_frame->tf_eflags &= ~PSL_C;
+		td->td_frame->tf_eflags &= ~PSL_C; //wyc clear the carry bit in the flag
 		break;
 
 	case ERESTART:
@@ -412,7 +425,7 @@ cpu_set_syscall_retval(struct thread *td, int error)
 
 	default:
 		td->td_frame->tf_eax = SV_ABI_ERRNO(td->td_proc, error);
-		td->td_frame->tf_eflags |= PSL_C;
+		td->td_frame->tf_eflags |= PSL_C; //wyc set the carry bit in the flag
 		break;
 	}
 }
@@ -461,12 +474,18 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * Set registers for trampoline to user mode.  Leave space for the
 	 * return address on stack.  These are the kernel mode register values.
 	 */
+#if defined(WYC)
+	//wyc the thread 'td' will resume by executing fork_trampoline and
+	//    fork_trampline() will call
+	//    fork_exit(fork_return, td, td->td_frame - sizeof(void *)
+	fork_exit(fork_return, td, (int)td->td_frame - sizeof(void *);
+#endif
 	pcb2->pcb_edi = 0;
-	pcb2->pcb_esi = (int)fork_return;		    /* trampoline arg */
+	pcb2->pcb_esi = (int)fork_return;		    /* fork_exit(callout,,) */ /* trampoline arg */
 	pcb2->pcb_ebp = 0;
-	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* trampoline arg */
-	pcb2->pcb_ebx = (int)td;			    /* trampoline arg */
-	pcb2->pcb_eip = (int)fork_trampoline;
+	pcb2->pcb_esp = (int)td->td_frame - sizeof(void *); /* fork_exit(,,frame) */ /* trampoline arg */
+	pcb2->pcb_ebx = (int)td;			    /* fork_exit(,arg1,) */ /* trampoline arg */
+	pcb2->pcb_eip = (int)fork_trampoline; //wyc this function will call fork_exit
 	pcb2->pcb_psl &= ~(PSL_I);	/* interrupts must be disabled */
 	pcb2->pcb_gs = rgs();
 	/*

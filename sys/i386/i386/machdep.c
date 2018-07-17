@@ -1514,7 +1514,7 @@ setidt(
 	ip->gd_hioffset = ((int)func)>>16 ;
 }
 
-#if !defined(WYC) //can not be parsed by SI, so surround it with #if
+#if !defined(WYC) //the block below will cause parsing error in SI
 extern inthand_t
 	IDTVEC(div), IDTVEC(dbg), IDTVEC(nmi), IDTVEC(bpt), IDTVEC(ofl),
 	IDTVEC(bnd), IDTVEC(ill), IDTVEC(dna), IDTVEC(fpusegm),
