@@ -52,7 +52,7 @@ static inline void
 counter_64_inc_8b(uint64_t *p, int64_t inc)
 {
 
-#if 0 // original code 
+#if 0 //wyc original code 
 	__asm __volatile(
 	"movl	%%fs:(%%esi),%%eax\n\t"
 	"movl	%%fs:4(%%esi),%%edx\n"
@@ -66,7 +66,7 @@ counter_64_inc_8b(uint64_t *p, int64_t inc)
 	:
 	: "S" ((char *)p - (char *)&__pcpu[0]), "D" (&inc)
 	: "memory", "cc", "eax", "edx", "ebx", "ecx");
-#else // wycgit
+#else // wyc
 	__asm __volatile(
 	"movl	(%%esi),%%eax\n\t"
 	"movl	4(%%esi),%%edx\n"
@@ -77,10 +77,10 @@ counter_64_inc_8b(uint64_t *p, int64_t inc)
 	"adcl	4(%%edi),%%ecx\n\t"
 	"cmpxchg8b (%%esi)\n\t"
 	"jnz	1b"
-	: /* no output registers */
+	: //wyc no output registers
 	: "S" (p), "D" (&inc)
 	: "memory", "cc", "eax", "edx", "ebx", "ecx");
-#endif //wycgit
+#endif //wyc
 }
 
 #ifdef IN_SUBR_COUNTER_C
@@ -171,28 +171,28 @@ counter_u64_zero_inline(counter_u64_t c)
 #endif
 
 #define	counter_u64_add_protected(c, inc)	do {	\
-	uint64_t *counter_addr;		/*wycgit*/	\
+	uint64_t *counter_addr;		/*wyc*/	\
 							\
-	counter_addr = zpcpu_get(c);	/*wycgit*/	\
+	counter_addr = zpcpu_get((c));	/*wyc*/	\
 	if ((cpu_feature & CPUID_CX8) == 0) {		\
 		CRITICAL_ASSERT(curthread);		\
-		*counter_addr += (inc);	/*wycgit*/	\
+		*counter_addr += (inc);	/*wyc*/	\
 	} else						\
-		counter_64_inc_8b(counter_addr, (inc));	/*wycgit*/ \
+		counter_64_inc_8b(counter_addr, (inc));	/*wyc*/ \
 } while (0)
 
 static inline void
 counter_u64_add(counter_u64_t c, int64_t inc)
 {
-	uint64_t *counter_addr;		//wycgit
+	uint64_t *counter_addr;		//wyc
 
-	counter_addr = zpcpu_get(c);	//wycgit
+	counter_addr = zpcpu_get(c);	//wyc
 	if ((cpu_feature & CPUID_CX8) == 0) { //wyc false cpu_feature==0x0fa3_fbff
 		critical_enter();
-		*counter_addr += inc;	//wycgit
+		*counter_addr += inc;	//wyc
 		critical_exit();
 	} else {
-		counter_64_inc_8b(counter_addr, inc);	//wycgit
+		counter_64_inc_8b(counter_addr, inc);	//wyc
 	}
 }
 

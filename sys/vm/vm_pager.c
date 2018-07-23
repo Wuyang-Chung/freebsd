@@ -146,7 +146,7 @@ static struct pagerops deadpagerops = {
 	.pgo_haspage =	dead_pager_haspage,
 };
 
-struct pagerops *pagertab[NOBJT] = { //wycgit
+struct pagerops *pagertab[NOBJT] = { //wyc
 	[OBJT_DEFAULT] = &defaultpagerops,
 	[OBJT_SWAP] =	&swappagerops,
 	[OBJT_VNODE] =	&vnodepagerops,
@@ -180,7 +180,7 @@ vm_pager_init(void)
 	 * Initialize known pagers
 	 */
 	for (pgops = pagertab; pgops < &pagertab[NOBJT]; pgops++) {
-		if (*pgops == NULL) //wycgit
+		if (*pgops == NULL) //wyc
 			panic("%s: pager operations is NULL", __func__);
 		if ((*pgops)->pgo_init != NULL)
 			(*(*pgops)->pgo_init)();
@@ -220,7 +220,7 @@ vm_object_t
 vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
     vm_prot_t prot, vm_ooffset_t off, struct ucred *cred)
 {
-#if 0 //wycgit
+#if 0 //wyc
 	vm_object_t ret;
 	struct pagerops *ops;
 

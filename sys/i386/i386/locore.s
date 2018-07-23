@@ -138,7 +138,7 @@ pc98_system_parameter:
 
 #define R(foo) ((foo)-KERNBASE)
 
-/*wycgit
+/*wyc
     %esi = physfree;
     physfree += foo*PAGE_SIZE
     bzero(%esi, foo*PAGE_SIZE);

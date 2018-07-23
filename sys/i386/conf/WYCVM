@@ -93,7 +93,7 @@ options	DDB		# console debugger
 #options	KDB_UNATTENDED	# when panic occurs, reboot instead of enter into debugger
 #options 	INVARIANTS		# enable extra sanity checking of internal structures
 
-options	MAXCPU=1		# defines the maximum number of CPUs that can boot in the system
+options	MAXCPU=2		# defines the maximum number of CPUs that can boot in the system
 
 # To make an SMP kernel, the next two lines are needed
 options 	SMP			# Symmetric MultiProcessor Kernel

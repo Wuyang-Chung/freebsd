@@ -238,17 +238,15 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	 * Set registers for trampoline to user mode.  Leave space for the
 	 * return address on stack.  These are the kernel mode register values.
 	 */
+	//wyc still don't understand why need to leave space for the return address
 #if defined(PAE) || defined(PAE_TABLES)
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdpt);
 #else
 	pcb2->pcb_cr3 = vtophys(vmspace_pmap(p2->p_vmspace)->pm_pdir);
 #endif
-#if defined(WYC)
 	//wyc the thread 'td2' will resume by executing fork_trampoline and
 	//    fork_trampline() will call
-	//    fork_exit(fork_return, td2, td2->td_frame - sizeof(void *)
-	fork_exit(fork_return, td2, (int)td2->td_frame - sizeof(void *);
-#endif
+	//    fork_exit(fork_return, td2, td2->td_frame -[sizeof(void *)])
 	pcb2->pcb_edi = 0;
 	pcb2->pcb_esi = (int)fork_return;	/* fork_exit(callout,,)*/ /* fork_trampoline argument */
 	pcb2->pcb_ebp = 0;
@@ -474,12 +472,10 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
 	 * Set registers for trampoline to user mode.  Leave space for the
 	 * return address on stack.  These are the kernel mode register values.
 	 */
-#if defined(WYC)
+	//wyc still don't understand why need to leave space for the return address
 	//wyc the thread 'td' will resume by executing fork_trampoline and
 	//    fork_trampline() will call
-	//    fork_exit(fork_return, td, td->td_frame - sizeof(void *)
-	fork_exit(fork_return, td, (int)td->td_frame - sizeof(void *);
-#endif
+	//    fork_exit(fork_return, td, td->td_frame -[sizeof(void *)])
 	pcb2->pcb_edi = 0;
 	pcb2->pcb_esi = (int)fork_return;		    /* fork_exit(callout,,) */ /* trampoline arg */
 	pcb2->pcb_ebp = 0;

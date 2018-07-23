@@ -354,7 +354,8 @@ again:
 }
 
 /*wyc
-  This function will not be called because RFPROC is always TRUE
+  This function will only be called when RFPROC is FALSE
+  But RFPROC is always TRUE, so this function will never be called.
 */
 #if 0
 static int
@@ -911,17 +912,18 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * processes; don't let root exceed the limit.
 	 */
 	nprocs_new = atomic_fetchadd_int(&nprocs, 1) + 1;
-	if ((nprocs_new >= maxproc - 10 && priv_check_cred(td->td_ucred,
-	    PRIV_MAXPROC, 0) != 0) || nprocs_new >= maxproc) {
-		error = EAGAIN;
-		sx_xlock(&allproc_lock);
-		if (ppsratecheck(&lastfail, &curfail, 1)) {
-			printf("maxproc limit exceeded by uid %u (pid %d); "
-			    "see tuning(7) and login.conf(5)\n",
-			    td->td_ucred->cr_ruid, p1->p_pid);
-		}
-		sx_xunlock(&allproc_lock);
-		goto fail2;
+	if (nprocs_new >= maxproc - 10) //wyc
+		if (nprocs_new >= maxproc || priv_check_cred(
+		    td->td_ucred, PRIV_MAXPROC, 0) != ESUCCESS) {
+			error = EAGAIN;
+			sx_xlock(&allproc_lock);
+			if (ppsratecheck(&lastfail, &curfail, 1)) {
+				printf("maxproc limit exceeded by uid %u (pid %d); "
+				    "see tuning(7) and login.conf(5)\n",
+				    td->td_ucred->cr_ruid, p1->p_pid);
+			}
+			sx_xunlock(&allproc_lock);
+			goto fail2;
 	}
 
 	/*

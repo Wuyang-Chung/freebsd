@@ -235,6 +235,8 @@ alloc_sv_tk(void)
 	shared_page_write(tk_base + offsetof(struct vdso_timekeep, tk_ver),
 	    sizeof(uint32_t), &tk_ver);
 	svtk->sv_timekeep_off = tk_base;
+	if (host_svtk != NULL) //wyctest
+		panic("%s", __func__);
 	timekeep_push_vdso(); //wycgit this could be removed since host_svtk is NULL at this point
 	return (svtk);
 }

@@ -717,7 +717,7 @@ shmget_allocate_segment(struct thread *td, struct shmget_args *uap, int mode)
 	 * to.
 	 */
 	shm_object = vm_pager_allocate(shm_use_phys ? OBJT_PHYS : OBJT_SWAP,
-	    NULL, size, VM_PROT_DEFAULT, 0, cred); //wycgit
+	    /*wyc 0*/NULL, size, VM_PROT_DEFAULT, 0, cred);
 	if (shm_object == NULL) {
 #ifdef RACCT
 		if (racct_enable) {

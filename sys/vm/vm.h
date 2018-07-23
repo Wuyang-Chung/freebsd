@@ -95,7 +95,7 @@ enum obj_type {
 	OBJT_DEAD,	//wyc after dealloc
 	OBJT_SG,	//wyc Scatter-Gather
 	OBJT_MGTDEVICE,	//wyc == OBJT_DEVICE with .pgo_init == NULL
-	NOBJT		//wycgit
+	NOBJT		//wyc
 };
 typedef u_char objtype_t;
 

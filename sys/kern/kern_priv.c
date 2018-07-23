@@ -102,7 +102,7 @@ priv_check_cred(struct ucred *cred, int priv, int flags)
 		switch (priv) {
 		case PRIV_VM_MLOCK:
 		case PRIV_VM_MUNLOCK:
-			error = 0;
+			error = ESUCCESS;
 			goto out;
 		}
 	}
@@ -124,13 +124,13 @@ priv_check_cred(struct ucred *cred, int priv, int flags)
 		case PRIV_MAXPROC:
 		case PRIV_PROC_LIMIT:
 			if (cred->cr_ruid == 0) {
-				error = 0;
+				error = ESUCCESS;
 				goto out;
 			}
 			break;
 		default:
 			if (cred->cr_uid == 0) {
-				error = 0;
+				error = ESUCCESS;
 				goto out;
 			}
 			break;
@@ -143,7 +143,7 @@ priv_check_cred(struct ucred *cred, int priv, int flags)
 	 * have permission to access /dev/[k]mem).
 	 */
 	if (priv == PRIV_KMEM_READ) {
-		error = 0;
+		error = ESUCCESS;
 		goto out;
 	}
 
