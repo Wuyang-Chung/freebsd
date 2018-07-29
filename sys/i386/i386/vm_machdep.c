@@ -157,9 +157,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	struct pcb *pcb2;
 	struct mdproc *mdp2;
 
-	//wyc panic if p2 != td2->td_proc
-	if ( p2 != td2->td_proc )
-		panic("p2 != td2->td_proc");
+	WYCASSERT(p2 == td2->td_proc);
 
 	p1 = td1->td_proc;
 	if ((flags & RFPROC) == 0) { //wyc FALSE always
@@ -221,7 +219,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 
 	td2->td_frame->tf_eax = 0;		/* Child returns zero */
 	td2->td_frame->tf_eflags &= ~PSL_C;	/* success */
-	td2->td_frame->tf_edx = 1;
+	td2->td_frame->tf_edx = 1; //wyc used by lib/libc/i386/gen/rfork_thread.S
 
 	/*
 	 * If the parent process has the trap bit set (i.e. a debugger had
@@ -378,7 +376,7 @@ cpu_thread_swapout(struct thread *td)
 void
 cpu_thread_alloc(struct thread *td)
 {
-	struct pcb *pcb;
+	struct pcb *pcb; //mar protocol control block
 	struct xstate_hdr *xhdr;
 
 	td->td_pcb = pcb = get_pcb_td(td);

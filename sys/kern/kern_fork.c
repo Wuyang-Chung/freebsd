@@ -229,7 +229,7 @@ sysctl_kern_randompid(SYSCTL_HANDLER_ARGS)
 	sx_xlock(&allproc_lock);
 	pid = randompid;
 	error = sysctl_handle_int(oidp, &pid, 0, req);
-	if (error == 0 && req->newptr != NULL) {
+	if (error == ESUCCESS && req->newptr != NULL) {
 		if (pid == 0)
 			randompid = 0;
 		else if (pid == 1)
@@ -249,7 +249,8 @@ sysctl_kern_randompid(SYSCTL_HANDLER_ARGS)
 }
 
 SYSCTL_PROC(_kern, OID_AUTO, randompid, CTLTYPE_INT|CTLFLAG_RW,
-    0, 0, sysctl_kern_randompid, "I", "Random PID modulus. Special values: 0: disable, 1: choose random value");
+    0, 0, sysctl_kern_randompid, "I",
+    "Random PID modulus. Special values: 0: disable, 1: choose random value");
 
 static int
 fork_findpid(int flags)
@@ -277,7 +278,7 @@ fork_findpid(int flags)
 		if (trypid < 10)
 			trypid = 10;
 	} else {
-		if (randompid) //wyc by default ==0. Random will cause a lot of overhead
+		if (randompid) //wyc =0. Random will cause a lot of overhead
 			trypid += arc4random() % randompid;
 	}
 retry:
@@ -425,9 +426,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	sx_assert(&allproc_lock, SX_XLOCKED);
 
 	p1 = td->td_proc;
-	//wyc panic if p2 != td2->td_proc
-	if ( p2 != td2->td_proc )
-		panic("p2 != td2->td_proc"); //wyc
+	WYCASSERT(p2 == td2->td_proc);
 
 	trypid = fork_findpid(fr->fr_flags); //wyc for thread, it is tid_alloc()
 
@@ -466,7 +465,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Malloc things while we don't hold any locks.
 	 */
-	if (fr->fr_flags & RFSIGSHARE) //wyc FALSE for vfork
+	if (fr->fr_flags & RFSIGSHARE) //wyc FALSE for (v)fork
 		newsigacts = NULL;
 	else
 		newsigacts = sigacts_alloc();
@@ -474,18 +473,18 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Copy filedesc.
 	 */
-	if (fr->fr_flags & RFCFDG) {	//wyc close all fds. FALSE for (v)fork
+	if (fr->fr_flags & RFCFDG) { //wyc FALSE for (v)fork
 		fd = fdinit(p1->p_fd, false);
 		fdtol = NULL;
-	} else if (fr->fr_flags & RFFDG) {	//wyc copy fd table. TRUE for (v)fork
+	} else if (fr->fr_flags & RFFDG) { //wyc TRUE for (v)fork
 		fd = fdcopy(p1->p_fd);
 		fdtol = NULL;
-	} else {
+	} else { //wyc share file descriptor
 		fd = fdshare(p1->p_fd);
 		if (p1->p_fdtol == NULL)
 			p1->p_fdtol = filedesc_to_leader_alloc(NULL, NULL,
 			    p1->p_leader);
-		if ((fr->fr_flags & RFTHREAD) != 0) {
+		if ((fr->fr_flags & RFTHREAD) != 0) { //wyc false always
 			/*
 			 * Shared file descriptor table, and shared
 			 * process leaders.
@@ -599,7 +598,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	/*
 	 * Set up linkage for kernel based threading.
 	 */
-	if ((fr->fr_flags & RFTHREAD) != 0) { //wyc FALSE for vfork
+	if ((fr->fr_flags & RFTHREAD) != 0) { //wyc false always
 		mtx_lock(&ppeers_lock);
 		p2->p_peers = p1->p_peers;
 		p1->p_peers = p2;
@@ -779,7 +778,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 		td->td_dbg_forked = p2->p_pid;
 		td2->td_dbgflags |= TDB_STOPATFORK;
 	}
-	if (fr->fr_flags & RFPPWAIT) { //wyc sys_vfork()
+	if (fr->fr_flags & RFPPWAIT) { //wyc true for vfork
 		td->td_pflags |= TDP_RFPPWAIT;
 		td->td_rfppwait_p = p2;
 		td->td_dbgflags |= TDB_VFORK;
@@ -913,8 +912,8 @@ fork1(struct thread *td, struct fork_req *fr)
 	 */
 	nprocs_new = atomic_fetchadd_int(&nprocs, 1) + 1;
 	if (nprocs_new >= maxproc - 10) //wyc
-		if (nprocs_new >= maxproc || priv_check_cred(
-		    td->td_ucred, PRIV_MAXPROC, 0) != ESUCCESS) {
+		if (priv_check_cred(td->td_ucred, PRIV_MAXPROC, 0)
+		    != ESUCCESS || nprocs_new >= maxproc) {
 			error = EAGAIN;
 			sx_xlock(&allproc_lock);
 			if (ppsratecheck(&lastfail, &curfail, 1)) {
@@ -952,6 +951,7 @@ fork1(struct thread *td, struct fork_req *fr)
 			error = ENOMEM;
 			goto fail2;
 		}
+		//WYCASSERT(newproc->p_numthreads != 0);
 		proc_linkup(newproc, td2);
 	} else {
 		if (td2->td_kstack == 0 || td2->td_kstack_pages != pages) {
@@ -1049,7 +1049,7 @@ fail2:
 		fdrop(fp_procdesc, td);
 	}
 	atomic_add_int(&nprocs, -1);
-	pause("fork", hz / 2);	//wyc slow down to prevent fork attack
+	pause("fork", hz / 2);	//mar slow down to prevent fork attack
 	return (error);
 }
 

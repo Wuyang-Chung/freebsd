@@ -35,6 +35,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+int foo(void *);
+
+int foo(void * __attribute__((__unused__)) arg)
+{
+
+	return 0;
+}
+
 int
 main(int argc __unused, char **argv __unused)
 {
@@ -47,5 +55,6 @@ main(int argc __unused, char **argv __unused)
 	if (modstat(modid, &stat) != 0)
 		err(1, "modstat");
 	syscall_num = stat.data.intval;
-	return syscall (syscall_num, 1, 2);
+	return syscall (syscall_num, foo, NULL);
 }
+

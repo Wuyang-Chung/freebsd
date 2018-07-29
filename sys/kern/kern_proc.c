@@ -125,7 +125,7 @@ static struct proc *zpfind_locked(pid_t pid);
 /*
  * Other process lists
  */
-struct pidhashhead *pidhashtbl;
+struct pidhashhead *pidhashtbl; //wyc protected by allproc_lock
 u_long pidhash;
 struct pgrphashhead *pgrphashtbl;
 u_long pgrphash;

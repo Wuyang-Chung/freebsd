@@ -392,7 +392,7 @@ vm_thread_new(struct thread *td, int pages)
 	for (i = 0; i < pages; i++)
 		ma[i]->valid = VM_PAGE_BITS_ALL;
 	VM_OBJECT_WUNLOCK(ksobj);
-	pmap_qenter(ks, ma, pages);
+	pmap_qenter(ks, ma, pages); //mar for entering into kernel map
 	return (1);
 }
 

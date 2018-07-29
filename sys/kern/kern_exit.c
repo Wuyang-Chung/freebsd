@@ -540,7 +540,7 @@ exit1(struct thread *td, int rval, int signo)
 			kern_psignal(q, q->p_pdeathsig);
 		CTR2(KTR_PTRACE, "exit: pid %d, clearing orphan %d", p->p_pid,
 		    q->p_pid);
-		clear_orphan(q);
+		clear_orphan(q); //mar it is related with debug
 		PROC_UNLOCK(q);
 	}
 

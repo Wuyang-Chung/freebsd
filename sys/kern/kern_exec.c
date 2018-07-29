@@ -482,9 +482,7 @@ interpret:
 
 	imgp->object = imgp->vp->v_object;
 
-	if (imgp->object == NULL) //wyc
-		panic("imgp->object == NULL"); //wyc
-
+	WYCASSERT(imgp->object != NULL);
 	if (imgp->object != NULL) //wyc imgp->object should never be NULL
 		vm_object_reference(imgp->object);
 
@@ -724,7 +722,7 @@ interpret:
 	else
 		suword(--stack_base, imgp->args->argc);
 
-	if (args->fdp != NULL) {
+	if (args->fdp != NULL) { //wyc false most of the time
 		/* Install a brand new file descriptor table. */
 		fdinstall_remapped(td, args->fdp);
 		args->fdp = NULL;

@@ -3,7 +3,7 @@
 
 PACKAGE=examples
 FILESDIR=${SHAREDIR}/examples/kld/${KMOD}
-KMOD=	syscall
-SRCS=	syscall.c
+KMOD=	sascall
+SRCS=	sascall.c
 
 .include <bsd.kmod.mk>

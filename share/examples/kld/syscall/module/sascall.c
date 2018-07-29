@@ -33,30 +33,42 @@
 #include <sys/sysent.h>
 #include <sys/kernel.h>
 #include <sys/systm.h>
+#include <sys/unistd.h>	
 
-struct hello_arg {
-	unsigned int a0;
-	unsigned int a1;
+struct sfork_arg {
+	int (*func)(void *);
+	void *arg;
 };
 
 /*
  * The function for implementing the syscall.
  */
 static int
-hello(struct thread *td, void *arg)
+sfork(struct thread *td, void *arg)
 {
-	struct hello_arg *uap = arg;
+	struct sfork_arg *uap = arg;
+	struct fork_req fr;
+	int error, pid;
 
-	printf("hello kernel %u %u\n", uap->a0, uap->a1);
-	return (0);
+	bzero(&fr, sizeof(fr));
+	fr.fr_flags = RFSAS |RFPROC | RFMEM;
+	fr.fr_pidp = &pid;
+	fr.fr_func = uap->func;
+	fr.fr_arg = uap->arg;
+	error = fork1(td, &fr);
+	if (error == 0) {
+		td->td_retval[0] = pid;	//wyc return value to the parent
+		td->td_retval[1] = 0;
+	}
+	return (error);
 }
 
 /*
  * The `sysent' for the new syscall
  */
-static struct sysent hello_sysent = {
+static struct sysent sfork_sysent = {
 	2,			/* sy_narg */
-	hello			/* sy_call */
+	sfork			/* sy_call */
 };
 
 /*
@@ -86,4 +98,4 @@ load(struct module *module, int cmd, void *arg)
 	return (error);
 }
 
-SYSCALL_MODULE(syscall, &offset, &hello_sysent, load, NULL);
+SYSCALL_MODULE(syscall, &offset, &sfork_sysent, load, NULL);

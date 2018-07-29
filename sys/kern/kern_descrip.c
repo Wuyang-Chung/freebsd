@@ -3161,7 +3161,10 @@ mountcheckdirs(struct vnode *olddp, struct vnode *newdp)
 }
 
 struct filedesc_to_leader *
-filedesc_to_leader_alloc(struct filedesc_to_leader *old, struct filedesc *fdp, struct proc *leader)
+filedesc_to_leader_alloc(
+    struct filedesc_to_leader *old,
+    struct filedesc *fdp,
+    struct proc *leader)
 {
 	struct filedesc_to_leader *fdtol;
 

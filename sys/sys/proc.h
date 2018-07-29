@@ -206,7 +206,7 @@ struct rusage_ext {
 	uint64_t	rux_tu;         /* (c) Previous total time in usec. */
 };
 
-enum thr_state { //wyc
+enum thr_state { //wyc move enum out of struct thread so SI can see it
 	TDS_INACTIVE = 0x0,
 	TDS_INHIBITED,
 	TDS_CAN_RUN,
@@ -543,7 +543,7 @@ do {									\
 #define	TD_SBDRY_ERRNO(td) \
     (((td)->td_flags & TDF_SEINTR) != 0 ? EINTR : ERESTART)
 
-enum proc_state { //wyc
+enum proc_state { //wyc move enum out of struct proc so SI can see it
 	PRS_NEW = 0,		/* In creation */
 	PRS_NORMAL,		/* threads can be run. */
 	PRS_ZOMBIE
@@ -985,6 +985,8 @@ struct	fork_req {
 	int 		*fr_pd_fd;
 	int 		fr_pd_flags;
 	struct filecaps	*fr_pd_fcaps;
+	int (*fr_func)(void *);	//wyc
+	void *fr_arg;		//wyc
 };
 
 /*

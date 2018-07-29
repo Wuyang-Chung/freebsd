@@ -180,8 +180,7 @@ vm_pager_init(void)
 	 * Initialize known pagers
 	 */
 	for (pgops = pagertab; pgops < &pagertab[NOBJT]; pgops++) {
-		if (*pgops == NULL) //wyc
-			panic("%s: pager operations is NULL", __func__);
+		WYCASSERT(*pgops != NULL);
 		if ((*pgops)->pgo_init != NULL)
 			(*(*pgops)->pgo_init)();
 	}

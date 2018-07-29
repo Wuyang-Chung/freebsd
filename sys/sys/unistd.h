@@ -172,9 +172,11 @@
 #define	RFPROC		(1<<4)	/* change child (else changes curproc) */
 #define	RFMEM		(1<<5)	/* share `address space' */
 #define	RFNOWAIT	(1<<6)	/* give child to init */
+#define RFSAS		(1<<7)	//wyc
 #define	RFCNAMEG	(1<<10)	/* UNIMPL zero plan9 `name space' */
 #define	RFCENVG		(1<<11)	/* UNIMPL zero plan9 `env space' */
 #define	RFCFDG		(1<<12)	/* close all fds, zero fd table */
+//wyc rfork(2) RFTHREAD shares file descriptor to process leaders table with its parent
 #define	RFTHREAD	(1<<13)	/* enable kernel thread support */
 #define	RFSIGSHARE	(1<<14)	/* share signal handlers */
 #define	RFLINUXTHPN	(1<<16)	/* do linux clone exit parent notification */
@@ -187,7 +189,7 @@
 #define	RFTSIGFLAGS(signum)	((signum) << RFTSIGSHIFT)
 #define	RFPROCDESC	(1<<28)	/* return a process descriptor */
 #define	RFPPWAIT	(1<<31)	/* parent sleeps until child exits (vfork) */
-#define	RFFLAGS		(RFFDG | RFPROC | RFMEM | RFNOWAIT | RFCFDG | \
+#define	RFFLAGS		(RFFDG | RFPROC | RFMEM | RFNOWAIT | RFSAS | RFCFDG | \
     RFTHREAD | RFSIGSHARE | RFLINUXTHPN | RFSTOPPED | RFHIGHPID | RFTSIGZMB | \
     RFPROCDESC | RFPPWAIT)
 #define	RFKERNELONLY	(RFSTOPPED | RFHIGHPID | RFPPWAIT | RFPROCDESC)
