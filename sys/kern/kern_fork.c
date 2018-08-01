@@ -358,7 +358,7 @@ again:
   This function will only be called when RFPROC is FALSE
   But RFPROC is always TRUE, so this function will never be called.
 */
-#if 0
+#if 0 //wyc original
 static int
 fork_norfproc(struct thread *td, int flags)
 {
@@ -485,6 +485,8 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 			p1->p_fdtol = filedesc_to_leader_alloc(NULL, NULL,
 			    p1->p_leader);
 		if ((fr->fr_flags & RFTHREAD) != 0) { //wyc false always
+			panic("RFTHREAD != 0"); //wyc
+#if 0 //wyc
 			/*
 			 * Shared file descriptor table, and shared
 			 * process leaders.
@@ -493,6 +495,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 			FILEDESC_XLOCK(p1->p_fd);
 			fdtol->fdl_refcount++;
 			FILEDESC_XUNLOCK(p1->p_fd);
+#endif
 		} else {
 			/* 
 			 * Shared file descriptor table, and different
@@ -592,13 +595,15 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	PROC_UNLOCK(p2);
 
 	/* Bump references to the text vnode (for procfs). */
-	if (p2->p_textvp)
+	if (p2->p_textvp) //wyc will be NULL when called from create_init
 		vrefact(p2->p_textvp);
 
 	/*
 	 * Set up linkage for kernel based threading.
 	 */
 	if ((fr->fr_flags & RFTHREAD) != 0) { //wyc false always
+		panic("RFTHREAD != 0"); //wyc
+#if 0 //wyc
 		mtx_lock(&ppeers_lock);
 		p2->p_peers = p1->p_peers;
 		p1->p_peers = p2;
@@ -625,6 +630,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 			PROC_UNLOCK(p2);
 		} else
 			PROC_UNLOCK(p1->p_leader);
+#endif
 	} else {
 		p2->p_peers = NULL;
 		p2->p_leader = p2;
@@ -645,7 +651,7 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	if (p1->p_session->s_ttyvp != NULL && p1->p_flag & P_CONTROLT)
 		p2->p_flag |= P_CONTROLT;
 	SESS_UNLOCK(p1->p_session);
-	if (fr->fr_flags & RFPPWAIT)
+	if (fr->fr_flags & RFPPWAIT) //wyc true for vfork
 		p2->p_flag |= P_PPWAIT;
 
 	p2->p_pgrp = p1->p_pgrp;
@@ -680,8 +686,11 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * parent.
 	 */
 	if ((fr->fr_flags & RFNOWAIT) != 0) { //wyc FALSE for (v)fork
+		panic("RFNOWAIT != 0"); //wyc
+#if 0 //wyc
 		pptr = p1->p_reaper; //wyc normall reaper is init process.
 		p2->p_reaper = pptr;
+#endif
 	} else {
 		p2->p_reaper = (p1->p_treeflag & P_TREE_REAPER) != 0 ?
 		    p1 : p1->p_reaper;
@@ -733,7 +742,10 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	 * However, don't do this until after fork(2) can no longer fail.
 	 */
 	if (fr->fr_flags & RFPROCDESC) //wyc FALSE for (v)fork
+		panic("RFPROCDESC");
+#if 0 //wyc
 		procdesc_new(p2, fr->fr_pd_flags);
+#endif
 
 	/*
 	 * Both processes are set up, now check if any loadable modules want
@@ -798,8 +810,11 @@ do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *
 	SDT_PROBE3(proc, , , create, p2, p1, fr->fr_flags);
 
 	if (fr->fr_flags & RFPROCDESC) { //wyc FALSE for (v)fork
+		panic("RFPROCDESC");
+#if 0 //wyc
 		procdesc_finit(p2->p_procdesc, fp_procdesc);
 		fdrop(fp_procdesc, td);
+#endif
 	}
 
 	if ((fr->fr_flags & RFSTOPPED) == 0) { //wyc TRUE for (v)fork
@@ -841,8 +856,6 @@ fork1(struct thread *td, struct fork_req *fr)
 	int flags, pages;
 
 	flags = fr->fr_flags;
-	pages = fr->fr_pages;
-
 	if ((flags & RFSTOPPED) != 0) //wyc FALSE for (v)fork
 		MPASS(fr->fr_procp != NULL && fr->fr_pidp == NULL);
 	else
@@ -865,6 +878,8 @@ fork1(struct thread *td, struct fork_req *fr)
 		return (EINVAL);
 
 	if ((flags & RFPROCDESC) != 0) { //wyc FALSE almost
+		panic("RFPROCDESC");
+#if 0 //wyc
 		/* Can't not create a process yet get a process descriptor. */
 		if ((flags & RFPROC) == 0) //wyc FALSE always
 			return (EINVAL);
@@ -876,6 +891,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		/* Check if we are using supported flags. */
 		if ((fr->fr_pd_flags & ~PD_ALLOWED_AT_FORK) != 0)
 			return (EINVAL);
+#endif
 	}
 
 	p1 = td->td_proc;
@@ -886,7 +902,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	 */
 	if ((flags & RFPROC) == 0) { //wyc FALSE always
 		panic("RFPROC == 0"); //wyc
-#if 0 //wyc
+#if 0 //wyc original
 		if (fr->fr_procp != NULL)
 			*fr->fr_procp = NULL;
 		else if (fr->fr_pidp != NULL)
@@ -930,16 +946,20 @@ fork1(struct thread *td, struct fork_req *fr)
 	 * will abandon it if something goes wrong. We don't finit() until
 	 * later.
 	 */
-	if (flags & RFPROCDESC) {
+	if (flags & RFPROCDESC) { //wyc false for (v)fork
+		panic("RFPROCDESC");
+#if 0 //wyc
 		error = procdesc_falloc(td, &fp_procdesc, fr->fr_pd_fd,
 		    fr->fr_pd_flags, fr->fr_pd_fcaps);
 		if (error != 0)
 			goto fail2;
+#endif
 	}
 
 	/*wyc
 	    allocate new proc, new thread and thread stack
 	*/
+	pages = fr->fr_pages;
 	if (pages == 0) //wyc TRUE
 		pages = kstack_pages;
 	/* Allocate new proc. */
@@ -951,7 +971,6 @@ fork1(struct thread *td, struct fork_req *fr)
 			error = ENOMEM;
 			goto fail2;
 		}
-		//WYCASSERT(newproc->p_numthreads != 0);
 		proc_linkup(newproc, td2);
 	} else {
 		if (td2->td_kstack == 0 || td2->td_kstack_pages != pages) {
@@ -964,7 +983,9 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 	}
 
-	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
+	if (flags & RFSAS) { //wyc
+		vm2 = &vmsas;
+	} else if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
 		vm_ooffset_t mem_charged; //wyc
 
 		mem_charged = 0;
@@ -1009,8 +1030,8 @@ fork1(struct thread *td, struct fork_req *fr)
 	STAILQ_INIT(&newproc->p_ktr);
 
 	/* We have to lock the process tree while we look for a pid. */
-	sx_slock(&proctree_lock);
-	sx_xlock(&allproc_lock);
+	sx_slock(&proctree_lock);	//wyc? can it be moved into do_fork?
+	sx_xlock(&allproc_lock);	//wyc? can it be moved into do_fork?
 
 	/*
 	 * Increment the count of procs running with this uid. Don't allow
@@ -1027,7 +1048,7 @@ fork1(struct thread *td, struct fork_req *fr)
 	}
 	if (ok) {
 		do_fork(td, fr, newproc, td2, vm2, fp_procdesc);
-		return (0);
+		return (ESUCCESS);
 	}
 
 	error = EAGAIN;
@@ -1045,8 +1066,11 @@ fail2:
 		vmspace_free(vm2);
 	uma_zfree(proc_zone, newproc);
 	if ((flags & RFPROCDESC) != 0 && fp_procdesc != NULL) {
+		panic("RFPROCDESC");
+#if 0 //wyc
 		fdclose(td, fp_procdesc, *fr->fr_pd_fd);
 		fdrop(fp_procdesc, td);
+#endif
 	}
 	atomic_add_int(&nprocs, -1);
 	pause("fork", hz / 2);	//mar slow down to prevent fork attack
@@ -1094,7 +1118,10 @@ fork_exit(
 	 */
 	KASSERT(callout != NULL, ("NULL callout in fork_exit"));
 #if defined(WYC)
-	fork_return(arg, frame); //wyc for normal case
+	/*wyc
+	  The 'callout' and 'arg' might be changed by cpu_fork_kthread_handler
+	*/
+	fork_return(arg, frame); //wyc for sys_fork* or sys_thr_new
 #else
 	callout(arg, frame);
 #endif

@@ -257,7 +257,7 @@ init_secondary(void)
 	lldt(_default_ldt);
 
 	gdt[myid * NGDT + GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;
-#if 0 //wyc
+#if 0 //wyc original
 	PCPU_SET(currentldt, _default_ldt);
 	PCPU_SET(common_tss.tss_esp0, 0); /* not used until after switch */
 	PCPU_SET(common_tss.tss_ss0, GSEL(GDATA_SEL, SEL_KPL));

@@ -392,7 +392,7 @@ do_execve(
 	//     makes the initialization more efficient
 	static const char fexecv_proc_title[] = "(fexecv)";
 
-	//wyc??? why using pointer variable? 
+	//wyc? why using pointer variable? 
 	//     It is not as efficient as using the structure itself.
 	imgp = &image_params;
 

@@ -319,7 +319,7 @@ proc_linkup(struct proc *p, struct thread *td)
 		p->p_ksi->ksi_flags = KSI_EXT | KSI_INS;
 	}
 	LIST_INIT(&p->p_mqnotifier);
-	p->p_numthreads = 0;
+	WYCASSERT(p->p_numthreads == 0); //wyc
 	thread_link(td, p);
 }
 

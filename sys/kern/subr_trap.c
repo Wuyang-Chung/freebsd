@@ -343,5 +343,9 @@ syscallname(struct proc *p, u_int code)
 	sv = p->p_sysent;
 	if (sv->sv_syscallnames == NULL || code >= sv->sv_size)
 		return (unknown);
+#if defined(WYC)
+	return (syscallnames[code]);
+#else
 	return (sv->sv_syscallnames[code]);
+#endif
 }

@@ -98,10 +98,11 @@ void mi_startup(void);				/* Should be elsewhere */
 /* Components of the first process -- never freed. */
 static struct session session0;
 static struct pgrp pgrp0;
-struct	proc proc0;
+struct proc proc0;
 struct thread0_storage thread0_st __aligned(32);
-struct	vmspace vmspace0;
-struct	proc *initproc;
+struct vmspace vmspace0;
+struct vmspace vmsas; //wyc
+struct proc *initproc;
 
 #ifndef BOOTHOWTO
 #define	BOOTHOWTO	0

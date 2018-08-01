@@ -3951,7 +3951,7 @@ vmspace_exec(struct proc *p, vm_offset_t minuser, vm_offset_t maxuser)
 	return (ESUCCESS);
 }
 
-#if 0
+#if 0 //wyc original
 /*wyc
     Will only be called when RFPROC==0. Since RFPROC is always 1,
     this function will never be called

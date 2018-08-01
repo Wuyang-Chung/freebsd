@@ -157,12 +157,11 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	struct pcb *pcb2;
 	struct mdproc *mdp2;
 
-	WYCASSERT(p2 == td2->td_proc);
-
 	p1 = td1->td_proc;
+	WYCASSERT(p2 == td2->td_proc);
 	if ((flags & RFPROC) == 0) { //wyc FALSE always
 		panic("RFPROC == 0"); //wyc
-#if 0 //wyc
+#if 0 //wyc original
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */
 			struct mdproc *mdp1 = &p1->p_md;
@@ -559,10 +558,13 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	critical_enter();
 	/* set %gs */
 	td->td_pcb->pcb_gsd = sd;
+	WYCASSERT(td != curthread);
+#if 0 //wyc
 	if (td == curthread) {
 		PCPU_GET(fsgs_gdt)[1] = sd;
 		load_gs(GSEL(GUGS_SEL, SEL_UPL));
 	}
+#endif
 	critical_exit();
 	return (0);
 }

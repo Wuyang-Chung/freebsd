@@ -219,7 +219,7 @@ vm_object_t
 vm_pager_allocate(objtype_t type, void *handle, vm_ooffset_t size,
     vm_prot_t prot, vm_ooffset_t off, struct ucred *cred)
 {
-#if 0 //wyc
+#if 0 //wyc original
 	vm_object_t ret;
 	struct pagerops *ops;
 

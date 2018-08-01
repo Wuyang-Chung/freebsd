@@ -52,7 +52,7 @@ static inline void
 counter_64_inc_8b(uint64_t *p, int64_t inc)
 {
 
-#if 0 //wyc original code 
+#if 0 //wyc original
 	__asm __volatile(
 	"movl	%%fs:(%%esi),%%eax\n\t"
 	"movl	%%fs:4(%%esi),%%edx\n"

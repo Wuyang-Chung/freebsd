@@ -564,7 +564,10 @@ vm_forkproc(
 #endif
 	}
 
-	if (flags & RFMEM) { //wyc TRUE for vfork
+	if (flags & RFSAS) {
+		p2->p_vmspace = &vmsas;
+		atomic_add_int(&vmsas.vm_refcnt, 1);
+	} else if (flags & RFMEM) { //wyc TRUE for vfork
 		p2->p_vmspace = p1->p_vmspace;
 		atomic_add_int(&p1->p_vmspace->vm_refcnt, 1);
 	}

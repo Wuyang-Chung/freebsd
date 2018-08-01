@@ -618,25 +618,48 @@ atomic_subtract_64(volatile uint64_t *p, uint64_t v)
 
 #endif /* KLD_MODULE || !__GNUCLIKE_ASM */
 
-ATOMIC_ASM(set,	     char,  "orb %b1,%0",  "iq",  v);
-ATOMIC_ASM(clear,    char,  "andb %b1,%0", "iq", ~v);
-ATOMIC_ASM(add,	     char,  "addb %b1,%0", "iq",  v);
-ATOMIC_ASM(subtract, char,  "subb %b1,%0", "iq",  v);
+#if defined(WYC)
+//wyc the functions below are define in #else
+static __inline void atomic_set_char(volatile u_char *p, u_char v);
+static __inline void atomic_clear_char(volatile u_char *p, u_char v);
+static __inline void atomic_add_char(volatile u_char *p, u_char v);
+static __inline void atomic_subtract_char(volatile u_char *p, u_char v);
 
-ATOMIC_ASM(set,	     short, "orw %w1,%0",  "ir",  v);
-ATOMIC_ASM(clear,    short, "andw %w1,%0", "ir", ~v);
-ATOMIC_ASM(add,	     short, "addw %w1,%0", "ir",  v);
-ATOMIC_ASM(subtract, short, "subw %w1,%0", "ir",  v);
+static __inline void atomic_set_short(volatile u_short *p, u_short v);
+static __inline void atomic_clear_short(volatile u_short *p, u_short v);
+static __inline void atomic_add_short(volatile u_short *p, u_short v);
+static __inline void atomic_subtract_short(volatile u_short *p, u_short v);
 
-ATOMIC_ASM(set,	     int,   "orl %1,%0",   "ir",  v);
-ATOMIC_ASM(clear,    int,   "andl %1,%0",  "ir", ~v);
-ATOMIC_ASM(add,	     int,   "addl %1,%0",  "ir",  v);
-ATOMIC_ASM(subtract, int,   "subl %1,%0",  "ir",  v);
+static __inline void atomic_set_int(volatile u_int *p, u_int v);
+static __inline void atomic_clear_int(volatile u_int *p, u_int v);
+static __inline void atomic_add_int(volatile u_int *p, u_int v);
+static __inline void atomic_subtract_int(volatile u_int *p, u_int v);
 
-ATOMIC_ASM(set,	     long,  "orl %1,%0",   "ir",  v);
-ATOMIC_ASM(clear,    long,  "andl %1,%0",  "ir", ~v);
-ATOMIC_ASM(add,	     long,  "addl %1,%0",  "ir",  v);
-ATOMIC_ASM(subtract, long,  "subl %1,%0",  "ir",  v);
+static __inline void atomic_set_long(volatile u_long *p, u_long v);
+static __inline void atomic_clear_long(volatile u_long *p, u_long v);
+static __inline void atomic_add_long(volatile u_long *p, u_long v);
+static __inline void atomic_subtract_long(volatile u_long *p, u_long v);
+#else
+ATOMIC_ASM(set,	     char,  "orb %b1,%0",  "iq",  v); //wyc atomic_set_char
+ATOMIC_ASM(clear,    char,  "andb %b1,%0", "iq", ~v); //wyc atomic_clear_char
+ATOMIC_ASM(add,	     char,  "addb %b1,%0", "iq",  v); //wyc atomic_add_char
+ATOMIC_ASM(subtract, char,  "subb %b1,%0", "iq",  v); //wyc atomic_subtract_char
+
+ATOMIC_ASM(set,	     short, "orw %w1,%0",  "ir",  v); //wyc atomic_set_short
+ATOMIC_ASM(clear,    short, "andw %w1,%0", "ir", ~v); //wyc atomic_clear_short
+ATOMIC_ASM(add,	     short, "addw %w1,%0", "ir",  v); //wyc atomic_add_short
+ATOMIC_ASM(subtract, short, "subw %w1,%0", "ir",  v); //wyc atomic_subtract_short
+
+ATOMIC_ASM(set,	     int,   "orl %1,%0",   "ir",  v); //wyc atomic_set_int
+ATOMIC_ASM(clear,    int,   "andl %1,%0",  "ir", ~v); //wyc atomic_clear_int
+ATOMIC_ASM(add,	     int,   "addl %1,%0",  "ir",  v); //wyc atomic_add_int
+ATOMIC_ASM(subtract, int,   "subl %1,%0",  "ir",  v); //wyc atomic_subtract_int
+
+ATOMIC_ASM(set,	     long,  "orl %1,%0",   "ir",  v); //wyc atomic_set_long
+ATOMIC_ASM(clear,    long,  "andl %1,%0",  "ir", ~v); //wyc atomic_clear_long
+ATOMIC_ASM(add,	     long,  "addl %1,%0",  "ir",  v); //wyc atomic_add_long
+ATOMIC_ASM(subtract, long,  "subl %1,%0",  "ir",  v); //wyc atomic_subtract_long
+#endif
 
 #define	ATOMIC_LOADSTORE(TYPE)				\
 	ATOMIC_LOAD(TYPE);				\

@@ -2508,7 +2508,7 @@ init386(int first)
 		pmap_kenter(pa + KERNBASE, pa);
 	dpcpu_init((void *)(first + KERNBASE), 0);
 	first += DPCPU_SIZE;
-#if 0 //wyc
+#if 0 //wyc original
 	PCPU_SET(prvspace, pc);
 	PCPU_SET(curthread, &thread0);
 #else
@@ -2536,7 +2536,7 @@ init386(int first)
 
 	_default_ldt = GSEL(GLDT_SEL, SEL_KPL);
 	lldt(_default_ldt);
-#if 0 //wyc
+#if 0 //wyc original
 	PCPU_SET(currentldt, _default_ldt);
 #else
 	pc->pc_currentldt = _default_ldt;
@@ -2650,7 +2650,7 @@ init386(int first)
 	dblfault_tss.tss_fs = GSEL(GPRIV_SEL, SEL_KPL);
 	dblfault_tss.tss_cs = GSEL(GCODE_SEL, SEL_KPL);
 	dblfault_tss.tss_ldt = GSEL(GLDT_SEL, SEL_KPL);
-#if 0 //wyc
+#if 0 //wyc original
 	/* pointer to selector slot for %fs/%gs */
 	PCPU_SET(fsgs_gdt, &gdt[GUFS_SEL].sd);
 
@@ -2744,7 +2744,7 @@ init386(int first)
 		    1);
 		xhdr->xstate_bv = xsave_mask;
 	}
-#if 0 //wyc
+#if 0 //wyc original
 	PCPU_SET(curpcb, thread0.td_pcb);
 	/* Move esp0 in the tss to its final place. */
 	/* Note: -16 is so we can grow the trapframe if we came from vm86 */
