@@ -140,6 +140,7 @@ acpi_wakeup_ap(struct acpi_softc *sc, int cpu)
 	return (0);		/* return FAILURE */
 }
 
+#if !defined(WYC) //wyc to make SI work since it is also defined in mp_machdep.c
 #define	WARMBOOT_TARGET		0
 #define	WARMBOOT_OFF		(KERNBASE + 0x0467)
 #define	WARMBOOT_SEG		(KERNBASE + 0x0469)
@@ -148,6 +149,7 @@ acpi_wakeup_ap(struct acpi_softc *sc, int cpu)
 #define	CMOS_DATA		(0x71)
 #define	BIOS_RESET		(0x0f)
 #define	BIOS_WARM		(0x0a)
+#endif
 
 static void
 acpi_wakeup_cpus(struct acpi_softc *sc)

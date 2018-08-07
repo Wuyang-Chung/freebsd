@@ -106,7 +106,7 @@ thr_create_initthr(struct thread *td, void *thunk)
 
 	/* Copy out the child tid. */
 	args = thunk;
-	if (args->tid != NULL && suword_lwpid(args->tid, td->td_tid))
+	if (args->tid != NULL && suword_lwpid(args->tid, td->td_tid) != ESUCCESS)
 		return (EFAULT);
 
 	return (set_mcontext(td, &args->ctx.uc_mcontext));
@@ -161,7 +161,7 @@ sys_thr_new(
 static int
 thr_new_initthr(struct thread *td, void *thunk)
 {
-	stack_t stack;
+	//wyc stack_t stack;
 	struct thr_param *param;
 
 	/*
@@ -172,17 +172,19 @@ thr_new_initthr(struct thread *td, void *thunk)
 	 * memory is freed before parent thread can access it.
 	 */
 	param = thunk;
-	if ((param->child_tid != NULL &&
-	    suword_lwpid(param->child_tid, td->td_tid)) ||
-	    (param->parent_tid != NULL &&
-	    suword_lwpid(param->parent_tid, td->td_tid)))
+	if (param->child_tid != NULL &&
+	    suword_lwpid(param->child_tid, td->td_tid) != ESUCCESS)
+		return (EFAULT);
+	if (param->parent_tid != NULL &&
+	    suword_lwpid(param->parent_tid, td->td_tid) != ESUCCESS)
 		return (EFAULT);
 
 	/* Set up our machine context. */
-	stack.ss_sp = param->stack_base;
-	stack.ss_size = param->stack_size;
+	//wyc stack.ss_sp = param->stack_base;
+	//wyc stack.ss_size = param->stack_size;
 	/* Set upcall address to user thread entry function. */
-	cpu_set_upcall(td, param->start_func, param->arg, &stack);
+	cpu_set_upcall(td, param->start_func, param->arg, 
+	    param->stack_base, param->stack_size); //wyc
 	/* Setup user TLS address and TLS pointer register. */
 	return (cpu_set_user_tls(td, param->tls_base));
 }
@@ -256,6 +258,7 @@ thread_create(
 	newtd->td_sleeptimo = 0;
 	newtd->td_vslock_sz = 0;
 	bzero(&newtd->td_si, sizeof(newtd->td_si));
+
 	bcopy(&td->td_startcopy, &newtd->td_startcopy,
 	    __rangeof(struct thread, td_startcopy, td_endcopy));
 	newtd->td_sa = td->td_sa;
@@ -269,7 +272,7 @@ thread_create(
 #else
 	error = initialize_thread(newtd, thunk);
 #endif
-	if (error != 0) {
+	if (error != ESUCCESS) {
 		thread_cow_free(newtd);
 		thread_free(newtd);
 		goto fail;
@@ -310,7 +313,7 @@ thread_create(
 	sched_add(newtd, SRQ_BORING);
 	thread_unlock(newtd);
 
-	return (0);
+	return (ESUCCESS);
 
 fail:
 #ifdef RACCT
@@ -334,6 +337,12 @@ sys_thr_self(struct thread *td, struct thr_self_args *uap)
 		return (EFAULT);
 	return (0);
 }
+
+#if defined(WYC)
+struct thr_exit_args {
+	long *state;
+};
+#endif
 
 int
 sys_thr_exit(struct thread *td, struct thr_exit_args *uap)

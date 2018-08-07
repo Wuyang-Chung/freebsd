@@ -37,7 +37,7 @@
 
 int foo(void *);
 
-int foo(void * __attribute__((__unused__)) arg)
+int foo(void *arg __unused)
 {
 
 	return 0;

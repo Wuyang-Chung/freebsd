@@ -213,7 +213,7 @@ extern struct pcpu *pcpup;
 #define	PCPU_PTR(member)	__PCPU_PTR(pc_ ## member)
 #define	PCPU_SET(member, val)	__PCPU_SET(pc_ ## member, val)
 
-#define	OFFSETOF_CURTHREAD	0
+#define	OFFSETOF_CURTHREAD	0 //wyc cannot use __offsetof because struct pcpu is not defined in this file
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnull-dereference"

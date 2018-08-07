@@ -357,7 +357,11 @@ struct thread {
 
 struct thread0_storage {
 	struct thread t0st_thread;
+#if defined(WYC)
+	struct td_sched sched;
+#else
 	uint64_t t0st_sched[10];
+#endif
 };
 
 struct mtx *thread_lock_block(struct thread *);
@@ -1078,7 +1082,7 @@ void	cpu_fork(struct thread *, struct proc *, struct thread *, int);
 void	cpu_fork_kthread_handler(struct thread *, void (*)(void *), void *);
 void	cpu_set_syscall_retval(struct thread *, int);
 void	cpu_set_upcall(struct thread *, void (*)(void *), void *,
-	    stack_t *);
+	    char *stack_base, size_t stack_size); //wyc
 int	cpu_set_user_tls(struct thread *, void *tls_base);
 void	cpu_thread_alloc(struct thread *);
 void	cpu_thread_clean(struct thread *);

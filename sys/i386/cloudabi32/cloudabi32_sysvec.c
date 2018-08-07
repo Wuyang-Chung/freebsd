@@ -153,15 +153,16 @@ int
 cloudabi32_thread_setregs(struct thread *td,
     const cloudabi32_threadattr_t *attr, uint32_t tcb)
 {
-	stack_t stack;
+	//wyc stack_t stack;
 	uint32_t args[3];
 	void *frameptr;
 	int error;
 
 	/* Perform standard register initialization. */
-	stack.ss_sp = TO_PTR(attr->stack);
-	stack.ss_size = attr->stack_len - sizeof(args);
-	cpu_set_upcall(td, TO_PTR(attr->entry_point), NULL, &stack);
+	//wyc stack.ss_sp = TO_PTR(attr->stack);
+	//wyc stack.ss_size = attr->stack_len - sizeof(args);
+	cpu_set_upcall(td, TO_PTR(attr->entry_point), NULL,
+	    TO_PTR(attr->stack), attr->stack_len - sizeof(args));
 
 	/*
 	 * Copy the arguments for the thread entry point onto the stack

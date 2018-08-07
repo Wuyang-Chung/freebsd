@@ -503,8 +503,11 @@ cpu_copy_thread(struct thread *td, struct thread *td0)
  * the entry function with the given argument.
  */
 void
-cpu_set_upcall(struct thread *td, void (*entry)(void *), void *arg,
-    stack_t *stack)
+cpu_set_upcall(
+    struct thread *td, 
+    void (*entry)(void *), void *arg,
+    char *stack_base,
+    size_t stack_size)
 {
 
 	/* 
@@ -522,7 +525,7 @@ cpu_set_upcall(struct thread *td, void (*entry)(void *), void *arg,
 	 */
 	td->td_frame->tf_ebp = 0; 
 	td->td_frame->tf_esp =
-	    (((int)stack->ss_sp + stack->ss_size - 4) & ~0x0f) - 4;
+	    (((int)stack_base + stack_size - 4) & ~0x0f) - 4;
 	td->td_frame->tf_eip = (int)entry;
 
 	/* Return address sentinel value to stop stack unwinding. */

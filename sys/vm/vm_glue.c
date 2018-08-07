@@ -576,7 +576,7 @@ vm_forkproc(
 		VM_WAIT;
 	}
 
-	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork
+	if ((flags & RFMEM) == 0 && (flags & RFSAS) == 0) { //wyc FALSE for vfork
 		p2->p_vmspace = vm2;
 		if (p1->p_vmspace->vm_shm)
 			shmfork(p1, p2);

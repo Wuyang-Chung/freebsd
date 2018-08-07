@@ -285,6 +285,8 @@ long	fuword(volatile const void *base);
 int	fuword16(volatile const void *base);
 int32_t	fuword32(volatile const void *base);
 int64_t	fuword64(volatile const void *base);
+
+//wyc functions below return 0 for success
 int	fueword(volatile const void *base, long *val); //wyc fetch user with error check
 int	fueword32(volatile const void *base, int32_t *val);
 int	fueword64(volatile const void *base, int64_t *val);
@@ -293,6 +295,7 @@ int	suword(volatile void *base, long word);
 int	suword16(volatile void *base, int word);
 int	suword32(volatile void *base, int32_t word);
 int	suword64(volatile void *base, int64_t word);
+
 uint32_t casuword32(volatile uint32_t *base, uint32_t oldval, uint32_t newval);
 u_long	casuword(volatile u_long *p, u_long oldval, u_long newval);
 int	casueword32(volatile uint32_t *base, uint32_t oldval, uint32_t *oldvalp,

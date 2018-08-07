@@ -411,7 +411,8 @@ fail:
 #endif
 
 static void
-do_fork(struct thread *td, struct fork_req *fr, struct proc *p2, struct thread *td2,
+do_fork(struct thread *td, struct fork_req *fr,
+    struct proc *p2, struct thread *td2,
     struct vmspace *vm2,	//wyc NULL for vfork
     struct file *fp_procdesc)	//wyc NULL for vfork
 //__attribute__((optnone))	//wyc

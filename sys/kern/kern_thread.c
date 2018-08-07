@@ -973,7 +973,7 @@ thread_suspend_check(int return_instead)
 			 * because it can only be set to our address by us.
 			 */
 			if (p->p_singlethread == td)
-				return (0);	/* Exempt from stopping. */
+				return (ESUCCESS);	/* Exempt from stopping. */
 		}
 		if ((p->p_flag & P_SINGLE_EXIT) && return_instead)
 			return (EINTR);
@@ -992,7 +992,7 @@ thread_suspend_check(int return_instead)
 			KASSERT((td->td_flags & (TDF_SEINTR | TDF_SERESTART)) !=
 			    (TDF_SEINTR | TDF_SERESTART),
 			    ("both TDF_SEINTR and TDF_SERESTART"));
-			return (TD_SBDRY_INTR(td) ? TD_SBDRY_ERRNO(td) : 0);
+			return (TD_SBDRY_INTR(td) ? TD_SBDRY_ERRNO(td) : ESUCCESS);
 		}
 
 		/*
@@ -1042,7 +1042,7 @@ thread_suspend_check(int return_instead)
 		thread_unlock(td);
 		PROC_LOCK(p);
 	}
-	return (0);
+	return (ESUCCESS);
 }
 
 void
