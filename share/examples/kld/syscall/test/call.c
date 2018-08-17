@@ -50,11 +50,22 @@ main(int argc __unused, char **argv __unused)
 	struct module_stat stat;
 
 	stat.version = sizeof(stat);
-	if ((modid = modfind("sys/syscall")) == -1)
+	if ((modid = modfind("sys/sinit")) == -1)
 		err(1, "modfind");
 	if (modstat(modid, &stat) != 0)
 		err(1, "modstat");
 	syscall_num = stat.data.intval;
-	return syscall (syscall_num, foo, NULL);
+	syscall (syscall_num); //, foo, NULL);
+
+
+	stat.version = sizeof(stat);
+	if ((modid = modfind("sys/sfork")) == -1)
+		err(1, "modfind");
+	if (modstat(modid, &stat) != 0)
+		err(1, "modstat");
+	syscall_num = stat.data.intval;
+	syscall (syscall_num); //, foo, NULL);
+
+	return 0;
 }
 

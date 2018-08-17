@@ -46,6 +46,10 @@ struct sfork_arg {
 static int
 sfork(struct thread *td, void *arg)
 {
+#if 1
+	printf("sfork: Hello\n");
+	return (0);
+#else
 	struct sfork_arg *uap = arg;
 	struct fork_req fr;
 	int error, pid;
@@ -61,35 +65,36 @@ sfork(struct thread *td, void *arg)
 		td->td_retval[1] = 0;
 	}
 	return (error);
+#endif
 }
 
 /*
  * The `sysent' for the new syscall
  */
 static struct sysent sfork_sysent = {
-	2,			/* sy_narg */
+	0, //2,			/* sy_narg */
 	sfork			/* sy_call */
 };
 
 /*
  * The offset in sysent where the syscall is allocated.
  */
-static int offset = NO_SYSCALL;
+static int sfork_offset = NO_SYSCALL;
 
 /*
  * The function called at load/unload.
  */
 static int
-load(struct module *module, int cmd, void *arg)
+sfork_load(struct module *module, int cmd, void *arg)
 {
 	int error = 0;
 
 	switch (cmd) {
 	case MOD_LOAD :
-		printf("syscall loaded at %d\n", offset);
+		printf("syscall loaded at %d\n", sfork_offset);
 		break;
 	case MOD_UNLOAD :
-		printf("syscall unloaded from %d\n", offset);
+		printf("syscall unloaded from %d\n", sfork_offset);
 		break;
 	default :
 		error = EOPNOTSUPP;
@@ -98,4 +103,56 @@ load(struct module *module, int cmd, void *arg)
 	return (error);
 }
 
-SYSCALL_MODULE(syscall, &offset, &sfork_sysent, load, NULL);
+SYSCALL_MODULE(sfork, &sfork_offset, &sfork_sysent, sfork_load, NULL);
+
+struct sinit_arg {
+	int (*func)(void *);
+	void *arg;
+};
+
+/*
+ * The function for implementing sinit
+ */
+static int
+sinit(struct thread *td, void *arg)
+{
+	printf("sinit: Hello\n");
+	return (0);
+}
+
+/*
+ * The `sysent' for the new syscall
+ */
+static struct sysent sinit_sysent = {
+	0,			/* sy_narg */
+	sinit			/* sy_call */
+};
+
+/*
+ * The offset in sysent where the syscall is allocated.
+ */
+static int sinit_offset = NO_SYSCALL;
+
+/*
+ * The function called at load/unload.
+ */
+static int
+sinit_load(struct module *module, int cmd, void *arg)
+{
+	int error = 0;
+
+	switch (cmd) {
+	case MOD_LOAD :
+		printf("syscall loaded at %d\n", sinit_offset);
+		break;
+	case MOD_UNLOAD :
+		printf("syscall unloaded from %d\n", sinit_offset);
+		break;
+	default :
+		error = EOPNOTSUPP;
+		break;
+	}
+	return (error);
+}
+
+SYSCALL_MODULE(sinit, &sinit_offset, &sinit_sysent, sinit_load, NULL);
