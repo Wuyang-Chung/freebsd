@@ -272,7 +272,7 @@ thread_create(
 #else
 	error = initialize_thread(newtd, thunk);
 #endif
-	if (error != ESUCCESS) {
+	if (error) {
 		thread_cow_free(newtd);
 		thread_free(newtd);
 		goto fail;

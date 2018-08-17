@@ -2425,7 +2425,7 @@ sysctl_vm_swap_info(SYSCTL_HANDLER_ARGS)
 	if (arg2 != 1)			/* name length */
 		return (EINVAL);
 	error = swap_dev_info(*(int *)arg1, &xs, NULL, 0);
-	if (error != 0)
+	if (error != ESUCCESS)
 		return (error);
 	error = SYSCTL_OUT(req, &xs, sizeof(xs));
 	return (error);

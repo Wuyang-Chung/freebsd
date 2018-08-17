@@ -525,7 +525,8 @@ cpu_set_upcall(
 	 */
 	td->td_frame->tf_ebp = 0; 
 	td->td_frame->tf_esp =
-	    (((int)stack_base + stack_size - 4) & ~0x0f) - 4;
+	    //wyc (((int)stack_base + stack_size - 4) & ~0x0f) - 4;
+	    (((int)stack_base + stack_size) & ~0x03) - 8; //wyc
 	td->td_frame->tf_eip = (int)entry;
 
 	/* Return address sentinel value to stop stack unwinding. */
@@ -540,7 +541,6 @@ int
 cpu_set_user_tls(struct thread *td, void *tls_base)
 {
 	struct segment_descriptor sd;
-	uint32_t base;
 
 	/*
 	 * Construct a descriptor and store it in the pcb for
@@ -548,7 +548,8 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	 * so that the load of tf_fs into %fs will activate it
 	 * at return to userland.
 	 */
-	base = (uint32_t)tls_base;
+	fill_based_sd(&sd, (uint32_t)tls_base);
+#if 0 //wyc ori
 	USD_SETBASE(&sd, base);
 	sd.sd_lolimit = 0xffff;	/* 4GB limit, wraps around */
 	sd.sd_hilimit = 0xf;
@@ -558,6 +559,7 @@ cpu_set_user_tls(struct thread *td, void *tls_base)
 	sd.sd_xx    = 0;
 	sd.sd_def32 = 1;
 	sd.sd_gran  = 1;
+#endif
 	critical_enter();
 	/* set %gs */
 	td->td_pcb->pcb_gsd = sd;
