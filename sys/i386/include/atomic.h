@@ -619,7 +619,7 @@ atomic_subtract_64(volatile uint64_t *p, uint64_t v)
 #endif /* KLD_MODULE || !__GNUCLIKE_ASM */
 
 #if defined(WYC)
-//wyc the functions below are define in #else
+//wyc the functions below are defined in #else
 static __inline void atomic_set_char(volatile u_char *p, u_char v);
 static __inline void atomic_clear_char(volatile u_char *p, u_char v);
 static __inline void atomic_add_char(volatile u_char *p, u_char v);

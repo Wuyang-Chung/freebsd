@@ -159,13 +159,12 @@ ogetpagesize(struct thread *td, struct getpagesize_args *uap)
  */
 #if defined(WYC)
 struct mmap_args {
-	void *addr;
-	size_t len;
-	int prot;
-	int flags;
-	int fd;
-	long pad;
-	off_t pos;
+	caddr_t	addr;	// it is a hint if not 0
+	size_t	len;
+	int	prot;	// PROT_NONE, PROT_READ, PROT_WRITE, PROT_EXEC
+	int	flags;
+	int	fd;	// object
+	off_t	pos;	// offset within object. should be aligned at page boundary
 };
 #endif
 
@@ -317,7 +316,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		 * length 0.  For modern binaries, this function
 		 * returns an error earlier.
 		 */
-		error = 0;
+		error = ESUCCESS;
 	} else if ((flags & MAP_GUARD) != 0) {
 		error = vm_mmap_object(&vms->vm_map, &addr, size, VM_PROT_NONE,
 		    VM_PROT_NONE, flags, NULL, pos, FALSE, td);
@@ -346,7 +345,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		if (prot & PROT_EXEC)
 			cap_rights_set(&rights, CAP_MMAP_X);
 		error = fget_mmap(td, fd, &rights, &cap_maxprot, &fp);
-		if (error != 0)
+		if (error != ESUCCESS)
 			goto done;
 		if ((flags & (MAP_SHARED | MAP_PRIVATE)) == 0 &&
 		    td->td_proc->p_osrel >= P_OSREL_MAP_FSTRICT) {
@@ -1434,8 +1433,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
     boolean_t writecounted, struct thread *td)
 {
 	boolean_t curmap, fitit;
-	vm_offset_t max_addr;
-	int docow, error, findspace, rv;
+	int docow, error, rv;
 
 	curmap = map == &td->td_proc->p_vmspace->vm_map;
 	if (curmap) {
@@ -1519,6 +1517,9 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		docow |= MAP_CREATE_GUARD;
 
 	if (fitit) {
+		vm_offset_t max_addr;
+		int findspace;
+
 		if ((flags & MAP_ALIGNMENT_MASK) == MAP_ALIGNED_SUPER)
 			findspace = VMFS_SUPER_SPACE;
 		else if ((flags & MAP_ALIGNMENT_MASK) != 0)
@@ -1529,13 +1530,17 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		max_addr = 0;
 #ifdef MAP_32BIT
 		if ((flags & MAP_32BIT) != 0)
-			max_addr = MAP_32BIT_MAX_ADDR;
+			max_addr = MAP_32BIT_MAX_ADDR; // 2G
 #endif
 		if (curmap) {
+			vm_offset_t min_addr;
+
+			min_addr = round_page(
+			    (vm_offset_t)td->td_proc->p_vmspace->vm_daddr +
+			    lim_max(td, RLIMIT_DATA));
 			rv = vm_map_find_min(map, object, foff, addr, size,
-			    round_page((vm_offset_t)td->td_proc->p_vmspace->
-			    vm_daddr + lim_max(td, RLIMIT_DATA)), max_addr,
-			    findspace, prot, maxprot, docow);
+			    min_addr,
+			    max_addr, findspace, prot, maxprot, docow);
 		} else {
 			rv = vm_map_find(map, object, foff, addr, size,
 			    max_addr, findspace, prot, maxprot, docow);

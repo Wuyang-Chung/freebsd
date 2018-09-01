@@ -60,6 +60,20 @@ kproc_start(const void *udata)
 	const struct kproc_desc	*kp = udata;
 	int error;
 
+#if defined(WYC)
+		// these kernel processes will be created by SYSINIT(,,,kproc_start,);
+		// kp->func will be one of the following functions 
+		buf_daemon();	// bufdaemon
+		bufspace_daemon();	// bufspacedaemo
+		sched_sync();	// syncer
+		vm_daemon();	// swap-out daemon
+		vm_pageout();	// pagedaemon
+		vnlru_proc();	// vnlru
+		poll_idle();	// idlepoll
+		schedcpu_thread();	// sched_4bsd.c
+		random_kthread();	// rand_harvestq
+		ald_daemon();	// ALQ Daemon
+#endif
 	error = kproc_create((void (*)(void *))kp->func, NULL,
 		    kp->global_procpp, 0, 0, "%s", kp->arg0);
 	if (error)

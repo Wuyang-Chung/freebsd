@@ -984,11 +984,7 @@ fork1(struct thread *td, struct fork_req *fr)
 		}
 	}
 
-	if (flags & RFSAS) { //wyc TRUE for sfork
-		vm2 = &vmsas;
-	} else if (flags & RFMEM) { //wyc TRUE for vfork
-		vm2 = NULL;
-	} else {
+	if ((flags & RFMEM) == 0) { //wyc FALSE for vfork and sfork
 		vm_ooffset_t mem_charged; //wyc
 
 		mem_charged = 0;
@@ -1008,7 +1004,8 @@ fork1(struct thread *td, struct fork_req *fr)
 			error = ENOMEM;
 			goto fail2;
 		}
-	}
+	} else
+		vm2 = NULL;
 
 	/*
 	 * XXX: This is ugly; when we copy resource usage, we need to bump

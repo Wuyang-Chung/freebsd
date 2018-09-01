@@ -173,7 +173,7 @@ __FBSDID("$FreeBSD$");
 #define PV_STAT(x)	do { } while (0)
 #endif
 
-#define	pa_index(pa)	((pa) >> PDRSHIFT)
+//wyc duplicate definition #define	pa_index(pa)	((pa) >> PDRSHIFT)
 #define	pa_to_pvh(pa)	(&pv_table[pa_index(pa)])
 
 /*

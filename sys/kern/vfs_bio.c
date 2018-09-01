@@ -3027,7 +3027,7 @@ buf_flush(struct vnode *vp, int target)
 }
 
 static void
-buf_daemon()
+buf_daemon(void)
 {
 	int lodirty;
 

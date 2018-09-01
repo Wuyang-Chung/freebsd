@@ -55,7 +55,7 @@ sfork(struct thread *td, void *arg)
 	int error, pid;
 
 	bzero(&fr, sizeof(fr));
-	fr.fr_flags = RFFDG | RFPROC | RFSAS;
+	fr.fr_flags = RFPROC | RFSAS | RFMEM;
 	fr.fr_pidp = &pid;
 	fr.fr_func = uap->func;
 	fr.fr_arg = uap->arg;
