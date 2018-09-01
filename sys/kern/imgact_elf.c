@@ -936,7 +936,8 @@ __CONCAT(exec_, __elfN(imgact))(
 				    UIO_SYSSPACE, IO_NODELOCKED, td->td_ucred,
 				    NOCRED, NULL, td);
 				if (error != ESUCCESS) {
-					uprintf("i/o error PT_INTERP\n");
+					uprintf("i/o error PT_INTERP %d\n",
+					    error);
 					goto ret;
 				}
 				interp_buf[interp_name_len] = '\0';

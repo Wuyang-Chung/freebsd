@@ -2885,33 +2885,21 @@ freebsd32_copyout_strings(struct image_params *imgp)
 	destp -= ARG_MAX - imgp->args->stringspace;
 	destp = rounddown2(destp, sizeof(uint32_t));
 
-	/*
-	 * If we have a valid auxargs ptr, prepare some room
-	 * on the stack.
-	 */
+	vectp = (uint32_t *)destp;
 	if (imgp->auxargs) {
 		/*
-		 * 'AT_COUNT*2' is size for the ELF Auxargs data. This is for
-		 * lower compatibility.
+		 * Allocate room on the stack for the ELF auxargs
+		 * array.  It has up to AT_COUNT entries.
 		 */
-		imgp->auxarg_size = (imgp->auxarg_size) ? imgp->auxarg_size
-			: (AT_COUNT * 2);
-		/*
-		 * The '+ 2' is for the null pointers at the end of each of
-		 * the arg and env vector sets,and imgp->auxarg_size is room
-		 * for argument of Runtime loader.
-		 */
-		vectp = (u_int32_t *) (destp - (imgp->args->argc +
-		    imgp->args->envc + 2 + imgp->auxarg_size + execpath_len) *
-		    sizeof(u_int32_t));
-	} else {
-		/*
-		 * The '+ 2' is for the null pointers at the end of each of
-		 * the arg and env vector sets
-		 */
-		vectp = (u_int32_t *)(destp - (imgp->args->argc +
-		    imgp->args->envc + 2) * sizeof(u_int32_t));
+		vectp -= howmany(AT_COUNT * sizeof(Elf32_Auxinfo),
+		    sizeof(*vectp));
 	}
+
+	/*
+	 * Allocate room for the argv[] and env vectors including the
+	 * terminating NULL pointers.
+	 */
+	vectp -= imgp->args->argc + 1 + imgp->args->envc + 1;
 
 	/*
 	 * vectp also becomes our initial stack base
@@ -3186,4 +3174,21 @@ freebsd32_ppoll(struct thread *td, struct freebsd32_ppoll_args *uap)
 		ssp = NULL;
 
 	return (kern_poll(td, uap->fds, uap->nfds, tsp, ssp));
+}
+
+int
+freebsd32_sched_rr_get_interval(struct thread *td,
+    struct freebsd32_sched_rr_get_interval_args *uap)
+{
+	struct timespec ts;
+	struct timespec32 ts32;
+	int error;
+
+	error = kern_sched_rr_get_interval(td, uap->pid, &ts);
+	if (error == 0) {
+		CP(ts, ts32, tv_sec);
+		CP(ts, ts32, tv_nsec);
+		error = copyout(&ts32, uap->interval, sizeof(ts32));
+	}
+	return (error);
 }
