@@ -1407,12 +1407,12 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	if (start < map->min_offset)
 		start = map->min_offset;
 	if (start + length > map->max_offset || start + length < start)
-		return (1);
+		return (KERN_INVALID_ADDRESS);
 
 	/* Empty tree means wide open address space. */
 	if (map->root == NULL) {
 		*addr = start;
-		return (0);
+		return (KERN_SUCCESS);
 	}
 
 	/*
@@ -1422,7 +1422,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	map->root = vm_map_entry_splay(start, map->root);
 	if (start + length <= map->root->start) {
 		*addr = start;
-		return (0);
+		return (KERN_SUCCESS);
 	}
 
 	/*
@@ -1433,13 +1433,13 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	st = (start > map->root->end) ? start : map->root->end;
 	if (length <= map->root->end + map->root->adj_free - st) {
 		*addr = st;
-		return (0);
+		return (KERN_SUCCESS);
 	}
 
 	/* With max_free, can immediately tell if no solution. */
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
-		return (1);
+		return (KERN_NO_SPACE);
 
 	/*
 	 * Search the right subtree in the order: left subtree, root,
@@ -1451,7 +1451,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 			entry = entry->left;
 		else if (entry->adj_free >= length) {
 			*addr = entry->end;
-			return (0);
+			return (KERN_SUCCESS);
 		} else
 			entry = entry->right;
 	}
@@ -1528,7 +1528,7 @@ again:
 	vm_map_lock(map);
 	do {
 		if (find_space != VMFS_NO_SPACE) {
-			if (vm_map_findspace(map, start, length, addr) ||
+			if (vm_map_findspace(map, start, length, addr) != KERN_SUCCESS ||
 			    (max_addr != 0 && *addr + length > max_addr)) {
 				vm_map_unlock(map);
 				if (find_space == VMFS_OPTIMAL_SPACE) {
@@ -2330,7 +2330,7 @@ vm_map_madvise(
 		}
 		vm_map_unlock_read(map);
 	}
-	return (0);
+	return (KERN_SUCCESS);
 }
 
 
@@ -3607,8 +3607,11 @@ SYSCTL_INT(_security_bsd, OID_AUTO, stack_guard_page, CTLFLAG_RWTUN,
     "Specifies the number of guard pages for a stack that grows");
 
 static int
-vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
-    vm_size_t growsize, vm_prot_t prot, vm_prot_t max, int cow)
+vm_map_stack_locked(
+    vm_map_t map,
+    vm_offset_t addrbos, //wyc bottom of stack
+    vm_size_t max_ssize, vm_size_t growsize,
+    vm_prot_t prot, vm_prot_t max, int cow)
 {
 	vm_map_entry_t new_entry, prev_entry;
 	vm_offset_t bot, gap_bot, gap_top, top;
@@ -3638,7 +3641,7 @@ vm_map_stack_locked(vm_map_t map, vm_offset_t addrbos, vm_size_t max_ssize,
 		init_ssize = max_ssize - sgp;
 
 	/* If addr is already mapped, no go */
-	if (vm_map_lookup_entry(map, addrbos, &prev_entry))
+	if (vm_map_lookup_entry(map, addrbos, &prev_entry) == TRUE)
 		return (KERN_NO_SPACE);
 
 	/*

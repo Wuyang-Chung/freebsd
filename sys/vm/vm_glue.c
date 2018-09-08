@@ -200,7 +200,7 @@ vslock(void *addr, size_t len)
 	    VM_MAP_WIRE_SYSTEM | VM_MAP_WIRE_NOHOLES);
 	if (error == KERN_SUCCESS) {
 		curthread->td_vslock_sz += len;
-		return (0);
+		return (ESUCCESS);
 	}
 
 	/*

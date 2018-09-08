@@ -644,7 +644,7 @@ sys_minherit(struct thread *td, struct minherit_args *uap)
 	switch (vm_map_inherit(&td->td_proc->p_vmspace->vm_map, addr,
 	    addr + size, inherit)) {
 	case KERN_SUCCESS:
-		return (0);
+		return (ESUCCESS);
 	case KERN_PROTECTION_FAILURE:
 		return (EACCES);
 	}
@@ -1087,7 +1087,7 @@ sys_mlockall(struct thread *td, struct mlockall_args *uap)
 		 */
 		error = vm_map_wire(map, vm_map_min(map), vm_map_max(map),
 		    VM_MAP_WIRE_USER|VM_MAP_WIRE_HOLESOK);
-		error = (error == KERN_SUCCESS ? 0 : EAGAIN);
+		error = (error == KERN_SUCCESS ? ESUCCESS : EAGAIN);
 	}
 #ifdef RACCT
 	if (racct_enable && error != KERN_SUCCESS) {
@@ -1438,7 +1438,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
     vm_prot_t maxprot, int flags, vm_object_t object, vm_ooffset_t foff,
     boolean_t writecounted, struct thread *td)
 {
-	boolean_t curmap, fitit;
+	boolean_t curmap, fixed;
 	int docow, error, rv;
 
 	curmap = map == &td->td_proc->p_vmspace->vm_map;
@@ -1484,12 +1484,12 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 		return (EINVAL);
 
 	if ((flags & MAP_FIXED) == 0) {
-		fitit = TRUE;
-		*addr = round_page(*addr);
+		fixed = FALSE;
+		*addr = round_page(*addr);	//wyc roundup
 	} else {
-		if (*addr != trunc_page(*addr))
+		if (*addr != trunc_page(*addr))	//wyc rounddown
 			return (EINVAL);
-		fitit = FALSE;
+		fixed = TRUE;
 	}
 
 	if (flags & MAP_ANON) {
@@ -1522,7 +1522,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 	if ((flags & MAP_GUARD) != 0)
 		docow |= MAP_CREATE_GUARD;
 
-	if (fitit) {
+	if (!fixed) {
 		vm_offset_t max_addr;
 		int findspace;
 

@@ -1008,7 +1008,7 @@ shm_map(struct file *fp, size_t size, off_t offset, void **memp)
 		    VM_MAP_WIRE_SYSTEM | VM_MAP_WIRE_NOHOLES);
 		if (rv == KERN_SUCCESS) {
 			*memp = (void *)(kva + ofs);
-			return (0);
+			return (ESUCCESS);
 		}
 		vm_map_remove(kernel_map, kva, kva + size);
 	} else

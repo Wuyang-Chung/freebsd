@@ -1010,7 +1010,7 @@ __CONCAT(exec_, __elfN(imgact))(
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
-	if (error != KERN_SUCCESS)
+	if (error != ESUCCESS) //wycgit
 		goto ret;
 
 	for (i = 0; i < hdr->e_phnum; i++) {
@@ -1029,7 +1029,7 @@ __CONCAT(exec_, __elfN(imgact))(
 			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc et_dyn_addr==0
 			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
 			    sv->sv_pagesize);
-			if (error != 0)
+			if (error != ESUCCESS)
 				goto ret;
 
 			/*

@@ -79,12 +79,12 @@ __FBSDID("$FreeBSD$");
  * The number of bits by which a physical address is shifted to obtain the
  * reservation number
  */
-#define	VM_LEVEL_0_SHIFT	(VM_LEVEL_0_ORDER + PAGE_SHIFT)
+#define	VM_LEVEL_0_SHIFT	(VM_LEVEL_0_ORDER + PAGE_SHIFT) //wyc 10+12 == 22
 
 /*
  * The size of a level 0 reservation in bytes
  */
-#define	VM_LEVEL_0_SIZE		(1 << VM_LEVEL_0_SHIFT)
+#define	VM_LEVEL_0_SIZE		(1 << VM_LEVEL_0_SHIFT) //wyc 1<<22 == 4M
 
 /*
  * Computes the index of the small page underlying the given (object, pindex)

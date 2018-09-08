@@ -397,7 +397,7 @@ pmap_bootstrap(vm_paddr_t firstaddr)
 	 */
 	virtual_avail = (vm_offset_t) KERNBASE + firstaddr;
 
-	virtual_end = VM_MAX_KERNEL_ADDRESS;
+	virtual_end = VM_MAX_KERNEL_ADDRESS; //wyc 4G - 4K
 
 	/*
 	 * Initialize the kernel pmap (which is statically allocated).
@@ -449,7 +449,7 @@ pmap_bootstrap(vm_paddr_t firstaddr)
 	mtx_init(&pc->pc_cmap_lock, "SYSMAPS", NULL, MTX_DEF);
 	SYSMAP(caddr_t, pc->pc_cmap_pte1, pc->pc_cmap_addr1, 1)
 	SYSMAP(caddr_t, pc->pc_cmap_pte2, pc->pc_cmap_addr2, 1)
-	SYSMAP(vm_offset_t, pte, pc->pc_qmap_addr, 1)
+	SYSMAP(vm_offset_t, /*wycgit pte*/unused, pc->pc_qmap_addr, 1)
 
 	SYSMAP(caddr_t, CMAP3, CADDR3, 1)
 
@@ -3497,6 +3497,7 @@ pmap_enter(pmap_t pmap, vm_offset_t va, vm_page_t m, vm_prot_t prot,
 	vm_page_t mpte, om;
 	boolean_t invlva, wired;
 
+	WYCASSERT(psind == 0); //wyc it's always 0 for i386 machine
 	va = trunc_page(va);
 	mpte = NULL;
 	wired = (flags & PMAP_ENTER_WIRED) != 0;
@@ -4129,7 +4130,7 @@ pmap_copy(pmap_t dst_pmap, pmap_t src_pmap, vm_offset_t dst_addr, vm_size_t len,
 	struct spglist free;
 	vm_offset_t addr;
 	vm_offset_t end_addr = src_addr + len;
-	vm_offset_t pdnxt;
+	vm_offset_t pdnxt; //wyc next page directory
 
 	if (dst_addr != src_addr)
 		return;
@@ -4164,7 +4165,7 @@ pmap_copy(pmap_t dst_pmap, pmap_t src_pmap, vm_offset_t dst_addr, vm_size_t len,
 		if (srcptepaddr == 0)
 			continue;
 			
-		if (srcptepaddr & PG_PS) {
+		if (srcptepaddr & PG_PS) { //wyc 4M page
 			if ((addr & PDRMASK) != 0 || addr + NBPDR > end_addr)
 				continue;
 			if (dst_pmap->pm_pdir[ptepindex] == 0 &&

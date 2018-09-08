@@ -134,7 +134,7 @@ typedef	char vm_memattr_t;	/* memory attribute codes */
  */
 struct vm_page;
 typedef struct vm_page *vm_page_t;
-#endif				/* _KERNEL */
+#endif	/* !_KERNEL */
 
 struct vm_reserv;
 typedef struct vm_reserv *vm_reserv_t;

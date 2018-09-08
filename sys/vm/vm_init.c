@@ -108,7 +108,7 @@ kva_import(void *unused, vmem_size_t size, int flags, vmem_addr_t *addrp)
 
 	*addrp = addr;
 
-	return (0);
+	return (ESUCCESS);
 }
 
 /*
@@ -261,7 +261,7 @@ again:
 #else
 	exec_map_entries = 2 * mp_ncpus + 4;
 #endif
-	exec_map_entry_size = round_page(PATH_MAX + ARG_MAX);
+	exec_map_entry_size = round_page(PATH_MAX + ARG_MAX); //wyc roundup
 	exec_map = kmem_suballoc(kernel_map, &minaddr, &maxaddr,
 	    exec_map_entries * exec_map_entry_size + 64 * PAGE_SIZE, FALSE);
 	pipe_map = kmem_suballoc(kernel_map, &minaddr, &maxaddr, maxpipekva,

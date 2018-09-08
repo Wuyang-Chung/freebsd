@@ -3164,6 +3164,18 @@ uma_zone_reserve_kva(uma_zone_t zone, int count)
 }
 
 /* See uma.h */
+/*
+ * Used to pre-fill a zone with some number of items
+ *
+ * Arguments:
+ *	zone    The zone to fill
+ *	itemcnt The number of items to reserve
+ *
+ * Returns:
+ *	Nothing
+ *
+ * NOTE: This is blocking and should only be done at startup
+ */
 void
 uma_prealloc(uma_zone_t zone, int items)
 {

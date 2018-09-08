@@ -193,9 +193,9 @@ typedef uint32_t pt_entry_t;
  * Address of current address space page table maps and directories.
  */
 #ifdef _KERNEL
-extern pt_entry_t PTmap[];
-extern pd_entry_t PTD[];
-extern pd_entry_t PTDpde[];
+extern pt_entry_t PTmap[];	//wyc == 3G-4M
+extern pd_entry_t PTD[];	//wyc == 3G-1M-4K
+extern pd_entry_t PTDpde[];	//wyc == 3G-1M-1K-4
 
 #if defined(PAE) || defined(PAE_TABLES)
 extern pdpt_entry_t *IdlePDPT;
