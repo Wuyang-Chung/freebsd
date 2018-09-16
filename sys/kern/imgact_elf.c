@@ -440,7 +440,7 @@ __elfN(map_partial)(
 	 * Create the page if it doesn't exist yet. Ignore errors.
 	 */
 	vm_map_fixed(map, NULL, 0, trunc_page(start), round_page(end) -
-	    trunc_page(start), VM_PROT_ALL, VM_PROT_ALL, MAP_CHECK_EXCL);
+	    trunc_page(start), VM_PROT_ALL, VM_PROT_ALL, COW_CHECK_EXCL);
 
 	/*
 	 * Find the page from the underlying object.
@@ -513,7 +513,7 @@ __elfN(map_insert)(
 		 * to copy the data.
 		 */
 		rv = vm_map_fixed(map, NULL, 0, start, end - start,
-		    prot | VM_PROT_WRITE, VM_PROT_ALL, MAP_CHECK_EXCL);
+		    prot | VM_PROT_WRITE, VM_PROT_ALL, COW_CHECK_EXCL);
 		if (rv != KERN_SUCCESS)
 			return (rv);
 		if (object == NULL)
@@ -536,7 +536,7 @@ __elfN(map_insert)(
 	} else {
 		vm_object_reference(object);
 		rv = vm_map_fixed(map, object, offset, start, end - start,
-		    prot, VM_PROT_ALL, cow | MAP_CHECK_EXCL);
+		    prot, VM_PROT_ALL, cow | COW_CHECK_EXCL);
 		if (rv != KERN_SUCCESS) {
 			locked = VOP_ISLOCKED(imgp->vp);
 			VOP_UNLOCK(imgp->vp, 0);
@@ -609,8 +609,8 @@ __elfN(load_section)(
 
 	if (map_len != 0) {
 		/* cow flags: don't dump readonly sections in core */
-		cow = MAP_COPY_ON_WRITE | MAP_PREFAULT |
-		    (prot & VM_PROT_WRITE ? 0 : MAP_DISABLE_COREDUMP);
+		cow = COW_COPY_ON_WRITE | COW_PREFAULT |
+		    (prot & VM_PROT_WRITE ? 0 : COW_DISABLE_COREDUMP);
 #if defined(WYC)
 		rv = elf32_map_insert(
 #else

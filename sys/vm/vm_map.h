@@ -183,8 +183,8 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  */
 struct vm_map {
 	struct vm_map_entry header;	/* List of entries */
-#define	min_offset	header.end	/* (c) */
-#define	max_offset	header.start	/* (c) */
+#define	min_offset	header.end	/* (c) */ //wyc ==0
+#define	max_offset	header.start	/* (c) */ //wyc ==3G-4M
 	struct sx lock;			/* Lock for map data */
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
@@ -213,13 +213,13 @@ struct vm_map {
 static __inline vm_offset_t
 vm_map_max(const struct vm_map *map)
 {
-	return (map->max_offset);
+	return (map->max_offset); //wyc 3G-4M
 }
 
 static __inline vm_offset_t
 vm_map_min(const struct vm_map *map)
 {
-	return (map->min_offset);
+	return (map->min_offset); //wyc 0
 }
 
 static __inline pmap_t
@@ -322,23 +322,24 @@ long vmspace_resident_count(struct vmspace *vmspace);
 /*
  * Copy-on-write flags for vm_map operations
  */
-#define MAP_INHERIT_SHARE	0x0001
-#define MAP_COPY_ON_WRITE	0x0002
-#define MAP_NOFAULT		0x0004	//wyc The mapping should not generate page	faults
-#define MAP_PREFAULT		0x0008
-#define MAP_PREFAULT_PARTIAL	0x0010
-#define MAP_DISABLE_SYNCER	0x0020
-#define	MAP_CHECK_EXCL		0x0040
-#define	MAP_CREATE_GUARD	0x0080
-#define MAP_DISABLE_COREDUMP	0x0100
-#define MAP_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
-#define	MAP_VN_WRITECOUNT	0x0400
-#define	MAP_STACK_GROWS_DOWN	0x1000	//wyc always DOWN
-#define	MAP_STACK_GROWS_UP	0x2000	//wyc never UP
-#define	MAP_ACC_CHARGED		0x4000
-#define	MAP_ACC_NO_CHARGE	0x8000
-#define	MAP_CREATE_STACK_GAP_UP	0x10000	//wyc never UP
-#define	MAP_CREATE_STACK_GAP_DN	0x20000	//wyc always DN
+//wyc change the prefix from MAP to COW
+#define COW_INHERIT_SHARE	0x0001
+#define COW_COPY_ON_WRITE	0x0002
+#define COW_NOFAULT		0x0004	//wyc The mapping should not generate page	faults
+#define COW_PREFAULT		0x0008
+#define COW_PREFAULT_PARTIAL	0x0010
+#define COW_DISABLE_SYNCER	0x0020
+#define	COW_CHECK_EXCL		0x0040
+#define	COW_CREATE_GUARD	0x0080
+#define COW_DISABLE_COREDUMP	0x0100
+#define COW_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
+#define	COW_VN_WRITECOUNT	0x0400
+#define	COW_STACK_GROWS_DOWN	0x1000	//wyc always DOWN
+#define	COW_STACK_GROWS_UP	0x2000	//wyc never UP
+#define	COW_ACC_CHARGED		0x4000
+#define	COW_ACC_NO_CHARGE	0x8000
+#define	COW_CREATE_STACK_GAP_UP	0x10000	//wyc never UP
+#define	COW_CREATE_STACK_GAP_DN	0x20000	//wyc always DN
 
 /*
  * vm_fault option flags

@@ -183,7 +183,7 @@ sys_mmap(struct thread *td, struct mmap_args *uap)
 
 int
 kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
-    int fd, off_t pos)
+    int fd, off_t foff)
 {
 	struct vmspace *vms;
 	struct file *fp;
@@ -208,17 +208,17 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 	 * Mapping of length 0 is only allowed for old binaries.
 	 * Anonymous mapping shall specify -1 as filedescriptor and
 	 * zero position for new code. Be nice to ancient a.out
-	 * binaries and correct pos for anonymous mapping, since old
+	 * binaries and correct foff for anonymous mapping, since old
 	 * ld.so sometimes issues anonymous map requests with non-zero
-	 * pos.
+	 * foff.
 	 */
 	if (!SV_CURPROC_FLAG(SV_AOUT)) {
 		if ((size == 0 && curproc->p_osrel >= P_OSREL_MAP_ANON) ||
-		    ((flags & MAP_ANON) != 0 && (fd != -1 || pos != 0)))
+		    ((flags & MAP_ANON) != 0 && (fd != -1 || foff != 0)))
 			return (EINVAL);
 	} else {
 		if ((flags & MAP_ANON) != 0)
-			pos = 0;
+			foff = 0;
 	}
 
 	if (flags & MAP_STACK) {
@@ -226,7 +226,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		    ((prot & (PROT_READ | PROT_WRITE)) != (PROT_READ | PROT_WRITE)))
 			return (EINVAL);
 		flags |= MAP_ANON;
-		pos = 0;
+		foff = 0;
 	}
 	if ((flags & ~(MAP_SHARED | MAP_PRIVATE | MAP_FIXED | MAP_HASSEMAPHORE |
 	    MAP_STACK | MAP_NOSYNC | MAP_ANON | MAP_EXCL | MAP_NOCORE |
@@ -244,7 +244,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 	    (prot & ~(PROT_READ | PROT_WRITE | PROT_EXEC)) != 0)
 		return (EINVAL);
 	if ((flags & MAP_GUARD) != 0 && (prot != PROT_NONE || fd != -1 ||
-	    pos != 0 || (flags & (MAP_SHARED | MAP_PRIVATE | MAP_PREFAULT |
+	    foff != 0 || (flags & (MAP_SHARED | MAP_PRIVATE | COW_PREFAULT |
 	    MAP_PREFAULT_READ | MAP_ANON | MAP_STACK)) != 0))
 		return (EINVAL);
 
@@ -259,8 +259,8 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 	 * Align the file position to a page boundary,
 	 * and save its page offset component.
 	 */
-	pageoff = (pos & PAGE_MASK);
-	pos -= pageoff;
+	pageoff = (foff & PAGE_MASK);
+	foff -= pageoff;
 
 	/* Adjust size for rounding (on both ends). */
 	size += pageoff;			/* low end... */
@@ -323,18 +323,18 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		 */
 		error = ESUCCESS;
 	} else if ((flags & MAP_GUARD) != 0) {
-		WYCASSERT(pos == 0);
+		WYCASSERT(foff == 0);
 		error = vm_mmap_object(&vms->vm_map, &addr, size, VM_PROT_NONE,
-		    VM_PROT_NONE, flags, NULL, pos, FALSE, td);
+		    VM_PROT_NONE, flags, NULL, foff, FALSE, td);
 	} else if ((flags & MAP_ANON) != 0) {
 		/*
 		 * Mapping blank space is trivial.
 		 *
 		 * This relies on VM_PROT_* matching PROT_*.
 		 */
-		WYCASSERT(pos == 0);
+		WYCASSERT(foff == 0);
 		error = vm_mmap_object(&vms->vm_map, &addr, size, prot,
-		    VM_PROT_ALL, flags, NULL, pos, FALSE, td);
+		    VM_PROT_ALL, flags, NULL, foff, FALSE, td);
 	} else {
 		/*
 		 * Mapping file, get fp for validation and don't let the
@@ -367,7 +367,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		error = fo_mmap
 #endif
 		    (fp, &vms->vm_map, &addr, size, prot,
-		    cap_maxprot, flags, pos, td);
+		    cap_maxprot, flags, foff, td);
 	}
 
 	if (error == ESUCCESS)
@@ -1474,7 +1474,7 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 			}
 			error = racct_set(td->td_proc, RACCT_MEMLOCK,
 			    ptoa(pmap_wired_count(map->pmap)) + size);
-			if (error != 0) {
+			if (error != ESUCCESS) {
 				racct_set_force(td->td_proc, RACCT_VMEM,
 				    map->size);
 				PROC_UNLOCK(td->td_proc);
@@ -1509,30 +1509,30 @@ vm_mmap_object(vm_map_t map, vm_offset_t *addr, vm_size_t size, vm_prot_t prot,
 			return (EINVAL);
 		docow = 0;
 	} else if (flags & MAP_PREFAULT_READ)
-		docow = MAP_PREFAULT;
+		docow = COW_PREFAULT;
 	else
-		docow = MAP_PREFAULT_PARTIAL;
+		docow = COW_PREFAULT_PARTIAL;
 
 	if ((flags & (MAP_ANON|MAP_SHARED)) == 0)
-		docow |= MAP_COPY_ON_WRITE;
+		docow |= COW_COPY_ON_WRITE;
 	if (flags & MAP_NOSYNC)
-		docow |= MAP_DISABLE_SYNCER;
+		docow |= COW_DISABLE_SYNCER;
 	if (flags & MAP_NOCORE)
-		docow |= MAP_DISABLE_COREDUMP;
+		docow |= COW_DISABLE_COREDUMP;
 	/* Shared memory is also shared with children. */
 	if (flags & MAP_SHARED)
-		docow |= MAP_INHERIT_SHARE;
+		docow |= COW_INHERIT_SHARE;
 	if (writecounted)
-		docow |= MAP_VN_WRITECOUNT;
+		docow |= COW_VN_WRITECOUNT;
 	if (flags & MAP_STACK) {
 		if (object != NULL)
 			return (EINVAL);
-		docow |= MAP_STACK_GROWS_DOWN;
+		docow |= COW_STACK_GROWS_DOWN;
 	}
 	if ((flags & MAP_EXCL) != 0)
-		docow |= MAP_CHECK_EXCL;
+		docow |= COW_CHECK_EXCL;
 	if ((flags & MAP_GUARD) != 0)
-		docow |= MAP_CREATE_GUARD;
+		docow |= COW_CREATE_GUARD;
 
 	if (!fixed) {
 		vm_offset_t max_addr;
