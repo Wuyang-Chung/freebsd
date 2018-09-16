@@ -568,7 +568,7 @@ racct_add_locked(struct proc *p, int resource, uint64_t amount, int force)
 	racct_adjust_resource(p->p_racct, resource, amount);
 	racct_add_cred_locked(p->p_ucred, resource, amount);
 
-	return (0);
+	return (ESUCCESS);
 }
 
 /*
@@ -717,7 +717,7 @@ racct_set_locked(struct proc *p, int resource, uint64_t amount, int force)
 	else if (diff_cred < 0)
 		racct_sub_cred_locked(p->p_ucred, resource, -diff_cred);
 
-	return (0);
+	return (ESUCCESS);
 }
 
 /*

@@ -111,9 +111,7 @@ __FBSDID("$FreeBSD$");
  * space.
  */
 int
-kernacc(addr, len, rw)
-	void *addr;
-	int len, rw;
+kernacc(void *addr, int len, int rw)
 {
 	boolean_t rv;
 	vm_offset_t saddr, eaddr;
@@ -132,7 +130,7 @@ kernacc(addr, len, rw)
 	vm_map_lock_read(kernel_map);
 	rv = vm_map_check_protection(kernel_map, saddr, eaddr, prot);
 	vm_map_unlock_read(kernel_map);
-	return (rv == TRUE);
+	return (rv);
 }
 
 /*
@@ -145,9 +143,7 @@ kernacc(addr, len, rw)
  * used in conjunction with this call.
  */
 int
-useracc(addr, len, rw)
-	void *addr;
-	int len, rw;
+useracc(void *addr, int len, int rw)
 {
 	boolean_t rv;
 	vm_prot_t prot;
@@ -165,7 +161,7 @@ useracc(addr, len, rw)
 	rv = vm_map_check_protection(map, trunc_page((vm_offset_t)addr),
 	    round_page((vm_offset_t)addr + len), prot);
 	vm_map_unlock_read(map);
-	return (rv == TRUE);
+	return (rv);
 }
 
 int
@@ -543,7 +539,7 @@ vm_forkproc(
 
 	if ((flags & RFPROC) == 0) { //wyc FALSE always
 #if 1 //wyc
-		panic("RFPROC == 0"); //wyc
+		WYCPANIC();
 #else
 		int error;
 

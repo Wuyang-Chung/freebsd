@@ -143,8 +143,8 @@ struct vm_map_entry {
 #define	MAP_ENTRY_WIRE_SKIPPED		0x4000
 #define	MAP_ENTRY_VN_WRITECNT		0x8000	/* writeable vnode mapping */
 #define	MAP_ENTRY_GUARD			0x10000
-#define	MAP_ENTRY_STACK_GAP_DN		0x20000
-#define	MAP_ENTRY_STACK_GAP_UP		0x40000
+#define	MAP_ENTRY_STACK_GAP_DN		0x20000 //wyc true always
+#define	MAP_ENTRY_STACK_GAP_UP		0x40000 //wyc false always
 
 #ifdef	_KERNEL
 static __inline u_char
@@ -324,7 +324,7 @@ long vmspace_resident_count(struct vmspace *vmspace);
  */
 #define MAP_INHERIT_SHARE	0x0001
 #define MAP_COPY_ON_WRITE	0x0002
-#define MAP_NOFAULT		0x0004
+#define MAP_NOFAULT		0x0004	//wyc The mapping should not generate page	faults
 #define MAP_PREFAULT		0x0008
 #define MAP_PREFAULT_PARTIAL	0x0010
 #define MAP_DISABLE_SYNCER	0x0020

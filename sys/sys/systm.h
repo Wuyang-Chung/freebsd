@@ -105,7 +105,9 @@ void	kassert_panic(const char *fmt, ...)  __printflike(1, 2);
 #define	CTASSERT(x)	_Static_assert(x, "compile-time assertion failed")
 #endif
 
-#define WYCASSERT(x)	do if (!(x)) panic("%s %s", __func__, #x); while(0)
+#define WYCASSERT(x)	do if (!(x)) panic("%s %d", __FILE__, __LINE__); while(0)
+#define WYCPANIC()	do panic("%s %d", __FILE__, __LINE__); while(0)
+#define DDB_BREAK()	{void kdb_enter(const char *, const char *);kdb_enter("wyc", __func__);}
 
 /*
  * Assert that a pointer can be loaded from memory atomically.

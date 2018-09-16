@@ -160,7 +160,7 @@ cpu_fork(struct thread *td1, struct proc *p2, struct thread *td2, int flags)
 	p1 = td1->td_proc;
 	WYCASSERT(p2 == td2->td_proc);
 	if ((flags & RFPROC) == 0) { //wyc FALSE always
-		panic("RFPROC == 0"); //wyc
+		WYCPANIC();
 #if 0 //wyc original
 		if ((flags & RFMEM) == 0) {
 			/* unshare user LDT */

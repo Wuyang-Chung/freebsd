@@ -135,7 +135,7 @@ vm_mem_init(void *dummy)
 	vmem_startup();
 	vm_object_init();
 	vm_map_startup();
-	kmem_init(virtual_avail, virtual_end);
+	kmem_init(virtual_avail, virtual_end); //wyc virtual_end == 4G - 4K
 
 	/*
 	 * Initialize the kernel_arena.  This can grow on demand.

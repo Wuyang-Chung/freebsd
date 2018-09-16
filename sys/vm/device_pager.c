@@ -153,7 +153,11 @@ cdev_pager_allocate(void *handle, enum obj_type tp, struct cdev_pager_ops *ops,
 	    pindex < UOFF_TO_IDX(size))
 		return (NULL);
 
+#if defined(WYC)
+	old_dev_pager_ctor();
+#else
 	if (ops->cdev_pg_ctor(handle, size, prot, foff, cred, &color) != 0)
+#endif
 		return (NULL);
 	mtx_lock(&dev_pager_mtx);
 

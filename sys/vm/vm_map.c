@@ -1185,7 +1185,7 @@ int
 vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot, vm_prot_t max, int cow)
 {
-	vm_map_entry_t new_entry, prev_entry, temp_entry;
+	vm_map_entry_t new_entry, prev_entry;//, temp_entry;
 	struct ucred *cred;
 	vm_eflags_t protoeflags;
 	vm_inherit_t inheritance;
@@ -1209,10 +1209,10 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	 * Find the entry prior to the proposed starting address; if it's part
 	 * of an existing entry, this range is bogus.
 	 */
-	if (vm_map_lookup_entry(map, start, &temp_entry))
+	if (vm_map_lookup_entry(map, start, &prev_entry) == TRUE)
 		return (KERN_NO_SPACE);
 
-	prev_entry = temp_entry;
+	//prev_entry = temp_entry;
 
 	/*
 	 * Assert that the next entry doesn't overlap the end point.
@@ -1235,18 +1235,20 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 		protoeflags |= MAP_ENTRY_NOCOREDUMP;
 	if (cow & MAP_STACK_GROWS_DOWN)
 		protoeflags |= MAP_ENTRY_GROWS_DOWN;
-	if (cow & MAP_STACK_GROWS_UP)	//wyc FALSE always
-		//protoeflags |= MAP_ENTRY_GROWS_UP;
-		panic("MAP_STACK_GROWS_UP"); //wyc
+	if (cow & MAP_STACK_GROWS_UP) {	//wyc FALSE always
+		WYCPANIC();
+		protoeflags |= MAP_ENTRY_GROWS_UP;
+	}
 	if (cow & MAP_VN_WRITECOUNT)
 		protoeflags |= MAP_ENTRY_VN_WRITECNT;
 	if ((cow & MAP_CREATE_GUARD) != 0)
 		protoeflags |= MAP_ENTRY_GUARD;
 	if ((cow & MAP_CREATE_STACK_GAP_DN) != 0)
 		protoeflags |= MAP_ENTRY_STACK_GAP_DN;
-	if ((cow & MAP_CREATE_STACK_GAP_UP) != 0) //wyc FALSE always
-		//protoeflags |= MAP_ENTRY_STACK_GAP_UP;
-		panic("MAP_CREATE_STACK_GAP_UP"); //wyc
+	if ((cow & MAP_CREATE_STACK_GAP_UP) != 0) { //wyc FALSE always
+		WYCPANIC();
+		protoeflags |= MAP_ENTRY_STACK_GAP_UP;
+	}
 	if (cow & MAP_INHERIT_SHARE)
 		inheritance = VM_INHERIT_SHARE;
 	else
@@ -1461,15 +1463,9 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 }
 
 int
-vm_map_fixed(
-    vm_map_t map,
-    vm_object_t object,
-    vm_ooffset_t offset,
-    vm_offset_t start,
-    vm_size_t length,
-    vm_prot_t prot,
-    vm_prot_t max,
-    int cow)
+vm_map_fixed(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
+    vm_offset_t start, vm_size_t length, vm_prot_t prot,
+    vm_prot_t max, int cow)
 {
 	vm_offset_t end;
 	int result;
@@ -3666,7 +3662,7 @@ vm_map_stack_locked(
 		gap_bot = addrbos;
 		gap_top = bot;
 	} else /* if (orient == MAP_STACK_GROWS_UP) */ {
-		panic("MAP_STACK_GROWS_UP"); //wyc
+		WYCPANIC();
 		bot = addrbos;
 		top = bot + init_ssize;
 		gap_bot = top;
@@ -3747,6 +3743,7 @@ retry:
 		grow_amount = round_page(stack_entry->start - addr);
 		grow_down = true;
 	} else if ((gap_entry->eflags & MAP_ENTRY_STACK_GAP_UP) != 0) {
+		WYCPANIC();
 		stack_entry = gap_entry->prev;
 		if ((stack_entry->eflags & MAP_ENTRY_GROWS_UP) == 0 ||
 		    stack_entry->end != gap_entry->start)

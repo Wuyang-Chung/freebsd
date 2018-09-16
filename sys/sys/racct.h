@@ -191,7 +191,7 @@ static inline int
 racct_add(struct proc *p, int resource, uint64_t amount)
 {
 
-	return (0);
+	return (ESUCCESS);
 }
 
 static inline void
@@ -208,7 +208,7 @@ static inline int
 racct_set(struct proc *p, int resource, uint64_t amount)
 {
 
-	return (0);
+	return (ESUCCESS);
 }
 
 static inline void
@@ -247,7 +247,7 @@ static inline int
 racct_proc_fork(struct proc *parent, struct proc *child)
 {
 
-	return (0);
+	return (ESUCCESS);
 }
 
 static inline void

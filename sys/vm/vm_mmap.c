@@ -168,10 +168,15 @@ struct mmap_args {
 };
 #endif
 
+static int mmap_called;
+SYSCTL_INT(_vm, OID_AUTO, mmap_called, CTLFLAG_RW, &mmap_called, 0,
+    "Number of times mmap are called");
+
 int
 sys_mmap(struct thread *td, struct mmap_args *uap)
 {
 
+	mmap_called++; //wyc
 	return (kern_mmap(td, (uintptr_t)uap->addr, uap->len, uap->prot,
 	    uap->flags, uap->fd, uap->pos));
 }
@@ -243,6 +248,13 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 	    MAP_PREFAULT_READ | MAP_ANON | MAP_STACK)) != 0))
 		return (EINVAL);
 
+	/* Ensure alignment is at least a page and fits in a pointer. */
+	align = flags & MAP_ALIGNMENT_MASK;
+	if (align != 0 && align != MAP_ALIGNED_SUPER &&
+	    (align >> MAP_ALIGNMENT_SHIFT >= sizeof(void *) * NBBY ||
+	    align >> MAP_ALIGNMENT_SHIFT < PAGE_SHIFT))
+		return (EINVAL);
+
 	/*
 	 * Align the file position to a page boundary,
 	 * and save its page offset component.
@@ -253,13 +265,6 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 	/* Adjust size for rounding (on both ends). */
 	size += pageoff;			/* low end... */
 	size = (vm_size_t) round_page(size);	/* hi end */
-
-	/* Ensure alignment is at least a page and fits in a pointer. */
-	align = flags & MAP_ALIGNMENT_MASK;
-	if (align != 0 && align != MAP_ALIGNED_SUPER &&
-	    (align >> MAP_ALIGNMENT_SHIFT >= sizeof(void *) * NBBY ||
-	    align >> MAP_ALIGNMENT_SHIFT < PAGE_SHIFT))
-		return (EINVAL);
 
 	/*
 	 * Check for illegal addresses.  Watch out for address wrap... Note
@@ -318,6 +323,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		 */
 		error = ESUCCESS;
 	} else if ((flags & MAP_GUARD) != 0) {
+		WYCASSERT(pos == 0);
 		error = vm_mmap_object(&vms->vm_map, &addr, size, VM_PROT_NONE,
 		    VM_PROT_NONE, flags, NULL, pos, FALSE, td);
 	} else if ((flags & MAP_ANON) != 0) {
@@ -326,6 +332,7 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		 *
 		 * This relies on VM_PROT_* matching PROT_*.
 		 */
+		WYCASSERT(pos == 0);
 		error = vm_mmap_object(&vms->vm_map, &addr, size, prot,
 		    VM_PROT_ALL, flags, NULL, pos, FALSE, td);
 	} else {
@@ -354,11 +361,16 @@ kern_mmap(struct thread *td, uintptr_t addr0, size_t size, int prot, int flags,
 		}
 
 		/* This relies on VM_PROT_* matching PROT_*. */
-		error = fo_mmap(fp, &vms->vm_map, &addr, size, prot,
+#if defined(WYC)
+		error = vn_mmap
+#else
+		error = fo_mmap
+#endif
+		    (fp, &vms->vm_map, &addr, size, prot,
 		    cap_maxprot, flags, pos, td);
 	}
 
-	if (error == 0)
+	if (error == ESUCCESS)
 		td->td_retval[0] = (register_t) (addr + pageoff);
 done:
 	if (fp)

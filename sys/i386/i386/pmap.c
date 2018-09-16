@@ -5629,7 +5629,8 @@ pmap_sync_icache(pmap_t pm, vm_offset_t va, vm_size_t sz)
  */
 void
 pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
-    vm_offset_t *addr, vm_size_t size)
+    vm_offset_t *addr, /* IN/OUT */
+    vm_size_t size)
 {
 	vm_offset_t superpage_offset;
 
@@ -5642,9 +5643,11 @@ pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
 	    (*addr & PDRMASK) == superpage_offset)
 		return;
 	if ((*addr & PDRMASK) < superpage_offset)
-		*addr = (*addr & ~PDRMASK) + superpage_offset;
+		//wyc *addr = (*addr & ~PDRMASK) + superpage_offset;
+		*addr = rounddown2(*addr, NBPDR) + superpage_offset;
 	else
-		*addr = ((*addr + PDRMASK) & ~PDRMASK) + superpage_offset;
+		//wyc *addr = ((*addr + PDRMASK) & ~PDRMASK) + superpage_offset;
+		*addr = roundup2(*addr, NBPDR) + superpage_offset;
 }
 
 vm_offset_t
