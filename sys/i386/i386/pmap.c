@@ -199,11 +199,11 @@ static struct mtx allpmaps_lock;
 
 vm_offset_t virtual_avail;	/* VA of first avail page (after kernel bss) */
 vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
-int pgeflag = 0;		/* PG_G or-in */
-int pseflag = 0;		/* PG_PS or-in */
+int pgeflag = 0;		/* PG_G or-in	wyc page global or-in flag */
+int pseflag = 0;		/* PG_PS or-in	wyc page size or-in flag (4M) */
 
 static int nkpt = NKPT;
-vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR;
+vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR; //wyc 3G + 30*4M
 extern u_int32_t KERNend;
 extern u_int32_t KPTphys;
 
@@ -2105,9 +2105,11 @@ pmap_growkernel(vm_offset_t addr)
 	vm_page_t nkpg;
 	pd_entry_t newpdir;
 
+	WYCASSERT(aligned2(kernel_vm_end, NBPDR));
+
 	mtx_assert(&kernel_map->system_mtx, MA_OWNED);
 	addr = roundup2(addr, NBPDR);
-	if (addr - 1 >= kernel_map->max_offset)
+	if (addr - 1 >= kernel_map->max_offset) //wyc 4G-4K
 		addr = kernel_map->max_offset;
 	while (kernel_vm_end < addr) {
 		if (pdir_pde(PTD, kernel_vm_end)) {

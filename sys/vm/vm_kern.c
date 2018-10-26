@@ -279,7 +279,9 @@ retry:
  *	superpage_align	Request that min is superpage aligned
  */
 vm_map_t
-kmem_suballoc(vm_map_t parent, vm_offset_t *min, vm_offset_t *max,
+kmem_suballoc(vm_map_t parent,
+    vm_offset_t *min, //wyc OUT
+    vm_offset_t *max, //wyc OUT
     vm_size_t size, boolean_t superpage_align)
 {
 	int ret;
@@ -531,7 +533,7 @@ kmem_init(vm_offset_t start, vm_offset_t end)
 #ifdef __amd64__
 	    KERNBASE,
 #else		     
-	    VM_MIN_KERNEL_ADDRESS,
+	    VM_MIN_KERNEL_ADDRESS, //wyc 3G-1M-4K
 #endif
 	    start, VM_PROT_ALL, VM_PROT_ALL, COW_NOFAULT);
 	/* ... and ending with the completion of the above `insert' */

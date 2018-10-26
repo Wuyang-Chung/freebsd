@@ -183,8 +183,8 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  */
 struct vm_map {
 	struct vm_map_entry header;	/* List of entries */
-#define	min_offset	header.end	/* (c) */ //wyc ==0
-#define	max_offset	header.start	/* (c) */ //wyc ==3G-4M
+#define	min_offset	header.end	/* (c) */ //wyc 0,     VM_MIN_KERNEL_ADDRESS(3G-1M-4k)
+#define	max_offset	header.start	/* (c) */ //wyc 3G-4M, 4G-4K
 	struct sx lock;			/* Lock for map data */
 	struct mtx system_mtx;
 	int nentries;			/* Number of entries */
@@ -323,17 +323,17 @@ long vmspace_resident_count(struct vmspace *vmspace);
  * Copy-on-write flags for vm_map operations
  */
 //wyc change the prefix from MAP to COW
-#define COW_INHERIT_SHARE	0x0001
-#define COW_COPY_ON_WRITE	0x0002
-#define COW_NOFAULT		0x0004	//wyc The mapping should not generate page	faults
-#define COW_PREFAULT		0x0008
-#define COW_PREFAULT_PARTIAL	0x0010
-#define COW_DISABLE_SYNCER	0x0020
-#define	COW_CHECK_EXCL		0x0040
-#define	COW_CREATE_GUARD	0x0080
-#define COW_DISABLE_COREDUMP	0x0100
+#define COW_INHERIT_SHARE	0x0001	//wyc -> VM_INHERIT_SHARE
+#define COW_COPY_ON_WRITE	0x0002	//wyc -> MAP_ENTRY_COW | MAP_ENTRY_NEEDS_COPY
+#define COW_NOFAULT		0x0004	//wyc -> MAP_ENTRY_NOFAULT
+#define COW_PREFAULT		0x0008	//wyc prefault the page mappings into pmap
+#define COW_PREFAULT_PARTIAL	0x0010	//wyc prefault partial of the page mappings
+#define COW_DISABLE_SYNCER	0x0020	//wyc -> MAP_ENTRY_NOSYNC
+#define	COW_CHECK_EXCL		0x0040	//wyc do not delete the previous mapping
+#define	COW_CREATE_GUARD	0x0080	//wyc -> MAP_ENTRY_GUARD
+#define COW_DISABLE_COREDUMP	0x0100	//wyc -> MAP_ENTRY_NOCOREDUMP
 #define COW_PREFAULT_MADVISE	0x0200	/* from (user) madvise request */
-#define	COW_VN_WRITECOUNT	0x0400
+#define	COW_VN_WRITECOUNT	0x0400	//wyc ->MAP_ENTRY_VN_WRITECNT
 #define	COW_STACK_GROWS_DOWN	0x1000	//wyc always DOWN
 #define	COW_STACK_GROWS_UP	0x2000	//wyc never UP
 #define	COW_ACC_CHARGED		0x4000

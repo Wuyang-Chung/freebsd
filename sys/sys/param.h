@@ -297,6 +297,7 @@
 #define	rounddown2(x, y) ((x)&(~((y)-1)))          /* if y is power of two */
 #define	roundup(x, y)	((((x)+((y)-1))/(y))*(y))  /* to any y */
 #define	roundup2(x, y)	(((x)+((y)-1))&(~((y)-1))) /* if y is powers of two */
+#define aligned2(x, y)	(rounddown2((x),(y)) == (x)) //wyc
 #define powerof2(x)	((((x)-1)&(x))==0)
 
 /* Macros for min/max. */

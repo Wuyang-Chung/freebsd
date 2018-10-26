@@ -1185,7 +1185,7 @@ int
 vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
     vm_offset_t start, vm_offset_t end, vm_prot_t prot, vm_prot_t max, int cow)
 {
-	vm_map_entry_t new_entry, prev_entry;//, temp_entry;
+	vm_map_entry_t new_entry, prev_entry;//wyc , temp_entry;
 	struct ucred *cred;
 	vm_eflags_t protoeflags;
 	vm_inherit_t inheritance;
@@ -1212,7 +1212,7 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	if (vm_map_lookup_entry(map, start, &prev_entry) == TRUE)
 		return (KERN_NO_SPACE);
 
-	//prev_entry = temp_entry;
+	//wyc prev_entry = temp_entry;
 
 	/*
 	 * Assert that the next entry doesn't overlap the end point.
@@ -1220,8 +1220,10 @@ vm_map_insert(vm_map_t map, vm_object_t object, vm_ooffset_t offset,
 	if (prev_entry->next->start < end)
 		return (KERN_NO_SPACE);
 
-	if ((cow & COW_CREATE_GUARD) != 0 && (object != NULL ||
-	    max != VM_PROT_NONE))
+	if (cow & COW_NOFAULT)
+		WYCASSERT(map == kernel_map);
+	if ((cow & COW_CREATE_GUARD) != 0 &&
+	    (object != NULL || max != VM_PROT_NONE))
 		return (KERN_INVALID_ARGUMENT);
 
 	protoeflags = 0;

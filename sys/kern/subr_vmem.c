@@ -994,7 +994,8 @@ vmem_init(vmem_t *vm, const char *name, vmem_addr_t base, vmem_size_t size,
 	int i;
 
 	MPASS(quantum > 0);
-	MPASS((quantum & (quantum - 1)) == 0);
+	//wyc ori MPASS((quantum & (quantum - 1)) == 0);
+	MPASS(powerof2(quantum));
 
 	bzero(vm, sizeof(*vm));
 
