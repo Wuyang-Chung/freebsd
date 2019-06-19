@@ -12,8 +12,8 @@
 #ifndef	__IP_PROXY_H__
 #define	__IP_PROXY_H__
 
-#ifndef SOLARIS
-#define SOLARIS (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
+#ifdef SOLARIS
+#undef SOLARIS//wyc (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 #endif
 
 #if defined(__STDC__) || defined(__GNUC__) || defined(_AIX51)

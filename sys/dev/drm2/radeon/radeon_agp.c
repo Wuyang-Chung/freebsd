@@ -32,7 +32,7 @@ __FBSDID("$FreeBSD$");
 #include "radeon.h"
 #include <dev/drm2/radeon/radeon_drm.h>
 
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 
 struct radeon_agpmode_quirk {
 	u32 hostbridge_vendor;
@@ -130,7 +130,7 @@ static struct radeon_agpmode_quirk radeon_agpmode_quirk_list[] = {
 
 int radeon_agp_init(struct radeon_device *rdev)
 {
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 	struct radeon_agpmode_quirk *p = radeon_agpmode_quirk_list;
 	struct drm_agp_mode mode;
 	struct drm_agp_info info;
@@ -264,7 +264,7 @@ int radeon_agp_init(struct radeon_device *rdev)
 
 void radeon_agp_resume(struct radeon_device *rdev)
 {
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 	int r;
 	if (rdev->flags & RADEON_IS_AGP) {
 		r = radeon_agp_init(rdev);
@@ -276,7 +276,7 @@ void radeon_agp_resume(struct radeon_device *rdev)
 
 void radeon_agp_fini(struct radeon_device *rdev)
 {
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 	if (rdev->ddev->agp && rdev->ddev->agp->acquired) {
 		drm_agp_release(rdev->ddev);
 	}

@@ -229,7 +229,7 @@ struct nvme_command
 	uint32_t cdw13;		/* command-specific */
 	uint32_t cdw14;		/* command-specific */
 	uint32_t cdw15;		/* command-specific */
-} __packed;
+};//wyc __packed;
 
 struct nvme_status {
 

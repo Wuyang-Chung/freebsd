@@ -970,7 +970,7 @@ ipf_nat6_add(fin, np, natsave, flags, direction)
 	u_int nflags;
 	natinfo_t ni;
 	int move;
-#if SOLARIS && defined(_KERNEL) && (SOLARIS2 >= 6) && defined(ICK_M_CTL_MAGIC)
+#if 0//wyc SOLARIS && defined(_KERNEL) && (SOLARIS2 >= 6) && defined(ICK_M_CTL_MAGIC)
 	qpktinfo_t *qpi = fin->fin_qpi;
 #endif
 

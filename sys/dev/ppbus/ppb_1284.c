@@ -293,7 +293,7 @@ ppb_peripheral_terminate(device_t bus, int how)
 	ppb_1284_set_state(bus, PPB_PERIPHERAL_TERMINATION);
 
 	/* Event 22 - wait up to host response time (1s) */
-	if ((error = do_peripheral_wait(bus, SELECT | nBUSY, 0))) {
+	if ((error = do_peripheral_wait(bus, /*wycgit*/(char)(SELECT | nBUSY), 0))) {
 		ppb_1284_set_error(bus, PPB_TIMEOUT, 22);
 		goto error;
 	}
@@ -782,8 +782,8 @@ ppb_1284_negociate(device_t bus, int mode, int options)
 			goto error;
 		}
 #else
-		if (do_1284_wait(bus, nACK | SELECT | PERROR | nBUSY,
-					nACK | SELECT | PERROR | nBUSY)) {
+		if (do_1284_wait(bus, /*wycgit*/(char)(nACK | SELECT | PERROR | nBUSY),
+					/*wycgit*/(char)(nACK | SELECT | PERROR | nBUSY))) {
 			ppb_1284_set_error(bus, PPB_TIMEOUT, 30);
 			error = ENODEV;
 			goto error;
@@ -838,7 +838,7 @@ ppb_1284_terminate(device_t bus)
 	ppb_wctr(bus, (nINIT | SELECTIN) & ~(STROBE | AUTOFEED));
 
 	/* Event 24 - waiting for peripheral, Xflag ignored */
-	if (do_1284_wait(bus, nACK | nBUSY | nFAULT, nFAULT)) {
+	if (do_1284_wait(bus, /*wycgit*/(char)(nACK | nBUSY | nFAULT), nFAULT)) {
 		ppb_1284_set_error(bus, PPB_TIMEOUT, 24);
 		goto error;
 	}

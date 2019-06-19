@@ -913,7 +913,7 @@ ipf_proxy_check(fin, nat)
 {
 	ipf_main_softc_t *softc = fin->fin_main_soft;
 	ipf_proxy_softc_t *softp = softc->ipf_proxy_soft;
-#if SOLARIS && defined(_KERNEL) && defined(ICK_VALID)
+#if 0//wyc SOLARIS && defined(_KERNEL) && defined(ICK_VALID)
 	mb_t *m;
 #endif
 	tcphdr_t *tcp = NULL;
@@ -972,7 +972,7 @@ ipf_proxy_check(fin, nat)
 		{
 		case IPPROTO_TCP :
 			tcp = (tcphdr_t *)fin->fin_dp;
-#if SOLARIS && defined(_KERNEL) && defined(ICK_VALID)
+#if 0//wyc SOLARIS && defined(_KERNEL) && defined(ICK_VALID)
 			m = fin->fin_qfm;
 			if (dohwcksum && (m->b_ick_flag == ICK_VALID))
 				dosum = 0;

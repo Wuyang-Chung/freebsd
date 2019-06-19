@@ -205,7 +205,7 @@ struct vxlan_softc {
 struct vxlanudphdr {
 	struct udphdr		vxlh_udp;
 	struct vxlan_header	vxlh_hdr;
-} __packed;
+};//wyc __packed;
 
 static int	vxlan_ftable_addr_cmp(const uint8_t *, const uint8_t *);
 static void	vxlan_ftable_init(struct vxlan_softc *);

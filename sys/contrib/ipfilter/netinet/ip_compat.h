@@ -32,7 +32,7 @@
 # define 	__KERNEL__
 #endif
 
-#define	SOLARIS	(defined(sun) && (defined(__svr4__) || defined(__SVR4)))
+//#define	SOLARIS	(defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 
 
 #if defined(__SVR4) || defined(__svr4__) || defined(__sgi)

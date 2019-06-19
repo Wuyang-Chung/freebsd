@@ -345,7 +345,7 @@ ipf_p_irc_send(fin, nat)
 
 		linkb(m1, nm);
 	} else {
-# if SOLARIS && defined(ICK_VALID)
+# if 0//wyc SOLARIS && defined(ICK_VALID)
 		if (m1->b_datap->db_struiolim == m1->b_wptr)
 			m1->b_datap->db_struiolim += inc;
 		m1->b_datap->db_struioflag &= ~STRUIO_IP;

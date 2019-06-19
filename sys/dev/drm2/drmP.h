@@ -103,8 +103,12 @@ __FBSDID("$FreeBSD$");
 
 #include <dev/drm2/drm_os_freebsd.h>
 
-#define __OS_HAS_AGP (defined(CONFIG_AGP) || (defined(CONFIG_AGP_MODULE) && defined(MODULE)))
-#define __OS_HAS_MTRR (defined(CONFIG_MTRR))
+#if defined(CONFIG_AGP) || (defined(CONFIG_AGP_MODULE) && defined(MODULE))
+#define __OS_HAS_AGP
+#endif
+#if defined(CONFIG_MTRR)
+#define __OS_HAS_MTRR
+#endif
 
 struct drm_file;
 struct drm_device;
@@ -1138,7 +1142,7 @@ static inline int drm_dev_to_irq(struct drm_device *dev)
 }
 
 
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 static inline int drm_core_has_AGP(struct drm_device *dev)
 {
 	return drm_core_check_feature(dev, DRIVER_USE_AGP);
@@ -1147,7 +1151,7 @@ static inline int drm_core_has_AGP(struct drm_device *dev)
 #define drm_core_has_AGP(dev) (0)
 #endif
 
-#if __OS_HAS_MTRR
+#ifdef __OS_HAS_MTRR
 static inline int drm_core_has_MTRR(struct drm_device *dev)
 {
 	return drm_core_check_feature(dev, DRIVER_USE_MTRR);

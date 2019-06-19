@@ -203,7 +203,7 @@ bwn_phy_g_attach(struct bwn_mac *mac)
 			j++;
 		} while (delta >= 2);
 
-		pg->pg_tssi2dbm[i] = MIN(MAX(BWN_TSSI2DBM(m1 * f, 8192), -127),
+		pg->pg_tssi2dbm[i] = /*wycgit*/(int8_t)MIN(MAX(BWN_TSSI2DBM(m1 * f, 8192), -127),
 		    128);
 	}
 

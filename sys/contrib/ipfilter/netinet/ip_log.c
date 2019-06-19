@@ -18,8 +18,8 @@
 #if defined(__FreeBSD__) && !defined(_KERNEL)
 # include <osreldate.h>
 #endif
-#ifndef SOLARIS
-# define SOLARIS (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
+#ifdef SOLARIS
+#undef SOLARIS//wyc (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 #endif
 #include <sys/errno.h>
 #include <sys/types.h>
@@ -52,7 +52,7 @@ struct file;
 #  include <sys/proc.h>
 # endif
 #endif /* _KERNEL */
-#if !SOLARIS && !defined(__hpux) && !defined(linux)
+#if /*!SOLARIS && */!defined(__hpux) && !defined(linux)
 # if (defined(NetBSD) && (NetBSD > 199609)) || \
      (defined(OpenBSD) && (OpenBSD > 199603)) || \
      (defined(__FreeBSD_version) && (__FreeBSD_version >= 300000))
@@ -138,7 +138,7 @@ extern int selwait;
 
 typedef struct ipf_log_softc_s {
 	ipfmutex_t	ipl_mutex[IPL_LOGSIZE];
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 	kcondvar_t	ipl_wait[IPL_LOGSIZE];
 # endif
 # if defined(linux) && defined(_KERNEL)
@@ -310,7 +310,7 @@ ipf_log_soft_fini(softc, arg)
 		 */
 		MUTEX_ENTER(&softl->ipl_mutex[i]);
 		while (softl->ipl_readers[i] > 0) {
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 			cv_broadcast(&softl->ipl_wait[i]);
 			MUTEX_EXIT(&softl->ipl_mutex[i]);
 			delay(100);
@@ -346,7 +346,7 @@ ipf_log_soft_destroy(softc, arg)
 	int i;
 
 	for (i = IPL_LOGMAX; i >= 0; i--) {
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 		cv_destroy(&softl->ipl_wait[i]);
 # endif
 		MUTEX_DESTROY(&softl->ipl_mutex[i]);
@@ -388,7 +388,7 @@ ipf_log_pkt(fin, flags)
 	ipflog_t ipfl;
 	u_char p;
 	mb_t *m;
-# if (SOLARIS || defined(__hpux)) && defined(_KERNEL) && !defined(FW_HOOKS)
+# if (/*SOLARIS || */defined(__hpux)) && defined(_KERNEL) && !defined(FW_HOOKS)
 	qif_t *ifp;
 # else
 	struct ifnet *ifp;
@@ -462,7 +462,7 @@ ipf_log_pkt(fin, flags)
 	 * Get the interface number and name to which this packet is
 	 * currently associated.
 	 */
-# if (SOLARIS || defined(__hpux)) && defined(_KERNEL)
+# if (/*SOLARIS || */defined(__hpux)) && defined(_KERNEL)
 #  if !defined(FW_HOOKS)
 	ipfl.fl_unit = (u_int)ifp->qf_ppa;
 #  endif
@@ -655,7 +655,7 @@ ipf_log_items(softc, unit, fin, items, itemsz, types, cnt)
 	 * Now that the log record has been completed and added to the queue,
 	 * wake up any listeners who may want to read it.
 	 */
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 	cv_signal(&softl->ipl_wait[unit]);
 	MUTEX_EXIT(&softl->ipl_mutex[unit]);
 	pollwakeup(&softc->ipf_poll_head[unit], POLLRDNORM);
@@ -731,7 +731,7 @@ ipf_log_read(softc, unit, uio)
 	softl->ipl_readers[unit]++;
 
 	while (softl->ipl_log_init == 1 && softl->iplt[unit] == NULL) {
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 		if (!cv_wait_sig(&softl->ipl_wait[unit],
 				 &softl->ipl_mutex[unit].ipf_lk)) {
 			softl->ipl_readers[unit]--;

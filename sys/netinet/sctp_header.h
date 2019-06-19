@@ -40,7 +40,8 @@ __FBSDID("$FreeBSD$");
 #include <netinet/sctp.h>
 #include <netinet/sctp_constants.h>
 
-#define SCTP_PACKED __attribute__((packed))
+//wyc #define SCTP_PACKED __attribute__((packed))
+#define SCTP_PACKED
 
 /*
  * Parameter structures

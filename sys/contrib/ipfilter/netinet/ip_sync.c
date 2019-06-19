@@ -109,7 +109,7 @@ typedef struct ipf_sync_softc_s {
 	ipfmutex_t	ipsl_mutex;
 	ipfrwlock_t	ipf_syncstate;
 	ipfrwlock_t	ipf_syncnat;
-#if SOLARIS && defined(_KERNEL)
+#if 0//wyc SOLARIS && defined(_KERNEL)
 	kcondvar_t	ipslwait;
 #endif
 #if defined(linux) && defined(_KERNEL)
@@ -228,7 +228,7 @@ ipf_sync_soft_init(softc, arg)
 	softs->ipf_sync_lastwakeup = 0;
 
 
-# if SOLARIS && defined(_KERNEL)
+# if 0//wycSOLARIS && defined(_KERNEL)
 	cv_init(&softs->ipslwait, "ipsl condvar", CV_DRIVER, NULL);
 # endif
 	RWLOCK_INIT(&softs->ipf_syncstate, "add things to state sync table");
@@ -605,7 +605,7 @@ ipf_sync_read(softc, uio)
 	while ((softs->sl_tail == softs->sl_idx) &&
 	       (softs->su_tail == softs->su_idx)) {
 #  if defined(_KERNEL)
-#   if SOLARIS
+#   if 0//wyc SOLARIS
 		if (!cv_wait_sig(&softs->ipslwait, &softs->ipsl_mutex.ipf_lk)) {
 			MUTEX_EXIT(&softs->ipsl_mutex);
 			IPFERROR(110009);
@@ -1462,7 +1462,7 @@ ipf_sync_poll_wakeup(softc)
 	softs->ipf_sync_lastwakeup = softc->ipf_ticks;
 
 # ifdef _KERNEL
-#  if SOLARIS
+#  if 0//wyc SOLARIS
 	MUTEX_ENTER(&softs->ipsl_mutex);
 	cv_signal(&softs->ipslwait);
 	MUTEX_EXIT(&softs->ipsl_mutex);

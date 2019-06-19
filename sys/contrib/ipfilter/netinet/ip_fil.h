@@ -28,8 +28,8 @@
 # include <netinet/in.h>
 #endif
 
-#ifndef	SOLARIS
-# define SOLARIS (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
+#ifdef	SOLARIS
+# undef SOLARIS //wyc (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 #endif
 
 #ifndef	__P
@@ -1077,7 +1077,7 @@ typedef	struct	ipflog	{
  * ipl is already a name used by something else.
  */
 #ifndef	IPL_NAME
-# if	SOLARIS
+# if 0//wyc	SOLARIS
 #  define	IPL_NAME	"/dev/ipf"
 # else
 #  define	IPL_NAME	"/dev/ipl"
@@ -1662,7 +1662,7 @@ typedef struct ipf_main_softc_s {
 #if NETBSD_GE_REV(104040000)
 	struct callout	ipf_slow_ch;
 #endif
-#if SOLARIS
+#if 0//wyc SOLARIS
 # if SOLARIS2 >= 7
 	timeout_id_t	ipf_slow_ch;
 # else
@@ -1670,7 +1670,7 @@ typedef struct ipf_main_softc_s {
 # endif
 #endif
 #if defined(_KERNEL)
-# if SOLARIS
+# if 0//wyc SOLARIS
 	struct pollhead	ipf_poll_head[IPL_LOGSIZE];
 	void		*ipf_dip;
 #  if defined(INSTANCES)
@@ -1727,7 +1727,7 @@ extern	int	ipl_disable __P((void));
 # ifdef MENTAT
 extern	int	ipf_check __P((void *, struct ip *, int, void *, int, void *,
 			       mblk_t **));
-#  if SOLARIS
+#  if 0//wyc SOLARIS
 extern	void	ipf_prependmbt(fr_info_t *, mblk_t *);
 #   if SOLARIS2 >= 7
 extern	int	ipfioctl __P((dev_t, int, intptr_t, int, cred_t *, int *));

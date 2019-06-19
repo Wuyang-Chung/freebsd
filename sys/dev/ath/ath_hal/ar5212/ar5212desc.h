@@ -43,7 +43,7 @@ struct ar5212_desc {
 			uint32_t	status1;/* DMA status 1 */
 		} rx;
 	} u;
-} __packed;
+};//wyc __packed;
 #define	AR5212DESC(_ds)	((struct ar5212_desc *)(_ds))
 #define	AR5212DESC_CONST(_ds)	((const struct ar5212_desc *)(_ds))
 

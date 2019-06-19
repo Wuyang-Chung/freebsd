@@ -99,7 +99,7 @@ struct file;
 #include "netinet/ip_compat.h"
 #ifdef	USE_INET6
 # include <netinet/icmp6.h>
-# if !SOLARIS && defined(_KERNEL) && !defined(__osf__) && !defined(__hpux)
+# if /*wyc !SOLARIS && */defined(_KERNEL) && !defined(__osf__) && !defined(__hpux)
 #  include <netinet6/in6_var.h>
 # endif
 #endif
@@ -4170,7 +4170,7 @@ ipf_sync(softc, ifp)
 {
 	int i;
 
-# if !SOLARIS
+# if 1//wyc !SOLARIS
 	ipf_nat_sync(softc, ifp);
 	ipf_state_sync(softc, ifp);
 	ipf_lookup_sync(softc, ifp);
@@ -4221,7 +4221,7 @@ copyinptr(softc, src, dst, size)
 	caddr_t ca;
 	int error;
 
-# if SOLARIS
+# if 0//wyc SOLARIS
 	error = COPYIN(src, &ca, sizeof(ca));
 	if (error != 0)
 		return error;

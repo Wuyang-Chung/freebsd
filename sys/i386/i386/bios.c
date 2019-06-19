@@ -583,7 +583,7 @@ struct pnp_sysdev
 #define PNPATTR_CONFIG(a)	(((a) >> 7) & 0x3)
     /* device-specific data comes here */
     u_int8_t	devdata[0];
-} __packed;
+};//wyc __packed;
 
 /* We have to cluster arguments within a 64k range for the bios16 call */
 struct pnp_sysdevargs

@@ -990,7 +990,7 @@ extern vm_memattr_t ttm_io_prot(uint32_t caching_flags);
 
 extern const struct ttm_mem_type_manager_func ttm_bo_manager_func;
 
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 #define TTM_HAS_AGP
 
 /**

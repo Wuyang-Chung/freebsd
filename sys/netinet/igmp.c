@@ -543,7 +543,7 @@ igmp_ra_alloc(void)
 	m = m_get(M_WAITOK, MT_DATA);
 	p = mtod(m, struct ipoption *);
 	p->ipopt_dst.s_addr = INADDR_ANY;
-	p->ipopt_list[0] = IPOPT_RA;	/* Router Alert Option */
+	p->ipopt_list[0] = /*wyc*/(char)IPOPT_RA;	/* Router Alert Option */
 	p->ipopt_list[1] = 0x04;	/* 4 bytes long */
 	p->ipopt_list[2] = IPOPT_EOL;	/* End of IP option list */
 	p->ipopt_list[3] = 0x00;	/* pad byte */

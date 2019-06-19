@@ -379,19 +379,19 @@ siattach(device_t dev)
 		*(maddr+SIJETRESET) = 0;
 		switch (sc->sc_irq) {
 		case 9:
-			*(maddr+SIJETCONFIG) = SIJETBUSEN|SIJETIRQEN|0x90;
+			*(maddr+SIJETCONFIG) = /*wycgit*/(char)(SIJETBUSEN|SIJETIRQEN|0x90);
 			break;
 		case 10:
-			*(maddr+SIJETCONFIG) = SIJETBUSEN|SIJETIRQEN|0xa0;
+			*(maddr+SIJETCONFIG) = /*wycgit*/(char)(SIJETBUSEN|SIJETIRQEN|0xa0);
 			break;
 		case 11:
-			*(maddr+SIJETCONFIG) = SIJETBUSEN|SIJETIRQEN|0xb0;
+			*(maddr+SIJETCONFIG) = /*wycgit*/(char)(SIJETBUSEN|SIJETIRQEN|0xb0);
 			break;
 		case 12:
-			*(maddr+SIJETCONFIG) = SIJETBUSEN|SIJETIRQEN|0xc0;
+			*(maddr+SIJETCONFIG) = /*wycgit*/(char)(SIJETBUSEN|SIJETIRQEN|0xc0);
 			break;
 		case 15:
-			*(maddr+SIJETCONFIG) = SIJETBUSEN|SIJETIRQEN|0xf0;
+			*(maddr+SIJETCONFIG) = /*wycgit*/(char)(SIJETBUSEN|SIJETIRQEN|0xf0);
 			break;
 		}
 		break;

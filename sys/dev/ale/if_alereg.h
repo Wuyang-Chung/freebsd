@@ -611,7 +611,7 @@ struct smb {
 	uint32_t tx_pkts_truncated;
 	uint32_t tx_bcast_bytes;
 	uint32_t tx_mcast_bytes;
-} __packed;
+};//wyc __packed;
 
 #define	ALE_HOST_RXF0_PAGEOFF		0x1800
 

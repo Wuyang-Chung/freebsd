@@ -207,7 +207,7 @@ static ipftuneable_t ipf_nat_tuneables[] = {
 /* ======================================================================== */
 
 
-#if SOLARIS && !defined(INSTANCES)
+#if 0//wyc SOLARIS && !defined(INSTANCES)
 extern	int		pfil_delayed_copy;
 #endif
 
@@ -1531,7 +1531,7 @@ ipf_nat_siocaddnat(softc, softn, n, getlock)
 
 	n = NULL;
 	ATOMIC_INC32(softn->ipf_nat_stats.ns_rules);
-#if SOLARIS && !defined(INSTANCES)
+#if 0//wyc SOLARIS && !defined(INSTANCES)
 	pfil_delayed_copy = 0;
 #endif
 	if (getlock) {
@@ -2522,7 +2522,7 @@ ipf_nat_clearlist(softc, softn)
 		ipf_nat_delrule(softc, softn, n, 0);
 		i++;
 	}
-#if SOLARIS && !defined(INSTANCES)
+#if 0//wyc SOLARIS && !defined(INSTANCES)
 	pfil_delayed_copy = 1;
 #endif
 	return i;
@@ -3299,7 +3299,7 @@ ipf_nat_finalise(fin, nat)
 	u_32_t sum1, sum2, sumd;
 	frentry_t *fr;
 	u_32_t flags;
-#if SOLARIS && defined(_KERNEL) && (SOLARIS2 >= 6) && defined(ICK_M_CTL_MAGIC)
+#if 0//wyc SOLARIS && defined(_KERNEL) && (SOLARIS2 >= 6) && defined(ICK_M_CTL_MAGIC)
 	qpktinfo_t *qpi = fin->fin_qpi;
 #endif
 
@@ -6280,7 +6280,7 @@ ipf_nat_rule_deref(softc, inp)
 
 	KFREES(n, n->in_size);
 
-#if SOLARIS && !defined(INSTANCES)
+#if 0//wyc SOLARIS && !defined(INSTANCES)
 	if (softn->ipf_nat_stats.ns_rules == 0)
 		pfil_delayed_copy = 1;
 #endif

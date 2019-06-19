@@ -32,7 +32,7 @@ struct ar5211_desc {
 	uint32_t	ds_ctl1;	/* DMA control 1 */
 	uint32_t	ds_status0;	/* DMA status 0 */
 	uint32_t	ds_status1;	/* DMA status 1 */
-} __packed;
+};//wyc __packed;
 #define	AR5211DESC(_ds)	((struct ar5211_desc *)(_ds))
 #define	AR5211DESC_CONST(_ds)	((const struct ar5211_desc *)(_ds))
 

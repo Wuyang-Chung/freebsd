@@ -38,7 +38,7 @@ __FBSDID("$FreeBSD$");
 
 #include <dev/drm2/drmP.h>
 
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 static void *agp_remap(unsigned long offset, unsigned long size,
 		       struct drm_device * dev)
 {

@@ -195,7 +195,7 @@ ipf_auth_soft_create(softc)
 
 	RWLOCK_INIT(&softa->ipf_authlk, "ipf IP User-Auth rwlock");
 	MUTEX_INIT(&softa->ipf_auth_mx, "ipf auth log mutex");
-#if SOLARIS && defined(_KERNEL)
+#if 0//wyc SOLARIS && defined(_KERNEL)
 	cv_init(&softa->ipf_auth_wait, "ipf auth condvar", CV_DRIVER, NULL);
 #endif
 
@@ -317,7 +317,7 @@ ipf_auth_soft_destroy(softc, arg)
 {
 	ipf_auth_softc_t *softa = arg;
 
-# if SOLARIS && defined(_KERNEL)
+# if 0//wyc SOLARIS && defined(_KERNEL)
 	cv_destroy(&softa->ipf_auth_wait);
 # endif
 	MUTEX_DESTROY(&softa->ipf_auth_mx);
@@ -539,7 +539,7 @@ ipf_auth_new(m, fin)
 		ip->ip_off = htons(bo);
 	}
 #endif
-#if SOLARIS && defined(_KERNEL)
+#if 0//wyc SOLARIS && defined(_KERNEL)
 	COPYIFNAME(fin->fin_v, fin->fin_ifp, fra->fra_info.fin_ifname);
 	m->b_rptr -= qpi->qpi_off;
 	fra->fra_q = qpi->qpi_q;	/* The queue can disappear! */
@@ -1099,7 +1099,7 @@ ipf_auth_ioctlloop:
 
 	MUTEX_ENTER(&softa->ipf_auth_mx);
 #ifdef	_KERNEL
-# if	SOLARIS
+# if 0//wyc	SOLARIS
 	error = 0;
 	if (!cv_wait_sig(&softa->ipf_auth_wait, &softa->ipf_auth_mx.ipf_lk)) {
 		IPFERROR(10014);

@@ -1761,7 +1761,7 @@ struct mfi_mpi2_request_raid_scsi_io {
 	MPI2_SCSI_IO_CDB_UNION	CDB;                            /* 0x40 */
 	MPI2_SCSI_IO_VENDOR_UNIQUE	RaidContext;              /* 0x60 */
 	MPI2_SGE_IO_UNION	SGL;                            /* 0x80 */
-} __packed;
+};//wyc __packed;
 
 /*
  * MPT RAID MFA IO Descriptor.

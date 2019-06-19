@@ -557,7 +557,7 @@ static int compat_drm_dma(struct drm_device *dev, void *data,
 	return 0;
 }
 
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 typedef struct drm_agp_mode32 {
 	u32 mode;	/**< AGP mode */
 } drm_agp_mode32_t;
@@ -782,7 +782,7 @@ struct drm_ioctl_desc drm_compat_ioctls[256] = {
 	DRM_IOCTL_DEF(DRM_IOCTL_GET_SAREA_CTX32, compat_drm_getsareactx, DRM_AUTH),
 	DRM_IOCTL_DEF(DRM_IOCTL_RES_CTX32, compat_drm_resctx, DRM_AUTH),
 	DRM_IOCTL_DEF(DRM_IOCTL_DMA32, compat_drm_dma, DRM_AUTH),
-#if __OS_HAS_AGP
+#ifdef __OS_HAS_AGP
 	DRM_IOCTL_DEF(DRM_IOCTL_AGP_ENABLE32, compat_drm_agp_enable, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
 	DRM_IOCTL_DEF(DRM_IOCTL_AGP_INFO32, compat_drm_agp_info, DRM_AUTH),
 	DRM_IOCTL_DEF(DRM_IOCTL_AGP_ALLOC32, compat_drm_agp_alloc, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),

@@ -444,7 +444,7 @@ union ev_data {
 	struct mlx5_eqe_page_req	req_pages;
 	struct mlx5_eqe_port_module_event port_module_event;
 	struct mlx5_eqe_vport_change	vport_change;
-} __packed;
+};//wyc __packed;
 
 struct mlx5_eqe {
 	u8		rsvd0;
@@ -456,7 +456,7 @@ struct mlx5_eqe {
 	__be16		rsvd3;
 	u8		signature;
 	u8		owner;
-} __packed;
+};//wyc __packed;
 
 struct mlx5_cmd_prot_block {
 	u8		data[MLX5_CMD_DATA_BLOCK_SIZE];

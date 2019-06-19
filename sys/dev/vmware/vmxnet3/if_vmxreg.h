@@ -32,7 +32,7 @@ struct UPT1_TxStats {
 	uint64_t	bcast_bytes;
 	uint64_t	error;
 	uint64_t	discard;
-} __packed;
+};//wyc __packed;
 
 struct UPT1_RxStats {
 	uint64_t	LRO_packets;
@@ -45,7 +45,7 @@ struct UPT1_RxStats {
 	uint64_t	bcast_bytes;
 	uint64_t	nobuffer;
 	uint64_t	error;
-} __packed;
+};//wyc __packed;
 
 /* Interrupt moderation levels */
 #define UPT1_IMOD_NONE		0	/* No moderation */

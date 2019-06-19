@@ -205,7 +205,7 @@ struct mwl_txdesc {
 #define	EAGLE_TXD_FIXED_RATE	0x0100	/* get tx rate from Format */
 #define	EAGLE_TXD_DONT_AGGR	0x0200	/* don't aggregate frame */
 	uint32_t	ack_wcb_addr;
-} __packed;
+} /*wyc __packed*/;
 
 struct mwl_ant_info {
 	uint8_t		rssi_a;	/* RSSI for antenna A */
@@ -218,7 +218,7 @@ struct mwl_ant_info {
 	uint8_t		rsvd2;	/* Reserved */
 	uint8_t		nf;		/* Noise floor */
 	uint8_t		rsvd3[3];   /* Reserved - To make word aligned */
-} __packed;
+} /*wyc __packed*/;
 
 struct mwl_rxdesc {
 	uint8_t		RxControl;	/* control element */
@@ -248,7 +248,7 @@ struct mwl_rxdesc {
 #ifdef MWL_ANT_INFO_SUPPORT
 	struct mwl_ant_info ai;		/* antenna info */
 #endif
-} __packed;
+} /*wyc __packed*/;
 
 /*
 //          Define OpMode for SoftAP/Station mode
@@ -436,7 +436,7 @@ typedef struct {
     uint16_t     SeqNum;
 #endif
     uint16_t     Result; 
-} __packed FWCmdHdr;  
+} /*wyc __packed*/ FWCmdHdr;  
 
 typedef struct {
     FWCmdHdr	CmdHdr;
@@ -459,7 +459,7 @@ typedef struct {
 #define	SET_HW_SPEC_HOSTENCRDECR_MGMT	0x80
     uint32_t	TxWcbNumPerQueue;
     uint32_t	TotalRxWcb;
-} __packed HostCmd_DS_SET_HW_SPEC;
+} /*wyc __packed*/ HostCmd_DS_SET_HW_SPEC;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
@@ -476,12 +476,12 @@ typedef struct {
     u_int32_t   RxPdRdPtr;
     u_int32_t   ulFwAwakeCookie;
     u_int32_t   WcbBase1[TOTAL_TX_QUEUES-1];
-} __packed HostCmd_DS_GET_HW_SPEC;
+} /*wyc __packed*/ HostCmd_DS_GET_HW_SPEC;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     u_int32_t   Enable;   /* FALSE: Disable or TRUE: Enable */
-} __packed HostCmd_DS_BSS_START;
+} /*wyc __packed*/ HostCmd_DS_BSS_START;
 
 
 typedef struct {
@@ -494,7 +494,7 @@ typedef struct {
     u_int8_t    PwsKeyCipherList[4];
     u_int8_t    AuthKeyCnt[2];
     u_int8_t    AuthKeyList[4];
-} __packed RsnIE_t;
+} /*wyc __packed*/ RsnIE_t;
 
 typedef struct {
     u_int8_t    ElemId;
@@ -506,7 +506,7 @@ typedef struct {
     u_int8_t    AuthKeyCnt[2];
     u_int8_t    AuthKeyList[4];
     u_int8_t    RsnCap[2];
-} __packed Rsn48IE_t;
+} /*wyc __packed*/ Rsn48IE_t;
 
 typedef struct {
     u_int8_t    ElementId;
@@ -515,18 +515,18 @@ typedef struct {
     u_int8_t    CfpPeriod;
     u_int16_t   CfpMaxDuration;
     u_int16_t   CfpDurationRemaining;
-} __packed CfParams_t;
+} /*wyc __packed*/ CfParams_t;
 
 typedef struct {
     u_int8_t    ElementId;
     u_int8_t    Len;
     u_int16_t   AtimWindow;
-} __packed IbssParams_t;
+} /*wyc __packed*/ IbssParams_t;
 
 typedef union {
     CfParams_t   CfParamSet;
     IbssParams_t IbssParamSet;
-} __packed SsParams_t;
+} /*wyc __packed*/ SsParams_t;
 
 typedef struct {
     u_int8_t    ElementId;
@@ -535,31 +535,31 @@ typedef struct {
     u_int8_t    HopSet;
     u_int8_t    HopPattern;
     u_int8_t    HopIndex;
-} __packed FhParams_t;
+} /*wyc __packed*/ FhParams_t;
 
 typedef struct {
     u_int8_t    ElementId;
     u_int8_t    Len;
     u_int8_t    CurrentChan;
-} __packed DsParams_t;
+} /*wyc __packed*/ DsParams_t;
 
 typedef union {
     FhParams_t  FhParamSet;
     DsParams_t  DsParamSet;
-} __packed PhyParams_t;
+} /*wyc __packed*/ PhyParams_t;
 
 typedef struct {
     u_int8_t    FirstChannelNum;
     u_int8_t    NumOfChannels;
     u_int8_t    MaxTxPwrLevel;
-} __packed ChannelInfo_t;
+} /*wyc __packed*/ ChannelInfo_t;
 
 typedef struct {
     u_int8_t       ElementId;
     u_int8_t       Len;
     u_int8_t       CountryStr[3];
     ChannelInfo_t  ChannelInfo[40];
-} __packed Country_t;
+} /*wyc __packed*/ Country_t;
 
 typedef struct {
     u_int8_t AIFSN : 4;
@@ -567,18 +567,18 @@ typedef struct {
     u_int8_t ACI : 2;
     u_int8_t rsvd : 1;
 
-}__packed ACIAIFSN_field_t;
+}/*wyc __packed*/ ACIAIFSN_field_t;
 
 typedef  struct {
     u_int8_t ECW_min : 4;
     u_int8_t ECW_max : 4;
-}__packed  ECWmin_max_field_t;
+}/*wyc __packed*/  ECWmin_max_field_t;
 
 typedef struct {
     ACIAIFSN_field_t ACI_AIFSN;
     ECWmin_max_field_t ECW_min_max;
     u_int16_t TXOP_lim;
-}__packed  ACparam_rcd_t;
+}/*wyc __packed*/  ACparam_rcd_t;
 
 typedef struct {
     u_int8_t    ElementId;
@@ -592,7 +592,7 @@ typedef struct {
     ACparam_rcd_t AC_BK;
     ACparam_rcd_t AC_VI;
     ACparam_rcd_t AC_VO;
-} __packed WMM_param_elem_t ;
+} /*wyc __packed*/ WMM_param_elem_t ;
 
 typedef struct {
 #ifdef MWL_MBSS_SUPPORT
@@ -613,7 +613,7 @@ typedef struct {
     WMM_param_elem_t  WMMParam;
     Country_t   Country;
     u_int32_t   ApRFType; /* 0->B, 1->G, 2->Mixed, 3->A, 4->11J */
-} __packed StartCmd_t;
+} /*wyc __packed*/ StartCmd_t;
 
 #define HostCmd_CAPINFO_DEFAULT                0x0000
 #define HostCmd_CAPINFO_ESS                    0x0001
@@ -630,13 +630,13 @@ typedef struct {
 typedef struct {
     FWCmdHdr    CmdHdr;
     StartCmd_t  StartCmd;
-} __packed HostCmd_DS_AP_BEACON;
+} /*wyc __packed*/ HostCmd_DS_AP_BEACON;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint16_t	FrmBodyLen;
     uint8_t	FrmBody[1];		/* NB: variable length */
-} __packed HostCmd_DS_SET_BEACON;
+} /*wyc __packed*/ HostCmd_DS_SET_BEACON;
 
 //          Define data structure for HostCmd_CMD_MAC_MULTICAST_ADR
 typedef struct {
@@ -645,17 +645,17 @@ typedef struct {
    uint16_t      NumOfAdrs;
 #define	MWL_HAL_MCAST_MAX	32
    uint8_t       MACList[6*32];
-} __packed HostCmd_DS_MAC_MULTICAST_ADR;
+} /*wyc __packed*/ HostCmd_DS_MAC_MULTICAST_ADR;
 
 // Indicate to FW the current state of AP ERP info
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint32_t      GProtectFlag;
-} __packed HostCmd_FW_SET_G_PROTECT_FLAG;
+} /*wyc __packed*/ HostCmd_FW_SET_G_PROTECT_FLAG;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
-} __packed HostCmd_FW_SET_INFRA_MODE;
+} /*wyc __packed*/ HostCmd_FW_SET_INFRA_MODE;
 
 //          Define data structure for HostCmd_CMD_802_11_RF_CHANNEL
 typedef struct {
@@ -663,7 +663,7 @@ typedef struct {
    uint16_t      Action;
    uint8_t       CurrentChannel;	/* channel # */
    uint32_t  	ChannelFlags;		/* see below */
-} __packed HostCmd_FW_SET_RF_CHANNEL;
+} /*wyc __packed*/ HostCmd_FW_SET_RF_CHANNEL;
 
 /* bits 0-5 specify frequency band */
 #define FREQ_BAND_2DOT4GHZ	0x0001
@@ -695,13 +695,13 @@ typedef  struct {
     							// lower rate after the retry count
     uint32_t   FixRateType;	//0: legacy, 1: HT
     uint32_t   RetryCountValid; //0: retry count is not valid, 1: use retry count specified
-} __packed FIX_RATE_FLAG;
+} /*wyc __packed*/ FIX_RATE_FLAG;
 
 typedef  struct {
     FIX_RATE_FLAG FixRateTypeFlags;
     uint32_t 	FixedRate;	// legacy rate(not index) or an MCS code.
     uint32_t	RetryCount;
-} __packed FIXED_RATE_ENTRY;
+} /*wyc __packed*/ FIXED_RATE_ENTRY;
 	
 typedef  struct {
     FWCmdHdr	CmdHdr;
@@ -714,13 +714,13 @@ typedef  struct {
     uint8_t	MulticastRate;
     uint8_t	MultiRateTxType;
     uint8_t	ManagementRate;
-} __packed HostCmd_FW_USE_FIXED_RATE;
+} /*wyc __packed*/ HostCmd_FW_USE_FIXED_RATE;
 
 typedef struct {
     uint32_t   	AllowRateDrop;   
     uint32_t	EntryCount;
     FIXED_RATE_ENTRY FixedRateTable[4];
-} __packed USE_FIXED_RATE_INFO;
+} /*wyc __packed*/ USE_FIXED_RATE_INFO;
  
 typedef struct {
    FWCmdHdr    CmdHdr;
@@ -728,20 +728,20 @@ typedef struct {
    uint32_t     GIType;  
 #define	GI_TYPE_LONG	0x0001
 #define	GI_TYPE_SHORT	0x0002
-} __packed HostCmd_FW_HT_GUARD_INTERVAL;
+} /*wyc __packed*/ HostCmd_FW_HT_GUARD_INTERVAL;
 
 typedef struct {
    FWCmdHdr	CmdHdr;
    uint32_t    	Action; 
    uint8_t	RxAntennaMap;
    uint8_t	TxAntennaMap;
-} __packed HostCmd_FW_HT_MIMO_CONFIG;
+} /*wyc __packed*/ HostCmd_FW_HT_MIMO_CONFIG;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint16_t    Action;
    uint8_t     Slot;   // Slot=0 if regular, Slot=1 if short.
-} __packed HostCmd_FW_SET_SLOT;
+} /*wyc __packed*/ HostCmd_FW_SET_SLOT;
 
 
 //          Define data structure for HostCmd_CMD_802_11_GET_STAT
@@ -774,7 +774,7 @@ typedef struct {
     uint32_t 	RxUndecryptableFrames;
     uint32_t 	RxICVErrors;
     uint32_t 	RxExcludedFrames;
-} __packed HostCmd_DS_802_11_GET_STAT;
+} /*wyc __packed*/ HostCmd_DS_802_11_GET_STAT;
 
 
 //          Define data structure for HostCmd_CMD_MAC_REG_ACCESS
@@ -784,7 +784,7 @@ typedef struct {
    uint16_t      Offset;
    uint32_t      Value;
    uint16_t      Reserved;
-} __packed HostCmd_DS_MAC_REG_ACCESS;
+} /*wyc __packed*/ HostCmd_DS_MAC_REG_ACCESS;
 
 //          Define data structure for HostCmd_CMD_BBP_REG_ACCESS
 typedef struct {
@@ -793,7 +793,7 @@ typedef struct {
    uint16_t      Offset;
    uint8_t       Value;
    uint8_t       Reserverd[3];
-} __packed HostCmd_DS_BBP_REG_ACCESS;
+} /*wyc __packed*/ HostCmd_DS_BBP_REG_ACCESS;
 
 //          Define data structure for HostCmd_CMD_RF_REG_ACCESS
 typedef struct {
@@ -802,7 +802,7 @@ typedef struct {
    uint16_t      Offset;
    uint8_t       Value;
    uint8_t       Reserverd[3];
-} __packed HostCmd_DS_RF_REG_ACCESS;
+} /*wyc __packed*/ HostCmd_DS_RF_REG_ACCESS;
 
 
 //          Define data structure for HostCmd_CMD_802_11_RADIO_CONTROL
@@ -811,7 +811,7 @@ typedef struct {
    uint16_t      Action;                   
    uint16_t      Control;	// @bit0: 1/0,on/off, @bit1: 1/0, long/short @bit2: 1/0,auto/fix
    uint16_t      RadioOn;
-} __packed HostCmd_DS_802_11_RADIO_CONTROL;
+} /*wyc __packed*/ HostCmd_DS_802_11_RADIO_CONTROL;
 
 
 #define TX_POWER_LEVEL_TOTAL  8
@@ -823,27 +823,27 @@ typedef struct {
    uint16_t      CurrentTxPowerLevel;     
    uint16_t      Reserved;
    uint16_t      PowerLevelList[TX_POWER_LEVEL_TOTAL];
-} __packed HostCmd_DS_802_11_RF_TX_POWER;
+} /*wyc __packed*/ HostCmd_DS_802_11_RF_TX_POWER;
 
 //          Define data structure for HostCmd_CMD_802_11_RF_ANTENNA
 typedef struct _HostCmd_DS_802_11_RF_ANTENNA {
    FWCmdHdr    CmdHdr;
    uint16_t      Action;
    uint16_t      AntennaMode;             // Number of antennas or 0xffff(diversity)
-} __packed HostCmd_DS_802_11_RF_ANTENNA;
+} /*wyc __packed*/ HostCmd_DS_802_11_RF_ANTENNA;
 
 //          Define data structure for HostCmd_CMD_802_11_PS_MODE
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint16_t      Action;
    uint16_t      PowerMode;               // CAM, Max.PSP or Fast PSP
-} __packed HostCmd_DS_802_11_PS_MODE;
+} /*wyc __packed*/ HostCmd_DS_802_11_PS_MODE;
 
 typedef struct {
    FWCmdHdr		CmdHdr;
    uint16_t		Action;
    uint16_t		Threshold;
-} __packed HostCmd_DS_802_11_RTS_THSD;
+} /*wyc __packed*/ HostCmd_DS_802_11_RTS_THSD;
 
 // used for stand alone bssid sets/clears
 typedef struct {
@@ -856,7 +856,7 @@ typedef struct {
 #define	WL_MAC_TYPE_SECONDARY_AP	3
 #endif
    uint8_t       MacAddr[6];
-} __packed HostCmd_DS_SET_MAC,
+} /*wyc __packed*/ HostCmd_DS_SET_MAC,
   HostCmd_FW_SET_BSSID,
   HostCmd_FW_SET_MAC;
 
@@ -864,7 +864,7 @@ typedef struct {
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint32_t      PSPoll;
-} __packed HostCmd_FW_TX_POLL;
+} /*wyc __packed*/ HostCmd_FW_TX_POLL;
 
 // used for AID sets/clears
 typedef struct {
@@ -873,7 +873,7 @@ typedef struct {
    uint8_t       MacAddr[6]; //AP's Mac Address(BSSID)
    uint32_t      GProtection;
    uint8_t       ApRates[ RATE_INDEX_MAX_ARRAY];
-} __packed HostCmd_FW_SET_AID;
+} /*wyc __packed*/ HostCmd_FW_SET_AID;
 
 typedef struct {
    uint32_t	LegacyRateBitMap;
@@ -887,8 +887,8 @@ typedef struct {
 	uint8_t	AddChan;
 	uint16_t OpMode;
 	uint16_t stbc;
-   } __packed AddHtInfo;
-} __packed PeerInfo_t;
+   } /*wyc __packed*/ AddHtInfo;
+} /*wyc __packed*/ PeerInfo_t;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
@@ -901,28 +901,28 @@ typedef struct {
    uint8_t       Qosinfo;
    uint8_t       isQosSta;
    uint32_t      FwStaPtr;
-} __packed HostCmd_FW_SET_NEW_STN;
+} /*wyc __packed*/ HostCmd_FW_SET_NEW_STN;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t           tick;
-} __packed HostCmd_FW_SET_KEEP_ALIVE_TICK;
+} /*wyc __packed*/ HostCmd_FW_SET_KEEP_ALIVE_TICK;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t           QNum;
-} __packed HostCmd_FW_SET_RIFS;
+} /*wyc __packed*/ HostCmd_FW_SET_RIFS;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t	ApMode;
-} __packed HostCmd_FW_SET_APMODE;
+} /*wyc __packed*/ HostCmd_FW_SET_APMODE;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint16_t Action;			// see following
     uint16_t RadarTypeCode;
-} __packed HostCmd_802_11h_Detect_Radar;
+} /*wyc __packed*/ HostCmd_802_11h_Detect_Radar;
 
 #define DR_DFS_DISABLE				0
 #define DR_CHK_CHANNEL_AVAILABLE_START		1
@@ -934,17 +934,17 @@ typedef	struct	{
    FWCmdHdr    CmdHdr;
    uint16_t	   Aid;
    uint32_t      Set;
-} __packed HostCmd_UpdateTIM;
+} /*wyc __packed*/ HostCmd_UpdateTIM;
 
 typedef struct {
     FWCmdHdr	CmdHdr;
     uint32_t    SsidBroadcastEnable;
-} __packed HostCmd_SSID_BROADCAST;
+} /*wyc __packed*/ HostCmd_SSID_BROADCAST;
 
 typedef struct {
     FWCmdHdr	CmdHdr;
     uint32_t    WdsEnable;
-} __packed HostCmd_WDS;
+} /*wyc __packed*/ HostCmd_WDS;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
@@ -952,23 +952,23 @@ typedef struct {
     uint32_t    Mode;
     uint32_t    InitialCount;
 	uint32_t ChannelFlags ;
-} __packed HostCmd_SET_SWITCH_CHANNEL;
+} /*wyc __packed*/ HostCmd_SET_SWITCH_CHANNEL;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint32_t   	SpectrumMgmt;
-} __packed HostCmd_SET_SPECTRUM_MGMT;
+} /*wyc __packed*/ HostCmd_SET_SPECTRUM_MGMT;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     int32_t    	PowerConstraint;
-} __packed HostCmd_SET_POWER_CONSTRAINT;
+} /*wyc __packed*/ HostCmd_SET_POWER_CONSTRAINT;
 
 typedef  struct {
     uint8_t FirstChannelNo;
     uint8_t NoofChannel;
     uint8_t MaxTransmitPw;
-} __packed DomainChannelEntry;
+} /*wyc __packed*/ DomainChannelEntry;
 
 typedef  struct {
     uint8_t CountryString[3];
@@ -976,31 +976,31 @@ typedef  struct {
     DomainChannelEntry DomainEntryG[1]; /** Assume only 1 G zone **/
     uint8_t AChannelLen;
     DomainChannelEntry DomainEntryA[20]; /** Assume max of 5 A zone **/
-} __packed DomainCountryInfo;
+} /*wyc __packed*/ DomainCountryInfo;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint32_t	Action ; // 0 -> unset, 1 ->set
     DomainCountryInfo DomainInfo ;
-} __packed HostCmd_SET_COUNTRY_INFO;
+} /*wyc __packed*/ HostCmd_SET_COUNTRY_INFO;
 
 typedef struct {
 	FWCmdHdr    CmdHdr;
 	uint16_t    regionCode ; 
-} __packed HostCmd_SET_REGIONCODE_INFO;
+} /*wyc __packed*/ HostCmd_SET_REGIONCODE_INFO;
 
 // for HostCmd_CMD_SET_WMM_MODE
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint16_t    Action;  // 0->unset, 1->set
-} __packed HostCmd_FW_SetWMMMode;
+} /*wyc __packed*/ HostCmd_FW_SetWMMMode;
 
 typedef struct {
     FWCmdHdr    CmdHdr;
     uint16_t    Action;  // 0->unset, 1->set
     uint16_t    IeListLen;
     uint8_t     IeList[200];
-} __packed HostCmd_FW_SetIEs;
+} /*wyc __packed*/ HostCmd_FW_SetIEs;
 
 #define EDCA_PARAM_SIZE				18
 #define BA_PARAM_SIZE				2
@@ -1013,7 +1013,7 @@ typedef struct {
     uint32_t	CWMin;    // 0~15
     uint8_t	AIFSN;
     uint8_t	TxQNum;   // Tx Queue number.
-} __packed HostCmd_FW_SET_EDCA_PARAMS;
+} /*wyc __packed*/ HostCmd_FW_SET_EDCA_PARAMS;
 
 /******************************************************************************
 	@HWENCR@
@@ -1066,7 +1066,7 @@ typedef enum {
 typedef struct {
     // WEP key material (max 128bit)
     uint8_t   KeyMaterial[ MAX_ENCR_KEY_LENGTH ];
-} __packed WEP_TYPE_KEY;
+} /*wyc __packed*/ WEP_TYPE_KEY;
 
 /*
 	TKIP Key material definition
@@ -1079,7 +1079,7 @@ typedef struct {
 typedef struct {
     uint16_t low;
     uint32_t high;
-} __packed ENCR_TKIPSEQCNT;
+} /*wyc __packed*/ ENCR_TKIPSEQCNT;
 
 typedef struct {
     // TKIP Key material. Key type (group or pairwise key) is
@@ -1089,7 +1089,7 @@ typedef struct {
     uint8_t		TkipRxMicKey[ MIC_KEY_LENGTH ];
     ENCR_TKIPSEQCNT	TkipRsc;
     ENCR_TKIPSEQCNT	TkipTsc;
-} __packed TKIP_TYPE_KEY;
+} /*wyc __packed*/ TKIP_TYPE_KEY;
 
 /*
 	AES-CCMP Key material definition
@@ -1099,7 +1099,7 @@ typedef struct {
 typedef struct {
     // AES Key material
     uint8_t   KeyMaterial[ MAX_ENCR_KEY_LENGTH ];
-} __packed AES_TYPE_KEY;
+} /*wyc __packed*/ AES_TYPE_KEY;
 
 /*
 	Encryption key definition.
@@ -1117,11 +1117,11 @@ typedef struct {
 	WEP_TYPE_KEY	WepKey;
 	TKIP_TYPE_KEY	TkipKey;
 	AES_TYPE_KEY	AesKey;
-    }__packed Key;
+    }/*wyc __packed*/ Key;
 #ifdef MWL_MBSS_SUPPORT
     uint8_t   Macaddr[6];
 #endif
-} __packed KEY_PARAM_SET;
+} /*wyc __packed*/ KEY_PARAM_SET;
 
 /*
 	HostCmd_FW_UPDATE_ENCRYPTION
@@ -1137,7 +1137,7 @@ typedef struct {
     uint8_t	macaddr[6];
 #endif
     uint8_t	ActionData[1];
-} __packed HostCmd_FW_UPDATE_ENCRYPTION;
+} /*wyc __packed*/ HostCmd_FW_UPDATE_ENCRYPTION;
 
 
 typedef struct {
@@ -1148,7 +1148,7 @@ typedef struct {
 #ifndef MWL_MBSS_SUPPORT
     uint8_t     Macaddr[8];		/* XXX? */
 #endif
-} __packed HostCmd_FW_UPDATE_ENCRYPTION_SET_KEY;
+} /*wyc __packed*/ HostCmd_FW_UPDATE_ENCRYPTION_SET_KEY;
 
 typedef struct {
 	// Rate flags - see above.
@@ -1158,7 +1158,7 @@ typedef struct {
 	// 802.11 rate to conversion table index value.
 	// This is the value required by the firmware/hardware.
 	uint16_t	RateCodeToIndex;
-}__packed RATE_INFO;
+}/*wyc __packed*/ RATE_INFO;
 
 /*
 	UPDATE_STADB command action type.
@@ -1170,7 +1170,7 @@ typedef enum {
 	StaInfoDbActionModifyEntry,
 	// request to remove peer from stainfo db
 	StaInfoDbActionRemoveEntry
-}__packed STADB_ACTION_TYPE;
+}/*wyc __packed*/ STADB_ACTION_TYPE;
 
 /*
 	@11E-BA@
@@ -1199,7 +1199,7 @@ typedef enum {
 
 typedef struct {
 	uint32_t	Context;
-} __packed BASTREAM_CONTEXT;
+} /*wyc __packed*/ BASTREAM_CONTEXT;
 
 // parameters for block ack creation
 typedef struct {
@@ -1228,7 +1228,7 @@ typedef struct {
     
 	// proxy sta MAC Address
 	uint8_t		StaSrcMacAddr[6];
-}__packed BASTREAM_CREATE_STREAM;
+}/*wyc __packed*/ BASTREAM_CREATE_STREAM;
 
 // new transmit sequence number information 
 typedef struct {
@@ -1238,14 +1238,14 @@ typedef struct {
 	BASTREAM_CONTEXT FwBaContext;
 	// new sequence number for this block ack stream
 	uint16_t			 BaSeqNum;
-}__packed BASTREAM_UPDATE_STREAM;
+}/*wyc __packed*/ BASTREAM_UPDATE_STREAM;
 
 typedef struct {
 	// BA Stream flags
 	uint32_t	 Flags;
 	// returned by firmware in the create ba stream response
 	BASTREAM_CONTEXT FwBaContext;
-}__packed BASTREAM_STREAM_INFO;
+}/*wyc __packed*/ BASTREAM_STREAM_INFO;
 
 //Command to create/destroy block ACK
 typedef struct {
@@ -1261,14 +1261,14 @@ typedef struct {
 		BASTREAM_STREAM_INFO	DestroyParams;
 		// destroy an existing stream...
 		BASTREAM_STREAM_INFO	FlushParams;
-	}__packed BaInfo;
-}__packed HostCmd_FW_BASTREAM;
+	}/*wyc __packed*/ BaInfo;
+}/*wyc __packed*/ HostCmd_FW_BASTREAM;
 
 //          Define data structure for HostCmd_CMD_GET_WATCHDOG_BITMAP
 typedef struct {
    FWCmdHdr	CmdHdr;
    uint8_t	Watchdogbitmap;		// for SW/BA
-} __packed HostCmd_FW_GET_WATCHDOG_BITMAP;
+} /*wyc __packed*/ HostCmd_FW_GET_WATCHDOG_BITMAP;
 
 
 
@@ -1277,36 +1277,36 @@ typedef struct {
    FWCmdHdr    CmdHdr;
    uint16_t    MaxPowerLevel;     
    uint16_t    Reserved;
-} __packed HostCmd_DS_SET_REGION_POWER;
+} /*wyc __packed*/ HostCmd_DS_SET_REGION_POWER;
 
 //          Define data structure for HostCmd_CMD_SET_RATE_ADAPT_MODE
 typedef struct {
    FWCmdHdr	CmdHdr;
    uint16_t	Action;
    uint16_t	RateAdaptMode;     
-} __packed HostCmd_DS_SET_RATE_ADAPT_MODE;
+} /*wyc __packed*/ HostCmd_DS_SET_RATE_ADAPT_MODE;
 
 //          Define data structure for HostCmd_CMD_SET_LINKADAPT_CS_MODE
 typedef struct {
    FWCmdHdr	CmdHdr;
    uint16_t	Action;
    uint16_t	CSMode;     
-} __packed HostCmd_DS_SET_LINKADAPT_CS_MODE;
+} /*wyc __packed*/ HostCmd_DS_SET_LINKADAPT_CS_MODE;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint32_t     NProtectFlag;
-} __packed HostCmd_FW_SET_N_PROTECT_FLAG;
+} /*wyc __packed*/ HostCmd_FW_SET_N_PROTECT_FLAG;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t       NProtectOpMode;
-} __packed HostCmd_FW_SET_N_PROTECT_OPMODE;
+} /*wyc __packed*/ HostCmd_FW_SET_N_PROTECT_OPMODE;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t       OptLevel;
-} __packed HostCmd_FW_SET_OPTIMIZATION_LEVEL;
+} /*wyc __packed*/ HostCmd_FW_SET_OPTIMIZATION_LEVEL;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
@@ -1316,14 +1316,14 @@ typedef struct {
    uint8_t     Reserverd; 
 #define CAL_TBL_SIZE        160
    uint8_t     calTbl[CAL_TBL_SIZE];
-} __packed HostCmd_FW_GET_CALTABLE;
+} /*wyc __packed*/ HostCmd_FW_GET_CALTABLE;
 
 typedef struct {
    FWCmdHdr    CmdHdr;
    uint8_t     Addr[6]; 
    uint8_t     Enable;
    uint8_t     Mode;
-} __packed HostCmd_FW_SET_MIMOPSHT;
+} /*wyc __packed*/ HostCmd_FW_SET_MIMOPSHT;
 
 #define MAX_BEACON_SIZE        1024
 typedef struct {
@@ -1331,26 +1331,26 @@ typedef struct {
    uint16_t    Bcnlen;
    uint8_t     Reserverd[2]; 
    uint8_t     Bcn[MAX_BEACON_SIZE];
-} __packed HostCmd_FW_GET_BEACON;
+} /*wyc __packed*/ HostCmd_FW_GET_BEACON;
 
 typedef struct {
 	FWCmdHdr CmdHdr;
 	uint8_t	NumberOfPowersave;
 	uint8_t	reserved;
-} __packed HostCmd_SET_POWERSAVESTATION;
+} /*wyc __packed*/ HostCmd_SET_POWERSAVESTATION;
 
 typedef struct {
 	FWCmdHdr CmdHdr;
 	uint16_t Aid;
 	uint32_t Set;
 	uint8_t	reserved;
-} __packed HostCmd_SET_TIM;
+} /*wyc __packed*/ HostCmd_SET_TIM;
 
 typedef struct {
 	FWCmdHdr CmdHdr;
 	uint8_t	TrafficMap[251];
 	uint8_t	reserved;
-} __packed HostCmd_GET_TIM;
+} /*wyc __packed*/ HostCmd_GET_TIM;
 
 typedef struct {
 	FWCmdHdr CmdHdr;
@@ -1358,22 +1358,22 @@ typedef struct {
 	uint8_t	TID;
 	uint16_t SeqNo;
 	uint8_t	reserved;
-} __packed HostCmd_GET_SEQNO;
+} /*wyc __packed*/ HostCmd_GET_SEQNO;
 
 typedef struct {
 	FWCmdHdr    CmdHdr;
 	uint32_t    Enable;    //0 -- Disbale. or 1 -- Enable.
-} __packed HostCmd_DWDS_ENABLE;
+} /*wyc __packed*/ HostCmd_DWDS_ENABLE;
 
 typedef struct {
 	FWCmdHdr    CmdHdr;
 	uint16_t    Action;  /* 0: Get. 1:Set */
 	uint32_t    Option;  /* 0: default. 1:Aggressive */
 	uint32_t    Threshold;  /* Range 0-200, default 8 */
-}__packed HostCmd_FW_AMPDU_RETRY_RATEDROP_MODE;
+}/*wyc __packed*/ HostCmd_FW_AMPDU_RETRY_RATEDROP_MODE;
 
 typedef struct {
 	FWCmdHdr    CmdHdr;
 	uint32_t    Enable; /* 0 -- Disable. or 1 -- Enable */
-}__packed HostCmd_CFEND_ENABLE;
+}/*wyc __packed*/ HostCmd_CFEND_ENABLE;
 #endif /* _MWL_HALREG_H_ */

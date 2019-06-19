@@ -40,7 +40,7 @@ options	MAXCPU=2	# defines the maximum number of CPUs that can boot in the syste
 options 	SCHED_ULE		# ULE scheduler
 options 	PREEMPTION		# Enable kernel thread preemption
 options 	INET			# InterNETworking
-options 	INET6			# IPv6 communications protocols
+#options 	INET6			# IPv6 communications protocols
 options 	IPSEC			# IP (v4/v6) security
 options 	TCP_OFFLOAD		# TCP offload
 options 	SCTP			# Stream Control Transmission Protocol
