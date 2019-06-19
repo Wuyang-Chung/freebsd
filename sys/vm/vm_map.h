@@ -184,7 +184,7 @@ struct vm_map {
  *  offsetof(entry_head, prev) must be equal to offsetof(vm_map_entry, prev)
  *  offsetof(entry_head, next) must be equal to offsetof(vm_map_entry, next)
  */
-	struct {
+	struct vm_map_entry_head {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
 	} entry_head;			/* Sentinel node of the circular link list */

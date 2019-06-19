@@ -96,6 +96,11 @@ __FBSDID("$FreeBSD$");
 #include <vm/swap_pager.h>
 #include <vm/uma.h>
 
+_Static_assert(__offsetof(struct vm_map_entry_head, prev) ==
+    __offsetof(struct vm_map_entry, prev), "");
+_Static_assert(__offsetof(struct vm_map_entry_head, next) ==
+    __offsetof(struct vm_map_entry, next), "");
+
 /*
  *	Virtual memory maps provide for the mapping, protection,
  *	and sharing of virtual memory objects.  In addition,
