@@ -75,7 +75,7 @@ __FBSDID("$FreeBSD$");
  * violated.  Typically new fields are moved to the end of the
  * structures.
  */
-#ifdef __amd64__
+#if defined(__amd64__)
 _Static_assert(offsetof(struct thread, td_flags) == 0xe4,
     "struct thread KBI td_flags");
 _Static_assert(offsetof(struct thread, td_pflags) == 0xec,
@@ -94,8 +94,7 @@ _Static_assert(offsetof(struct proc, p_comm) == 0x3d0,
     "struct proc KBI p_comm");
 _Static_assert(offsetof(struct proc, p_emuldata) == 0x4a0,
     "struct proc KBI p_emuldata");
-#endif
-#ifdef __i386__
+#elif defined(__i386__)
 _Static_assert(offsetof(struct thread, td_flags) == 0x8c,
     "struct thread KBI td_flags");
 _Static_assert(offsetof(struct thread, td_pflags) == 0x94,

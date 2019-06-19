@@ -163,16 +163,14 @@ uint32_t arch_i386_xbox_memsize = 0;
 /* Sanity check for __curthread() */
 CTASSERT(offsetof(struct pcpu, pc_curthread) == 0);
 
-extern register_t init386(int first);
+register_t init386(int first);
 extern void dblfault_handler(void);
 
-static void cpu_startup(void *);
 static void fpstate_drop(struct thread *td);
 static void get_fpcontext(struct thread *td, mcontext_t *mcp,
     char *xfpusave, size_t xfpusave_len);
 static int  set_fpcontext(struct thread *td, mcontext_t *mcp,
     char *xfpustate, size_t xfpustate_len);
-SYSINIT(cpu, SI_SUB_CPU, SI_ORDER_FIRST, cpu_startup, NULL);
 
 /* Intel ICH registers */
 #define ICH_PMBASE	0x400
@@ -329,6 +327,7 @@ cpu_startup(dummy)
 	vm_pager_bufferinit();
 	cpu_setregs();
 }
+SYSINIT(cpu, SI_SUB_CPU, SI_ORDER_FIRST, cpu_startup, NULL);
 
 /*
  * Send an interrupt to process.
@@ -977,15 +976,19 @@ freebsd4_sigreturn(td, uap)
 }
 #endif	/* COMPAT_FREEBSD4 */
 
+#if defined(WYC)
+struct sigreturn_args {
+	const struct __ucontext * sigcntxp;
+};
+#endif
+
 /*
  * MPSAFE
  */
 int
-sys_sigreturn(td, uap)
-	struct thread *td;
-	struct sigreturn_args /* {
-		const struct __ucontext *sigcntxp;
-	} */ *uap;
+sys_sigreturn(
+	struct thread *td,
+	struct sigreturn_args *uap)
 {
 	ucontext_t uc;
 	struct proc *p;
@@ -1283,7 +1286,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	},
 [GUFS_SEL] =	/* 2 %fs Descriptor for user */
 {	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = 0xbffff, //wyc
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_UPL,
 	.ssd_p = 1,
@@ -1292,7 +1295,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_gran = 1		},
 [GUGS_SEL] =	/* 3 %gs Descriptor for user */
 {	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = 0xbffff, //wyc
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_UPL,
 	.ssd_p = 1,
@@ -1319,16 +1322,16 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_gran = 1		},
 [GUCODE_SEL] =	/* 6 Code Descriptor for user */
 {	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = 0xbffff, //wyc can not login if set to 0x7ffff
 	.ssd_type = SDT_MEMERA,
 	.ssd_dpl = SEL_UPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
 	.ssd_gran = 1		},
-[GUDATA_SEL] = 	/* 7 Data Descriptor for user */
+[GUDATA_SEL] =	/* 7 Data Descriptor for user */
 {	.ssd_base = 0x0,
-	.ssd_limit = 0xfffff,
+	.ssd_limit = 0xbffff, //wyc fail to boot if set to 0x7ffff
 	.ssd_type = SDT_MEMRWA,
 	.ssd_dpl = SEL_UPL,
 	.ssd_p = 1,
@@ -1349,7 +1352,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 	.ssd_base = 0x0,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = SEL_KPL,
+	.ssd_dpl = SEL_KPL, //wyc
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1367,7 +1370,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = (int) ldt,
 	.ssd_limit = (512 * sizeof(union descriptor)-1),
 	.ssd_type = SDT_SYSLDT,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1376,7 +1379,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = (int) &dblfault_tss,
 	.ssd_limit = sizeof(struct i386tss)-1,
 	.ssd_type = SDT_SYS386TSS,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1385,7 +1388,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1394,7 +1397,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMERA,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1403,7 +1406,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 1,
@@ -1412,7 +1415,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1421,7 +1424,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0,
 	.ssd_limit = 0xfffff,
 	.ssd_type = SDT_MEMRWA,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 1,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1430,7 +1433,7 @@ struct soft_segment_descriptor gdt_segs[] = {
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 0,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1442,7 +1445,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 0,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1451,7 +1454,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 0,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1460,7 +1463,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 0,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1478,7 +1481,7 @@ static struct soft_segment_descriptor ldt_segs[] = {
 {	.ssd_base = 0x0,
 	.ssd_limit = 0x0,
 	.ssd_type = 0,
-	.ssd_dpl = 0,
+	.ssd_dpl = SEL_KPL,
 	.ssd_p = 0,
 	.ssd_xx = 0, .ssd_xx1 = 0,
 	.ssd_def32 = 0,
@@ -1515,7 +1518,6 @@ setidt(
 	ip->gd_hioffset = ((int)func)>>16 ;
 }
 
-#if !defined(WYC) //the block below will cause parsing error in SI
 extern inthand_t
 	IDTVEC(div), IDTVEC(dbg), IDTVEC(nmi), IDTVEC(bpt), IDTVEC(ofl),
 	IDTVEC(bnd), IDTVEC(ill), IDTVEC(dna), IDTVEC(fpusegm),
@@ -1528,8 +1530,8 @@ extern inthand_t
 #ifdef XENHVM
 	IDTVEC(xen_intr_upcall),
 #endif
-	IDTVEC(lcall_syscall), IDTVEC(int0x80_syscall);
-#endif // !WYC
+	//wyc IDTVEC(lcall_syscall),
+	IDTVEC(int0x80_syscall);
 
 #ifdef DDB
 /*
@@ -1595,7 +1597,7 @@ DB_SHOW_COMMAND(dbregs, db_show_dbregs)
 	db_printf("dr6\t0x%08x\n", rdr6());
 	db_printf("dr7\t0x%08x\n", rdr7());	
 }
-#endif
+#endif //DDB
 
 void
 sdtossd(
@@ -2098,7 +2100,7 @@ getmemsize(int first)
 		has_smap = 1;
 		goto have_smap;
 	}
-
+WYCPANIC();
 	/*
 	 * Some newer BIOSes have a broken INT 12H implementation
 	 * which causes a kernel panic immediately.  In this case, we
@@ -2445,7 +2447,7 @@ i386_kdb_init(void)
 register_t
 init386(int first)
 {
-	struct gate_descriptor *gdp;
+	//wyc struct gate_descriptor *gdp;
 	int gsel_tss, metadata_missing, x, pa;
 	struct pcpu *pc;
 	struct xstate_hdr *xhdr;
@@ -2490,12 +2492,12 @@ init386(int first)
 	 * Make gdt memory segments.  All segments cover the full 4GB
 	 * of address space and permissions are enforced at page level.
 	 */
-	gdt_segs[GCODE_SEL].ssd_limit = atop(0 - 1);
-	gdt_segs[GDATA_SEL].ssd_limit = atop(0 - 1);
-	gdt_segs[GUCODE_SEL].ssd_limit = atop(0 - 1);
-	gdt_segs[GUDATA_SEL].ssd_limit = atop(0 - 1);
-	gdt_segs[GUFS_SEL].ssd_limit = atop(0 - 1);
-	gdt_segs[GUGS_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GCODE_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GDATA_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GUCODE_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GUDATA_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GUFS_SEL].ssd_limit = atop(0 - 1);
+	//wyc gdt_segs[GUGS_SEL].ssd_limit = atop(0 - 1);
 
 	pc = &__pcpu[0];
 	//wyc gdt_segs[GPRIV_SEL].ssd_limit = atop(0 - 1);
@@ -2508,7 +2510,7 @@ init386(int first)
 	r_gdt.rd_limit = NGDT * sizeof(gdt[0]) - 1;
 	r_gdt.rd_base =  (int) gdt;
 	mtx_init(&dt_lock, "descriptor tables", NULL, MTX_SPIN);
-	lgdt(&r_gdt); //wyc will also load ds, es, gs, ss, fs and cs
+	lgdt(&r_gdt); //wyc will also load ds, es, gs, ss and fs, cs
 
 	pcpu_init(pc, 0, sizeof(struct pcpu));
 	for (pa = first; pa < first + DPCPU_SIZE; pa += PAGE_SIZE)
@@ -2764,7 +2766,7 @@ init386(int first)
 #endif
 	gdt[GPROC0_SEL].sd.sd_type = SDT_SYS386TSS;	/* clear busy bit */
 	ltr(gsel_tss);
-
+#if 0 //wyc
 	/* make a call gate to reenter kernel with */
 	gdp = &ldt[LSYS5CALLS_SEL].gd;
 
@@ -2781,7 +2783,7 @@ init386(int first)
 	/* XXX yes! */
 	ldt[LBSDICALLS_SEL] = ldt[LSYS5CALLS_SEL];
 	ldt[LSOL26CALLS_SEL] = ldt[LSYS5CALLS_SEL];
-
+#endif //wyc
 	/* transfer to user mode */
 
 	_ucodesel = GSEL(GUCODE_SEL, SEL_UPL);
@@ -2971,6 +2973,7 @@ fill_regs(struct thread *td, struct reg *regs)
 int
 fill_frame_regs(struct trapframe *tp, struct reg *regs)
 {
+
 	regs->r_fs = tp->tf_fs;
 	regs->r_es = tp->tf_es;
 	regs->r_ds = tp->tf_ds;

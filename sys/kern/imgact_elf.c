@@ -94,7 +94,11 @@ static int __elfN(load_file)(struct proc *p, const char *file, u_long *addr,
 static int __elfN(load_section)(struct image_params *imgp, vm_ooffset_t offset,
     caddr_t vmaddr, size_t memsz, size_t filsz, vm_prot_t prot,
     size_t pagesize);
+#if defined(WYC)
+static int exec_elf32_imgact(struct image_params *imgp);
+#else
 static int __CONCAT(exec_, __elfN(imgact))(struct image_params *imgp);
+#endif
 static boolean_t __elfN(freebsd_trans_osrel)(const Elf_Note *note,
     int32_t *osrel);
 static boolean_t kfreebsd_trans_osrel(const Elf_Note *note, int32_t *osrel);
@@ -486,8 +490,8 @@ __elfN(map_insert)(
 #else
 		rv = __elfN(map_partial)(
 #endif
-		    map, object, offset, start,
-		    round_page(start), prot);
+			map, object, offset, start,
+			round_page(start), prot);
 		if (rv != KERN_SUCCESS)
 			return (rv);
 		offset += round_page(start) - start;
@@ -499,8 +503,8 @@ __elfN(map_insert)(
 #else
 		rv = __elfN(map_partial)(
 #endif
-		    map, object, offset +
-		    trunc_page(end) - start, trunc_page(end), end, prot);
+			map, object, offset +
+			trunc_page(end) - start, trunc_page(end), end, prot);
 		if (rv != KERN_SUCCESS)
 			return (rv);
 		end = trunc_page(end);
@@ -616,13 +620,13 @@ __elfN(load_section)(
 #else
 		rv = __elfN(map_insert)(
 #endif
-				      imgp, map,
-				      object,
-				      file_addr,	/* file offset */
-				      map_addr,		/* virtual start */
-				      map_addr + map_len,/* virtual end */
-				      prot,
-				      cow);
+			imgp, map,
+			object,
+			file_addr,	/* file offset */
+			map_addr,	/* virtual start */
+			map_addr + map_len,/* virtual end */
+			prot,
+			cow);
 		if (rv != KERN_SUCCESS)
 			return (EINVAL);
 
@@ -651,8 +655,8 @@ __elfN(load_section)(
 #else
 		rv = __elfN(map_insert)(
 #endif
-		    imgp, map, NULL, 0, map_addr,
-		    map_addr + map_len, prot, 0);
+			imgp, map, NULL, 0, map_addr,
+			map_addr + map_len, prot, 0);
 		if (rv != KERN_SUCCESS)
 			return (EINVAL);
 	}
@@ -809,9 +813,9 @@ __elfN(load_file)(
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
 			error = __elfN(load_section)(
 #endif
-			    imgp, phdr[i].p_offset,
-			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + rbase,
-			    phdr[i].p_memsz, phdr[i].p_filesz, prot, pagesize);
+				imgp, phdr[i].p_offset,
+				(caddr_t)(uintptr_t)phdr[i].p_vaddr + rbase,
+				phdr[i].p_memsz, phdr[i].p_filesz, prot, pagesize);
 			if (error != 0)
 				goto fail;
 			/*
@@ -841,11 +845,10 @@ fail:
 
 static int
 #if defined(WYC)
-exec_elf32_imgact(
+exec_elf32_imgact(struct image_params *imgp)
 #else
-__CONCAT(exec_, __elfN(imgact))(
+__CONCAT(exec_, __elfN(imgact))(struct image_params *imgp)
 #endif
-    struct image_params *imgp)
 {
 	struct thread *td;
 	const Elf_Ehdr *hdr;
@@ -949,7 +952,7 @@ __CONCAT(exec_, __elfN(imgact))(
 			break;
 		case PT_GNU_STACK:
 #if defined(WYC)
-			if (elf32_nxstack)
+			if (elf32_nxstack) //wyc ==0
 #else
 			if (__elfN(nxstack))
 #endif
@@ -962,11 +965,11 @@ __CONCAT(exec_, __elfN(imgact))(
 
 #if defined(WYC)
 	brand_info = &freebsd_brand_info; //wyc brand_info == freebsd_brand_info
-	brand_info = elf32_get_brandinfo(imgp, interp, interp_name_len,
+	brand_info = elf32_get_brandinfo(
 #else
-	brand_info = __elfN(get_brandinfo)(imgp, interp, interp_name_len,
+	brand_info = __elfN(get_brandinfo)(
 #endif
-	    &osrel);
+		imgp, interp, interp_name_len, &osrel);
 	if (brand_info == NULL) {
 		uprintf("ELF binary type \"%u\" not known.\n",
 		    hdr->e_ident[EI_OSABI]);
@@ -1010,7 +1013,7 @@ __CONCAT(exec_, __elfN(imgact))(
 	imgp->proc->p_sysent = sv;
 
 	vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
-	if (error != ESUCCESS) //wycgit
+	if (error != ESUCCESS)
 		goto ret;
 
 	for (i = 0; i < hdr->e_phnum; i++) {
@@ -1025,10 +1028,10 @@ __CONCAT(exec_, __elfN(imgact))(
 			prot = __elfN(trans_prot)(phdr[i].p_flags);
 			error = __elfN(load_section)(
 #endif
-			    imgp, phdr[i].p_offset,
-			    (caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc et_dyn_addr==0
-			    phdr[i].p_memsz, phdr[i].p_filesz, prot,
-			    sv->sv_pagesize);
+				imgp, phdr[i].p_offset,
+				(caddr_t)(uintptr_t)phdr[i].p_vaddr + et_dyn_addr, //wyc et_dyn_addr==0
+				phdr[i].p_memsz, phdr[i].p_filesz, prot,
+				sv->sv_pagesize);
 			if (error != ESUCCESS)
 				goto ret;
 
@@ -1137,8 +1140,8 @@ __CONCAT(exec_, __elfN(imgact))(
 #else
 			error = __elfN(load_file)(
 #endif
-			    imgp->proc, path, &addr,
-			    &imgp->entry_addr, sv->sv_pagesize);
+				imgp->proc, path, &addr,
+				&imgp->entry_addr, sv->sv_pagesize);
 			free(path, M_TEMP);
 			if (error == 0)
 				have_interp = TRUE;
@@ -1151,8 +1154,8 @@ __CONCAT(exec_, __elfN(imgact))(
 #else
 			error = __elfN(load_file)(
 #endif
-			    imgp->proc, newinterp, &addr,
-			    &imgp->entry_addr, sv->sv_pagesize);
+				imgp->proc, newinterp, &addr,
+				&imgp->entry_addr, sv->sv_pagesize);
 			if (error == 0)
 				have_interp = TRUE;
 		}
@@ -1162,8 +1165,8 @@ __CONCAT(exec_, __elfN(imgact))(
 #else
 			error = __elfN(load_file)(
 #endif
-			    imgp->proc, interp, &addr,
-			    &imgp->entry_addr, sv->sv_pagesize);
+				imgp->proc, interp, &addr,
+				&imgp->entry_addr, sv->sv_pagesize);
 		}
 		vn_lock(imgp->vp, LK_EXCLUSIVE | LK_RETRY);
 		if (error != 0) {

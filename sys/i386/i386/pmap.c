@@ -173,7 +173,7 @@ __FBSDID("$FreeBSD$");
 #define PV_STAT(x)	do { } while (0)
 #endif
 
-//wyc duplicate definition #define	pa_index(pa)	((pa) >> PDRSHIFT)
+//wycgit duplicate definition #define	pa_index(pa)	((pa) >> PDRSHIFT)
 #define	pa_to_pvh(pa)	(&pv_table[pa_index(pa)])
 
 /*
@@ -202,7 +202,7 @@ vm_offset_t virtual_end;	/* VA of last avail page (end of kernel AS) */
 int pgeflag = 0;		/* PG_G or-in	wyc page global or-in flag */
 int pseflag = 0;		/* PG_PS or-in	wyc page size or-in flag (4M) */
 
-static int nkpt = NKPT;
+static int nkpt = NKPT;	//wyc NKPT==30. nkpt will be changed by pmap_growkernel()
 vm_offset_t kernel_vm_end = KERNBASE + NKPT * NBPDR; //wyc 3G + 30*4M
 extern u_int32_t KERNend;
 extern u_int32_t KPTphys;
@@ -255,9 +255,10 @@ vm_offset_t pv_vafree;			/* freelist stored in the PTE */
  * All those kernel PT submaps that BSD is so fond of
  */
 pt_entry_t *CMAP3;
-static pd_entry_t *KPTD;
-caddr_t ptvmmap = 0;
 caddr_t CADDR3;
+pt_entry_t *KPTmap; //wyc address of kernel page tables. move from locore.s
+static pd_entry_t *KPTD; //wyc address of kernel page table directory
+caddr_t ptvmmap = 0;
 struct msgbuf *msgbufp = NULL;
 
 /*
@@ -798,7 +799,7 @@ pmap_init(void)
 		mpte->wire_count = 1;
 		if (pseflag != 0 &&
 		    KERNBASE <= i << PDRSHIFT && i << PDRSHIFT < KERNend &&
-		    pmap_insert_pt_page(kernel_pmap, mpte))
+		    pmap_insert_pt_page(kernel_pmap, mpte) != ESUCCESS)
 			panic("pmap_init: pmap_insert_pt_page failed");
 	}
 	PMAP_UNLOCK(kernel_pmap);
@@ -1930,7 +1931,7 @@ pmap_pinit(pmap_t pmap)
 
 	CPU_ZERO(&pmap->pm_active);
 	TAILQ_INIT(&pmap->pm_pvchunk);
-	bzero(&pmap->pm_stats, sizeof(pmap->pm_stats)); //wyc add parenthesis for sizeof
+	bzero(&pmap->pm_stats, sizeof pmap->pm_stats);
 
 	return (1);
 }
@@ -2149,7 +2150,7 @@ pmap_growkernel(vm_offset_t addr)
  * page management routines.
  ***************************************************/
 
-#if defined(QUEUE_MACRO_DEBUG) //wyc
+#if defined(QUEUE_MACRO_DEBUG) //wycgit
 CTASSERT(sizeof(struct pv_chunk) <= PAGE_SIZE);
 CTASSERT(_NPCM == 5);
 CTASSERT(_NPCPV == 143);
@@ -5631,7 +5632,7 @@ pmap_sync_icache(pmap_t pm, vm_offset_t va, vm_size_t sz)
  */
 void
 pmap_align_superpage(vm_object_t object, vm_ooffset_t offset,
-    vm_offset_t *addr, /* IN/OUT */
+    vm_offset_t *addr, //wyc IN/OUT
     vm_size_t size)
 {
 	vm_offset_t superpage_offset;

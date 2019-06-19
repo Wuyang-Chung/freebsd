@@ -213,12 +213,14 @@ struct vm_map {
 static __inline vm_offset_t
 vm_map_max(const struct vm_map *map)
 {
+
 	return (map->max_offset); //wyc 3G-4M
 }
 
 static __inline vm_offset_t
 vm_map_min(const struct vm_map *map)
 {
+
 	return (map->min_offset); //wyc 0
 }
 

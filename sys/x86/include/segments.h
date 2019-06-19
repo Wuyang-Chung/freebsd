@@ -59,7 +59,7 @@
  * For long-mode apps, %cs only has the conforming bit in sd_type, the sd_dpl,
  * sd_p, sd_l and sd_def32 which must be zero).  %ds only has sd_p.
  */
-#ifdef __i386__
+#ifdef __i386__ //wyc
 struct segment_descriptor {
 	unsigned sd_lolimit:16;		/* segment extent (lsb) */
 	unsigned sd_lobase:16;		/* segment base address (lsb) */
@@ -79,7 +79,7 @@ struct segment_descriptor {
 #define	USD_SETBASE(sd, b)	(sd)->sd_lobase = (b) & 0xffff;	\
 				(sd)->sd_midbase = ((b) >> 16) & 0xff;	\
 				(sd)->sd_hibase  = ((b) >> 24) & 0xff
-#else // !__i386__
+#else //wyc !__i386__
 struct user_segment_descriptor {
 	unsigned sd_lolimit:16;		/* segment extent (lsb) */
 	unsigned sd_lobase:24;		/* segment base address (lsb) */
@@ -97,7 +97,7 @@ struct user_segment_descriptor {
 #define	USD_GETBASE(sd)		(((sd)->sd_lobase) | (sd)->sd_hibase << 24)
 #define	USD_SETBASE(sd, b)	(sd)->sd_lobase = (b);	\
 				(sd)->sd_hibase = ((b) >> 24);
-#endif // __i386__
+#endif //wyc __i386__
 #define	USD_GETLIMIT(sd)	(((sd)->sd_lolimit) | (sd)->sd_hilimit << 16)
 #define	USD_SETLIMIT(sd, l)	(sd)->sd_lolimit = (l);	\
 				(sd)->sd_hilimit = ((l) >> 16);

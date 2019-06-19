@@ -272,28 +272,19 @@ vm_map_zdtor(void *mem, int size, void *arg)
  *
  * If 'pinit' is NULL then the embedded pmap is initialized via pmap_pinit().
  */
+/*wyc
+	'pinit' is always pmap_pinit in i386.
+		== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
+*/
 struct vmspace *
 vmspace_alloc(vm_offset_t min, vm_offset_t max, pmap_pinit_t pinit)
 {
 	struct vmspace *vm;
 
 	vm = uma_zalloc(vmspace_zone, M_WAITOK);
-
 	KASSERT(vm->vm_map.pmap == NULL, ("vm_map.pmap must be NULL"));
-
-	if (pinit == NULL)
-		pinit = &pmap_pinit;
-	else {
-		//wyc 'pinit' is always NULL in i386.
-		//	== ept_pinit() | npt_pinit() in __amd64__ Virtual Machine eXtension.
-		panic("pinit != NULL");
-	}
-
-#if defined(WYC)
+	WYCASSERT(pinit == pmap_pinit);
 	if (!pmap_pinit(vmspace_pmap(vm))) {
-#else
-	if (!pinit(vmspace_pmap(vm))) {
-#endif
 		uma_zfree(vmspace_zone, vm);
 		return (NULL);
 	}
@@ -1411,12 +1402,12 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	if (start < map->min_offset)
 		start = map->min_offset;
 	if (start + length > map->max_offset || start + length < start)
-		return (KERN_INVALID_ADDRESS);
+		return (KERN_INVALID_ADDRESS); //wycgit
 
 	/* Empty tree means wide open address space. */
 	if (map->root == NULL) {
 		*addr = start;
-		return (KERN_SUCCESS);
+		return (KERN_SUCCESS); //wycgit
 	}
 
 	/*
@@ -1426,7 +1417,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	map->root = vm_map_entry_splay(start, map->root);
 	if (start + length <= map->root->start) {
 		*addr = start;
-		return (KERN_SUCCESS);
+		return (KERN_SUCCESS); //wycgit
 	}
 
 	/*
@@ -1437,13 +1428,13 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 	st = (start > map->root->end) ? start : map->root->end;
 	if (length <= map->root->end + map->root->adj_free - st) {
 		*addr = st;
-		return (KERN_SUCCESS);
+		return (KERN_SUCCESS); //wycgit
 	}
 
 	/* With max_free, can immediately tell if no solution. */
 	entry = map->root->right;
 	if (entry == NULL || length > entry->max_free)
-		return (KERN_NO_SPACE);
+		return (KERN_NO_SPACE); //wycgit
 
 	/*
 	 * Search the right subtree in the order: left subtree, root,
@@ -1455,7 +1446,7 @@ vm_map_findspace(vm_map_t map, vm_offset_t start, vm_size_t length,
 			entry = entry->left;
 		else if (entry->adj_free >= length) {
 			*addr = entry->end;
-			return (KERN_SUCCESS);
+			return (KERN_SUCCESS); //wycgit
 		} else
 			entry = entry->right;
 	}
@@ -2328,7 +2319,7 @@ vm_map_madvise(
 		}
 		vm_map_unlock_read(map);
 	}
-	return (KERN_SUCCESS);
+	return (KERN_SUCCESS); //wycgit
 }
 
 

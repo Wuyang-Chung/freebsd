@@ -412,9 +412,9 @@ fail:
 
 static void
 do_fork(struct thread *td, struct fork_req *fr,
-    struct proc *p2, struct thread *td2,
-    struct vmspace *vm2,	//wyc NULL for vfork
-    struct file *fp_procdesc)	//wyc NULL for vfork
+	struct proc *p2, struct thread *td2,
+	struct vmspace *vm2,		//wyc NULL for vfork
+	struct file *fp_procdesc)	//wyc NULL for vfork
 //__attribute__((optnone))	//wyc
 {
 	struct proc *p1, *pptr;
@@ -720,20 +720,20 @@ do_fork(struct thread *td, struct fork_req *fr,
 	vm_forkproc(td, p2, td2, vm2, fr->fr_flags);
 
 	if (fr->fr_flags == (RFFDG | RFPROC)) {
-		PCPU_INC(cnt.v_forks);
-		PCPU_ADD(cnt.v_forkpages, p2->p_vmspace->vm_dsize +
+		PCPU_INC(pc_cnt.v_forks);
+		PCPU_ADD(pc_cnt.v_forkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
 	} else if (fr->fr_flags == (RFFDG | RFPROC | RFPPWAIT | RFMEM)) {
-		PCPU_INC(cnt.v_vforks);
-		PCPU_ADD(cnt.v_vforkpages, p2->p_vmspace->vm_dsize +
+		PCPU_INC(pc_cnt.v_vforks);
+		PCPU_ADD(pc_cnt.v_vforkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
 	} else if (p1 == &proc0) {
-		PCPU_INC(cnt.v_kthreads);
-		PCPU_ADD(cnt.v_kthreadpages, p2->p_vmspace->vm_dsize +
+		PCPU_INC(pc_cnt.v_kthreads);
+		PCPU_ADD(pc_cnt.v_kthreadpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
 	} else {
-		PCPU_INC(cnt.v_rforks);
-		PCPU_ADD(cnt.v_rforkpages, p2->p_vmspace->vm_dsize +
+		PCPU_INC(pc_cnt.v_rforks);
+		PCPU_ADD(pc_cnt.v_rforkpages, p2->p_vmspace->vm_dsize +
 		    p2->p_vmspace->vm_ssize);
 	}
 
@@ -1100,9 +1100,9 @@ fail2:
  */
 void
 fork_exit(
-    void (*callout)(void *, struct trapframe *),//wyc fork_return()
-    void *arg,			//wyc struct thread *td
-    struct trapframe *frame)	//wyc (int)td->td_frame - sizeof(void *)
+	void (*callout)(void *, struct trapframe *),//wyc fork_return()
+	void *arg,			//wyc struct thread *td
+	struct trapframe *frame)	//wyc (int)td->td_frame - sizeof(void *)
 //__attribute__((optnone))	//wyc
 {
 	struct proc *p;
@@ -1122,8 +1122,8 @@ fork_exit(
 	* cpu_switch()'ed to, but when children start up they arrive here
 	* instead, so we must do much the same things as mi_switch() would.
 	*/
-	if ((dtd = PCPU_GET(deadthread))) {
-		PCPU_SET(deadthread, NULL);
+	if ((dtd = PCPU_GET(pc_deadthread))) {
+		PCPU_SET(pc_deadthread, NULL);
 		thread_stash(dtd);
 	}
 	thread_unlock(td);

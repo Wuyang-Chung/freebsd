@@ -142,9 +142,7 @@ struct thr_new_args {
 
 //wyc pthread_create() calls this syscall
 int
-sys_thr_new(
-    struct thread *td, 
-    struct thr_new_args *uap)
+sys_thr_new(struct thread *td, struct thr_new_args *uap)
     /* struct thr_param * */
 {
 	struct thr_param param;
@@ -258,7 +256,6 @@ thread_create(
 	newtd->td_sleeptimo = 0;
 	newtd->td_vslock_sz = 0;
 	bzero(&newtd->td_si, sizeof(newtd->td_si));
-
 	bcopy(&td->td_startcopy, &newtd->td_startcopy,
 	    __rangeof(struct thread, td_startcopy, td_endcopy));
 	newtd->td_sa = td->td_sa;
@@ -272,7 +269,7 @@ thread_create(
 #else
 	error = initialize_thread(newtd, thunk);
 #endif
-	if (error) {
+	if (error != ESUCCESS) {
 		thread_cow_free(newtd);
 		thread_free(newtd);
 		goto fail;
