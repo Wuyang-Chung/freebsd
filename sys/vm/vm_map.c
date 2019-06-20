@@ -97,9 +97,9 @@ __FBSDID("$FreeBSD$");
 #include <vm/uma.h>
 
 _Static_assert(__offsetof(struct vm_map_entry_head, prev) ==
-    __offsetof(struct vm_map_entry, prev), "");
+    __offsetof(struct vm_map_entry, prev), "Offset of prev of vm_map_entry not equal");
 _Static_assert(__offsetof(struct vm_map_entry_head, next) ==
-    __offsetof(struct vm_map_entry, next), "");
+    __offsetof(struct vm_map_entry, next), "Offset of next of vm_map_entry not equal");
 
 /*
  *	Virtual memory maps provide for the mapping, protection,
@@ -2711,9 +2711,10 @@ vm_map_wire(vm_map_t map, vm_offset_t start, vm_offset_t end,
 		 * If VM_MAP_WIRE_HOLESOK was specified, skip this check.
 		 */
 	next_entry:
-		if (((flags & VM_MAP_WIRE_HOLESOK) == 0) &&
-		    (entry->end < end && (entry->next == MAP_ENTRY_SENTINEL(map) ||
-		    entry->next->start > entry->end))) {
+		if ((flags & VM_MAP_WIRE_HOLESOK) == 0 &&
+		    entry->end < end && 
+		    (entry->next == MAP_ENTRY_SENTINEL(map) ||
+		    entry->next->start > entry->end)) {
 			end = entry->end;
 			rv = KERN_INVALID_ADDRESS;
 			goto done;
@@ -3027,7 +3028,7 @@ vm_map_delete(vm_map_t map, vm_offset_t start, vm_offset_t end)
 	/*
 	 * Step through all entries in this region
 	 */
-	while ((entry != MAP_ENTRY_SENTINEL(map)) && (entry->start < end)) {
+	while (entry != MAP_ENTRY_SENTINEL(map) && entry->start < end) {
 		vm_map_entry_t next;
 
 		/*

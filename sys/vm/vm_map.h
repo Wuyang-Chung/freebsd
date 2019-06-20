@@ -179,11 +179,11 @@ vm_map_entry_system_wired_count(vm_map_entry_t entry)
  * List of locks
  *	(c)	const until freed
  */
-struct vm_map {
 /* wyc
- *  offsetof(entry_head, prev) must be equal to offsetof(vm_map_entry, prev)
- *  offsetof(entry_head, next) must be equal to offsetof(vm_map_entry, next)
+ *  offsetof(vm_map_entry_head, prev) must be equal to offsetof(vm_map_entry, prev)
+ *  offsetof(vm_map_entry_head, next) must be equal to offsetof(vm_map_entry, next)
  */
+struct vm_map {
 	struct vm_map_entry_head {
 		struct vm_map_entry *prev;
 		struct vm_map_entry *next;
